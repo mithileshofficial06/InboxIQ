@@ -59,10 +59,10 @@ export default function DashboardPage() {
 
   return (
     <div style={{ paddingBottom: "40px" }}>
-      <h1 className="editorial-heading" style={{ fontSize: "36px", marginBottom: "40px" }}>Overview</h1>
+      <h1 className="editorial-heading animate-fade-in" style={{ fontSize: "36px", marginBottom: "40px" }}>Overview</h1>
 
       {/* Stats */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "24px", marginBottom: "40px" }}>
+      <div className="animate-fade-in-up delay-100" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "24px", marginBottom: "40px" }}>
         {STATS.map((s, i) => (
           <div key={s.label} className="editorial-card" style={{ display: "flex", flexDirection: "column", gap: "16px", padding: "32px 24px" }}>
             <div className="editorial-subheading">{s.label}</div>
@@ -72,7 +72,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Charts Row 1 */}
-      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "24px", marginBottom: "24px" }}>
+      <div className="animate-fade-in-up delay-200" style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "24px", marginBottom: "24px" }}>
         <div className="editorial-card">
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "32px", alignItems: "center" }}>
             <h3 className="editorial-heading" style={{ fontSize: "20px" }}>Volume History</h3>
@@ -117,7 +117,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Charts Row 2 */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", marginBottom: "24px" }}>
+      <div className="animate-fade-in-up delay-300" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", marginBottom: "24px" }}>
         <div className="editorial-card">
           <h3 className="editorial-heading" style={{ fontSize: "20px", marginBottom: "32px" }}>Top Senders</h3>
           <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>

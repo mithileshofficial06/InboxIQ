@@ -53,7 +53,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div style={{ display: "flex", minHeight: "100vh" }}>
       
       {/* Sidebar */}
-      <aside className="editorial-sidebar" style={{ padding: "32px 0" }}>
+      <aside className="editorial-sidebar animate-slide-in-right" style={{ padding: "32px 0" }}>
         <div style={{ padding: "0 24px 40px", display: "flex", alignItems: "center", gap: "12px" }}>
           <div style={{ width: "28px", height: "28px", background: "var(--color-text-primary)", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <Mail size={14} color="#fff" />
@@ -88,7 +88,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Main Content */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", height: "100vh", background: "var(--color-bg-primary)" }}>
         {/* Topbar */}
-        <header style={{ padding: "24px 48px", display: "flex", justifyContent: "flex-end", alignItems: "center", borderBottom: "1px solid var(--color-border-default)", background: "var(--color-bg-secondary)" }}>
+        <header className="animate-fade-in" style={{ padding: "24px 48px", display: "flex", justifyContent: "flex-end", alignItems: "center", borderBottom: "1px solid var(--color-border-default)", background: "var(--color-bg-secondary)" }}>
           <div style={{ display: "flex", gap: "24px", alignItems: "center" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: user?.sync_status === "syncing" ? "var(--color-ochre)" : "var(--color-sage)" }} />

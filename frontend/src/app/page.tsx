@@ -22,7 +22,7 @@ export default function LandingPage() {
     <div className="min-h-screen">
       
       {/* ========== Navigation ========== */}
-      <nav style={{ padding: "24px 48px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid var(--color-border-default)" }}>
+      <nav className="animate-fade-in" style={{ padding: "24px 48px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid var(--color-border-default)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <div style={{ width: "32px", height: "32px", background: "var(--color-text-primary)", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <Inbox size={16} color="#fff" />
@@ -42,20 +42,20 @@ export default function LandingPage() {
 
       {/* ========== Hero Section ========== */}
       <section style={{ maxWidth: "1000px", margin: "0 auto", padding: "120px 32px 80px", textAlign: "center" }}>
-        <div className="editorial-subheading" style={{ marginBottom: "24px", color: "var(--color-sage)" }}>
+        <div className="editorial-subheading animate-fade-in-up" style={{ marginBottom: "24px", color: "var(--color-sage)" }}>
           Intelligence for your inbox
         </div>
         
-        <h1 className="editorial-heading" style={{ fontSize: "clamp(40px, 6vw, 72px)", lineHeight: 1.1, marginBottom: "32px", color: "var(--color-text-primary)" }}>
+        <h1 className="editorial-heading animate-fade-in-up delay-100" style={{ fontSize: "clamp(40px, 6vw, 72px)", lineHeight: 1.1, marginBottom: "32px", color: "var(--color-text-primary)" }}>
           The elegant way to <br />
           <span style={{ fontStyle: "italic", color: "var(--color-slate)" }}>understand your email.</span>
         </h1>
         
-        <p style={{ fontSize: "18px", color: "var(--color-text-secondary)", maxWidth: "600px", margin: "0 auto 48px", lineHeight: 1.7, fontWeight: 400 }}>
+        <p className="animate-fade-in-up delay-200" style={{ fontSize: "18px", color: "var(--color-text-secondary)", maxWidth: "600px", margin: "0 auto 48px", lineHeight: 1.7, fontWeight: 400 }}>
           InboxIQ applies refined machine learning to categorize, analyze, and extract insights from your communication data—securely and privately.
         </p>
         
-        <div style={{ display: "flex", gap: "16px", justifyContent: "center" }}>
+        <div className="animate-fade-in-up delay-300" style={{ display: "flex", gap: "16px", justifyContent: "center" }}>
           <button className="editorial-btn-primary" style={{ padding: "16px 32px", fontSize: "15px" }} onClick={isLoggedIn ? () => router.push("/dashboard") : handleLogin}>
             {isLoggedIn ? "Open Dashboard" : "Connect with Google"} <ArrowRight size={16} />
           </button>
@@ -70,7 +70,7 @@ export default function LandingPage() {
             { title: "Natural Language", desc: "Query your historical communications with conversational precision.", icon: MessagesSquare },
             { title: "Strict Privacy", desc: "Read-only access ensures your data remains fundamentally untempered.", icon: ShieldCheck },
           ].map((f, i) => (
-            <div key={i} className="editorial-card" style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", padding: "40px" }}>
+            <div key={i} className={`editorial-card animate-fade-in-up delay-${(i + 3) * 100}`} style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", padding: "40px" }}>
               <f.icon size={28} style={{ color: "var(--color-text-primary)", marginBottom: "24px" }} strokeWidth={1.5} />
               <h3 className="editorial-heading" style={{ fontSize: "22px", marginBottom: "12px" }}>{f.title}</h3>
               <p style={{ fontSize: "15px", color: "var(--color-text-secondary)", lineHeight: 1.6 }}>{f.desc}</p>
@@ -80,7 +80,7 @@ export default function LandingPage() {
       </section>
       
       {/* ========== Footer ========== */}
-      <footer style={{ borderTop: "1px solid var(--color-border-default)", padding: "40px", textAlign: "center" }}>
+      <footer className="animate-fade-in delay-500" style={{ borderTop: "1px solid var(--color-border-default)", padding: "40px", textAlign: "center" }}>
         <div className="editorial-heading" style={{ fontSize: "18px", marginBottom: "8px" }}>InboxIQ</div>
         <div className="editorial-subheading" style={{ fontSize: "10px" }}>© {new Date().getFullYear()}</div>
       </footer>
