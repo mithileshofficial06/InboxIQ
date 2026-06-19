@@ -561,7 +561,7 @@ export default function InboxChaosAnimation() {
       {/* ══════════ MAIN AREA ══════════ */}
       <div className="relative" style={{ height: "calc(100% - 49px)" }}>
 
-        {/* ── AI Processing Core (Centerpiece) ── */}
+        {/* ── AI Processing Core (Glass Prism Centerpiece) ── */}
         <AnimatePresence>
           {phase !== "done" && phase !== "burst" && (
             <motion.div
@@ -570,39 +570,64 @@ export default function InboxChaosAnimation() {
               exit={{ opacity: 0, scale: 0.8 }}
               className="absolute left-1/2 top-[40%] -translate-x-1/2 -translate-y-1/2 z-0 flex flex-col items-center justify-center"
             >
-              {/* Outer scanner circle */}
+              {/* Rotating outer scanner line */}
               <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
                 className="absolute border border-dashed border-stone-200/80 rounded-full"
                 style={{ width: "150px", height: "150px" }}
               />
-              
-              {/* Inner glowing core */}
-              <div
-                className="relative rounded-full bg-stone-50/90 border border-stone-200/60 flex flex-col items-center justify-center shadow-[0_8px_30px_rgba(0,0,0,0.03)]"
-                style={{ width: "90px", height: "90px" }}
+
+              {/* Ambient refraction spectrum glow */}
+              <motion.div
+                animate={{
+                  scale: phase === "sorting" ? [1, 1.15, 1] : 1,
+                  opacity: phase === "sorting" ? 0.35 : 0.15,
+                }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="absolute w-24 h-24 rounded-full bg-gradient-to-tr from-emerald-400 via-blue-500 to-indigo-500 blur-xl"
+              />
+
+              {/* The Glass Prism Core (Hexagonal Cut glassmorphic diamond) */}
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 24, repeat: Infinity, ease: "linear" }}
+                className="relative z-10 w-16 h-16 bg-white/20 border border-white/40 shadow-[0_8px_32px_rgba(31,38,135,0.08)] backdrop-blur-md flex flex-col items-center justify-center"
+                style={{
+                  clipPath: "polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%)",
+                }}
               >
-                {/* Radial active glow during sorting */}
-                {phase === "sorting" && (
-                  <motion.div
-                    animate={{ scale: [1, 1.3, 1], opacity: [0.2, 0.4, 0.2] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute inset-0 rounded-full bg-stone-200"
-                  />
-                )}
+                {/* Internal spectrum core */}
+                <div className="absolute inset-[2px] bg-gradient-to-tr from-emerald-500/20 via-blue-500/20 to-indigo-500/20 mix-blend-color-dodge rounded-full animate-pulse" />
                 
                 <Sparkles
-                  size={24}
-                  className={`relative z-10 transition-colors duration-500 ${
-                    phase === "sorting" ? "text-stone-700 animate-pulse" : "text-stone-400"
+                  size={20}
+                  className={`relative z-20 transition-transform duration-300 ${
+                    phase === "sorting" ? "text-stone-700 animate-pulse scale-110" : "text-stone-400"
                   }`}
                 />
-                
-                <span className="relative z-10 text-[9px] font-bold text-stone-500 uppercase tracking-wider mt-1">
-                  {phase === "sorting" ? "Sorting" : "AI Core"}
-                </span>
-              </div>
+              </motion.div>
+
+              {/* Dynamic Refraction Sparkle Flash */}
+              <AnimatePresence>
+                {isRefracting && refractingColor && (
+                  <motion.div
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    animate={{ scale: [0.5, 2, 0.5], opacity: [0, 0.9, 0] }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.35, ease: "easeOut" }}
+                    className="absolute z-20 w-12 h-12 rounded-full blur-sm"
+                    style={{
+                      background: refractingColor,
+                      boxShadow: `0 0 24px ${refractingColor}`,
+                    }}
+                  />
+                )}
+              </AnimatePresence>
+              
+              <span className="relative z-20 text-[9px] font-bold text-stone-500 uppercase tracking-wider mt-3">
+                {phase === "sorting" ? "Refracting" : "AI Prism"}
+              </span>
             </motion.div>
           )}
         </AnimatePresence>
