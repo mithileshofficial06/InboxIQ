@@ -130,6 +130,110 @@ function Typewriter({ queries }: { queries: string[] }) {
   );
 }
 
+/* ─── Floating Parallax / Proximity Particle ─── */
+function FloatingParticle({ text, index, cursorPos }: { text: string; index: number; cursorPos: { x: number; y: number } }) {
+  const particleRef = useRef<HTMLDivElement>(null);
+  
+  // Layer calculations (3 layers)
+  const layer = index % 3;
+  let scale = 1.0;
+  let baseOpacity = 0.4;
+  let blur = "none";
+  let speed = 25 + (index % 5) * 5; // seconds
+  let displayWord = text;
+
+  if (layer === 0) {
+    // Foreground
+    scale = 1.4;
+    baseOpacity = 0.12;
+    blur = "blur(2px)";
+    speed = 18 + (index % 4) * 3;
+  } else if (layer === 2) {
+    // Background
+    scale = 0.65;
+    baseOpacity = 0.18;
+    blur = "none";
+    speed = 35 + (index % 6) * 5;
+    // Abstract text to prevent competing with main content
+    const clean = text.replace("✉ ", "").toLowerCase();
+    displayWord = `✉ ${clean.slice(0, 5)}...`;
+  }
+
+  // React to mouse proximity
+  const [repel, setRepel] = useState({ x: 0, y: 0 });
+  const [isGlowing, setIsGlowing] = useState(false);
+
+  useEffect(() => {
+    const el = particleRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const px = rect.left + rect.width / 2;
+    const py = rect.top + rect.height / 2;
+
+    const dx = px - cursorPos.x;
+    const dy = py - cursorPos.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const radius = 160;
+
+    if (dist < radius && dist > 0) {
+      const force = (radius - dist) / radius;
+      setRepel({
+        x: (dx / dist) * force * 30 * scale,
+        y: (dy / dist) * force * 30 * scale,
+      });
+      setIsGlowing(true);
+    } else {
+      setRepel({ x: 0, y: 0 });
+      setIsGlowing(false);
+    }
+  }, [cursorPos, scale]);
+
+  const left = `${5 + (index * 6.25) % 90}%`;
+
+  return (
+    <motion.div
+      ref={particleRef}
+      initial={{ y: "110vh", x: 0, rotate: 0, opacity: 0 }}
+      animate={{
+        y: "-110vh",
+        x: [0, 30, -20, 0],
+        rotate: [0, 5, -5, 0],
+        opacity: [0, baseOpacity, baseOpacity, baseOpacity, 0],
+      }}
+      transition={{
+        duration: speed,
+        repeat: Infinity,
+        ease: "linear",
+        delay: index * 1.5,
+      }}
+      style={{
+        position: "absolute",
+        left,
+        top: 0,
+        fontSize: "11px",
+        fontWeight: 500,
+        padding: "6px 12px",
+        borderRadius: "6px",
+        background: isGlowing ? "rgba(255, 255, 255, 0.85)" : "rgba(255, 255, 255, 0.5)",
+        border: isGlowing ? "1px solid rgba(107, 122, 143, 0.4)" : "1px solid rgba(229, 226, 219, 0.6)",
+        color: "var(--color-text-tertiary)",
+        whiteSpace: "nowrap",
+        pointerEvents: "none",
+        zIndex: layer === 0 ? 10 : 1,
+        filter: blur,
+        transformOrigin: "center",
+        boxShadow: isGlowing ? "0 8px 24px rgba(107, 122, 143, 0.15)" : "none",
+        scale,
+        translateX: repel.x,
+        translateY: repel.y,
+      }}
+      className="transition-shadow duration-300"
+    >
+      <span style={{ opacity: layer === 2 ? 0.6 : 1 }}>{displayWord}</span>
+    </motion.div>
+  );
+}
+
 /* ─── Concept 2: Neural Vector Search Grid (Semantic Mapper) ─── */
 function HeroCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -153,6 +257,8 @@ function HeroCanvas() {
       color: string;
       pulse: number;
       pulseSpeed: number;
+      isNearCursor?: boolean;
+      cursorGlowFactor?: number;
     }[] = [];
 
     const resize = () => {
@@ -196,6 +302,8 @@ function HeroCanvas() {
             color,
             pulse: Math.random() * Math.PI * 2,
             pulseSpeed: 0.025 + Math.random() * 0.035, // Faster pulsing cycles
+            isNearCursor: false,
+            cursorGlowFactor: 0,
           });
         }
       }
@@ -203,6 +311,15 @@ function HeroCanvas() {
 
     resize();
     window.addEventListener("resize", resize);
+
+    // Track mouse position relative to canvas bounding box
+    const mouse = { x: -1000, y: -1000 };
+    const handleMouseMoveGlobal = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      mouse.x = e.clientX - rect.left;
+      mouse.y = e.clientY - rect.top;
+    };
+    window.addEventListener("mousemove", handleMouseMoveGlobal);
 
     // Active path signal lines representing semantic search queries
     interface ActivePulse {
@@ -278,11 +395,28 @@ function HeroCanvas() {
       const h = window.innerHeight;
       ctx.clearRect(0, 0, w, h);
 
-      // No point warping - cursor effect disabled
+      // Apply mouse-reactive proximity offset and glow to points
       for (const pt of points) {
         pt.pulse += pt.pulseSpeed;
-        pt.x = pt.baseX;
-        pt.y = pt.baseY;
+
+        const dx = pt.baseX - mouse.x;
+        const dy = pt.baseY - mouse.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const radius = 150; // proximity threshold
+
+        if (dist < radius && dist > 0) {
+          const force = (radius - dist) / radius;
+          // Gently push points away from cursor
+          pt.x = pt.baseX + (dx / dist) * force * 15;
+          pt.y = pt.baseY + (dy / dist) * force * 15;
+          pt.isNearCursor = true;
+          pt.cursorGlowFactor = force;
+        } else {
+          pt.x = pt.baseX;
+          pt.y = pt.baseY;
+          pt.isNearCursor = false;
+          pt.cursorGlowFactor = 0;
+        }
       }
 
       const cols = Math.ceil(w / spacing) + 1;
@@ -327,14 +461,32 @@ function HeroCanvas() {
         const pulseVal = Math.sin(pt.pulse) * 0.25 + 0.75;
         ctx.beginPath();
         
+        let opacity = 0.55 * pulseVal;
+        if (pt.isNearCursor && pt.cursorGlowFactor) {
+          // Increase opacity as cursor approaches
+          opacity = 0.55 * pulseVal + pt.cursorGlowFactor * 0.45;
+        }
+        
         if (pt.color.includes("28, 25, 23")) {
-          ctx.arc(pt.x, pt.y, 2, 0, Math.PI * 2); // Larger coordinate dot
-          ctx.fillStyle = `rgba(168, 162, 158, ${0.55 * pulseVal})`; // Highly visible gray opacity
+          // Normal gray intersection dot
+          const r = pt.isNearCursor && pt.cursorGlowFactor ? 2 + pt.cursorGlowFactor * 2 : 2;
+          ctx.arc(pt.x, pt.y, r, 0, Math.PI * 2);
+          ctx.fillStyle = pt.isNearCursor && pt.cursorGlowFactor
+            ? `rgba(107, 122, 143, ${opacity})` // soft slate color on hover
+            : `rgba(168, 162, 158, ${opacity})`;
         } else {
-          ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2); // Larger category coordinate cluster anchor
-          ctx.fillStyle = pt.color.replace("0.65", (0.95 * pulseVal).toString()); // Vibrant cluster glow
+          // Colorful category anchor dot
+          const r = pt.isNearCursor && pt.cursorGlowFactor ? 4 + pt.cursorGlowFactor * 3 : 4;
+          ctx.arc(pt.x, pt.y, r, 0, Math.PI * 2);
+          ctx.fillStyle = pt.color.replace("0.65", (0.95 * pulseVal + (pt.cursorGlowFactor || 0) * 0.05).toString());
+          
+          if (pt.isNearCursor && pt.cursorGlowFactor) {
+            ctx.shadowColor = pt.color;
+            ctx.shadowBlur = 10 * pt.cursorGlowFactor;
+          }
         }
         ctx.fill();
+        ctx.shadowBlur = 0;
       }
 
       // Update and draw active pulses
@@ -414,6 +566,7 @@ function HeroCanvas() {
       cancelAnimationFrame(animationId);
       clearInterval(pulseInterval);
       window.removeEventListener("resize", resize);
+      window.removeEventListener("mousemove", handleMouseMoveGlobal);
     };
   }, []);
 
@@ -486,15 +639,7 @@ export default function LandingPage() {
       {/* ─── Floating Email Particles ─── */}
       <div style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", overflow: "hidden" }}>
         {PARTICLES.map((p, i) => (
-          <div key={i} className="email-particle" style={{
-            left: `${5 + (i * 6.25) % 90}%`,
-            top: `${100 + (i * 17) % 40}%`,
-            animationDelay: `${i * 2.2}s`,
-            animationDuration: `${25 + (i % 5) * 5}s`,
-            opacity: 0,
-          }}>
-            {p}
-          </div>
+          <FloatingParticle key={i} text={p} index={i} cursorPos={cursorPos} />
         ))}
       </div>
 
@@ -538,6 +683,19 @@ export default function LandingPage() {
         <HeroCanvas />
         <div style={{ maxWidth: "900px", margin: "0 auto", padding: "0 32px", position: "relative", zIndex: 1 }}>
 
+          {/* Central Ambient Aurora Spotlight backdrop */}
+          <motion.div
+            animate={{
+              opacity: [0.4, 0.7, 0.4]
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-gradient-to-tr from-indigo-100/30 to-emerald-100/30 blur-[120px] rounded-full w-[300px] sm:w-[500px] h-[150px] sm:h-[250px] pointer-events-none -z-10"
+          />
+
           <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0}
             style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "6px 16px", borderRadius: "100px", background: "rgba(255,255,255,0.7)", border: "1px solid var(--color-border-default)", marginBottom: "32px", fontSize: "13px", fontWeight: 500, color: "var(--color-text-secondary)", backdropFilter: "blur(8px)" }}>
             <Sparkles size={14} color="var(--color-sage)" />
@@ -553,10 +711,10 @@ export default function LandingPage() {
             <AnimatePresence mode="wait">
               <motion.h1
                 key={wordIdx}
-                initial={{ y: 50, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: -50, opacity: 0 }}
-                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                initial={{ y: 60, opacity: 0, filter: "blur(8px)" }}
+                animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+                exit={{ y: -60, opacity: 0, filter: "blur(8px)" }}
+                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                 style={{ fontSize: "clamp(40px, 6.5vw, 76px)", fontWeight: 800, lineHeight: 1.05, letterSpacing: "-0.04em", fontStyle: "italic", color: "var(--color-slate)" }}
               >
                 {ROTATING_WORDS[wordIdx]}
@@ -572,13 +730,49 @@ export default function LandingPage() {
           <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={4}
             style={{ display: "flex", gap: "12px", justifyContent: "center", marginBottom: "16px" }}>
             <motion.button
-              whileHover={{ scale: 1.04, boxShadow: "0 12px 40px rgba(28, 25, 23, 0.15)" }}
+              whileHover={{ 
+                scale: 1.04, 
+                boxShadow: "0 0 25px rgba(99, 102, 241, 0.45), 0 0 50px rgba(16, 185, 129, 0.25)" 
+              }}
               whileTap={{ scale: 0.97 }}
               onClick={handleCTA}
-              style={{ display: "inline-flex", alignItems: "center", gap: "10px", padding: "14px 32px", fontSize: "15px", fontWeight: 600, background: "var(--color-accent)", color: "#fff", border: "none", borderRadius: "8px", cursor: "pointer" }}
+              className="relative overflow-hidden cursor-pointer"
+              style={{ 
+                display: "inline-flex", 
+                alignItems: "center", 
+                gap: "10px", 
+                padding: "14px 32px", 
+                fontSize: "15px", 
+                fontWeight: 600, 
+                background: "var(--color-accent)", 
+                color: "#fff", 
+                border: "none", 
+                borderRadius: "8px", 
+                transition: "box-shadow 0.4s ease-in-out" 
+              }}
             >
-              {isLoggedIn ? "Open Dashboard" : "Connect with Google"}
-              <ArrowRight size={16} />
+              {/* Sleek angled white gradient sheen overlay */}
+              <motion.div
+                className="absolute top-0 bottom-0 left-0 pointer-events-none"
+                style={{
+                  width: "40%",
+                  background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.25) 50%, transparent)",
+                  skewX: "-25deg",
+                }}
+                animate={{
+                  x: ["-150%", "350%"]
+                }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  repeatDelay: 3.5,
+                  ease: "easeInOut"
+                }}
+              />
+              <span className="relative z-10 flex items-center gap-2">
+                {isLoggedIn ? "Open Dashboard" : "Connect with Google"}
+                <ArrowRight size={16} />
+              </span>
             </motion.button>
             <motion.button
               whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
@@ -785,13 +979,49 @@ export default function LandingPage() {
             Connect your Gmail account in seconds. Read-only access. Cancel anytime.
           </p>
           <motion.button
-            whileHover={{ scale: 1.04, boxShadow: "0 12px 40px rgba(28, 25, 23, 0.15)" }}
+            whileHover={{ 
+              scale: 1.04, 
+              boxShadow: "0 0 25px rgba(99, 102, 241, 0.45), 0 0 50px rgba(16, 185, 129, 0.25)" 
+            }}
             whileTap={{ scale: 0.97 }}
             onClick={handleCTA}
-            style={{ display: "inline-flex", alignItems: "center", gap: "10px", padding: "16px 36px", fontSize: "16px", fontWeight: 600, background: "var(--color-accent)", color: "#fff", border: "none", borderRadius: "8px", cursor: "pointer" }}
+            className="relative overflow-hidden cursor-pointer"
+            style={{ 
+              display: "inline-flex", 
+              alignItems: "center", 
+              gap: "10px", 
+              padding: "16px 36px", 
+              fontSize: "16px", 
+              fontWeight: 600, 
+              background: "var(--color-accent)", 
+              color: "#fff", 
+              border: "none", 
+              borderRadius: "8px", 
+              transition: "box-shadow 0.4s ease-in-out" 
+            }}
           >
-            {isLoggedIn ? "Open Dashboard" : "Get Started Free"}
-            <ArrowRight size={16} />
+            {/* Sleek angled white gradient sheen overlay */}
+            <motion.div
+              className="absolute top-0 bottom-0 left-0 pointer-events-none"
+              style={{
+                width: "40%",
+                background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.25) 50%, transparent)",
+                skewX: "-25deg",
+              }}
+              animate={{
+                x: ["-150%", "350%"]
+              }}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                repeatDelay: 3.5,
+                ease: "easeInOut"
+              }}
+            />
+            <span className="relative z-10 flex items-center gap-2">
+              {isLoggedIn ? "Open Dashboard" : "Get Started Free"}
+              <ArrowRight size={16} />
+            </span>
           </motion.button>
         </motion.div>
       </section>
