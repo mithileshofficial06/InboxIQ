@@ -144,7 +144,7 @@ function HeroCanvas() {
     const dpr = window.devicePixelRatio || 1;
 
     // Grid configuration
-    const spacing = 55; // Space between grid nodes
+    const spacing = 32; // Denser grid layout for more lines
     let points: {
       baseX: number;
       baseY: number;
@@ -154,8 +154,6 @@ function HeroCanvas() {
       pulse: number;
       pulseSpeed: number;
     }[] = [];
-
-    let mouse = { x: -1000, y: -1000, radius: 140 };
 
     const resize = () => {
       const w = window.innerWidth;
@@ -171,12 +169,12 @@ function HeroCanvas() {
       const cols = Math.ceil(w / spacing) + 1;
       const rows = Math.ceil(h / spacing) + 1;
 
-      // Soft pastel category colors matching the InboxIQ theme
+      // Category colors matching the InboxIQ theme with high visibility opacity
       const categoryColors = [
-        "rgba(107, 122, 143, 0.35)", // Jobs (slate)
-        "rgba(132, 155, 135, 0.35)", // Academic (sage)
-        "rgba(196, 107, 90, 0.35)",  // Bills (terracotta)
-        "rgba(201, 154, 92, 0.35)",  // Orders (ochre)
+        "rgba(107, 122, 143, 0.65)", // Jobs (slate)
+        "rgba(132, 155, 135, 0.65)", // Academic (sage)
+        "rgba(196, 107, 90, 0.65)",  // Bills (terracotta)
+        "rgba(201, 154, 92, 0.65)",  // Orders (ochre)
       ];
 
       for (let r = 0; r < rows; r++) {
@@ -197,7 +195,7 @@ function HeroCanvas() {
             y: y,
             color,
             pulse: Math.random() * Math.PI * 2,
-            pulseSpeed: 0.015 + Math.random() * 0.02,
+            pulseSpeed: 0.025 + Math.random() * 0.035, // Faster pulsing cycles
           });
         }
       }
@@ -205,20 +203,6 @@ function HeroCanvas() {
 
     resize();
     window.addEventListener("resize", resize);
-
-    const handleMouseMove = (e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      mouse.x = e.clientX - rect.left;
-      mouse.y = e.clientY - rect.top;
-    };
-
-    const handleMouseLeave = () => {
-      mouse.x = -1000;
-      mouse.y = -1000;
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseleave", handleMouseLeave);
 
     // Active path signal lines representing semantic search queries
     interface ActivePulse {
@@ -243,12 +227,12 @@ function HeroCanvas() {
       let currentX = startPt.baseX;
       let currentY = startPt.baseY;
 
-      // Select matching color theme for trail
+      // Select matching color theme for trail (high opacity)
       const trailColors = [
-        "rgba(107, 122, 143, 0.75)", // Jobs
-        "rgba(132, 155, 135, 0.75)", // Academic
-        "rgba(196, 107, 90, 0.75)",  // Bills
-        "rgba(201, 154, 92, 0.75)",  // Orders
+        "rgba(107, 122, 143, 0.9)", // Jobs
+        "rgba(132, 155, 135, 0.9)", // Academic
+        "rgba(196, 107, 90, 0.9)",  // Bills
+        "rgba(201, 154, 92, 0.9)",  // Orders
       ];
       const selectedColor = trailColors[Math.floor(Math.random() * trailColors.length)];
 
@@ -270,14 +254,14 @@ function HeroCanvas() {
         targetX: path[1].x,
         targetY: path[1].y,
         progress: 0,
-        speed: 0.04 + Math.random() * 0.03,
+        speed: 0.015 + Math.random() * 0.01, // Slower, smoother travel speed
         color: selectedColor,
         path,
         currentStep: 0,
       });
     };
 
-    let pulseInterval = setInterval(triggerPulse, 2000);
+    let pulseInterval = setInterval(triggerPulse, 800); // Trigger slightly less frequently since they move slower
 
     interface Ripple {
       x: number;
@@ -294,29 +278,17 @@ function HeroCanvas() {
       const h = window.innerHeight;
       ctx.clearRect(0, 0, w, h);
 
-      // Point warping calculation based on magnetic mouse pull
+      // No point warping - cursor effect disabled
       for (const pt of points) {
         pt.pulse += pt.pulseSpeed;
-        const dx = mouse.x - pt.baseX;
-        const dy = mouse.y - pt.baseY;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-
-        if (dist < mouse.radius) {
-          const force = (mouse.radius - dist) / mouse.radius;
-          const angle = Math.atan2(dy, dx);
-          const pull = force * 20; // grid warping pull weight
-          pt.x = pt.baseX + Math.cos(angle) * pull;
-          pt.y = pt.baseY + Math.sin(angle) * pull;
-        } else {
-          pt.x += (pt.baseX - pt.x) * 0.08;
-          pt.y += (pt.baseY - pt.y) * 0.08;
-        }
+        pt.x = pt.baseX;
+        pt.y = pt.baseY;
       }
 
       const cols = Math.ceil(w / spacing) + 1;
       const rows = Math.ceil(h / spacing) + 1;
 
-      // Draw horizontal grids
+      // Draw horizontal grids (increased width and opacity)
       for (let r = 0; r < rows; r++) {
         ctx.beginPath();
         for (let c = 0; c < cols; c++) {
@@ -328,12 +300,12 @@ function HeroCanvas() {
             ctx.lineTo(pt.x, pt.y);
           }
         }
-        ctx.strokeStyle = "rgba(168, 162, 158, 0.08)";
-        ctx.lineWidth = 1;
+        ctx.strokeStyle = "rgba(168, 162, 158, 0.22)"; // Highly visible grid line opacity
+        ctx.lineWidth = 1.2;
         ctx.stroke();
       }
 
-      // Draw vertical grids
+      // Draw vertical grids (increased width and opacity)
       for (let c = 0; c < cols; c++) {
         ctx.beginPath();
         for (let r = 0; r < rows; r++) {
@@ -345,22 +317,22 @@ function HeroCanvas() {
             ctx.lineTo(pt.x, pt.y);
           }
         }
-        ctx.strokeStyle = "rgba(168, 162, 158, 0.08)";
-        ctx.lineWidth = 1;
+        ctx.strokeStyle = "rgba(168, 162, 158, 0.22)"; // Highly visible grid line opacity
+        ctx.lineWidth = 1.2;
         ctx.stroke();
       }
 
-      // Draw intersection dots
+      // Draw intersection dots (larger radius and higher opacity)
       for (const pt of points) {
         const pulseVal = Math.sin(pt.pulse) * 0.25 + 0.75;
         ctx.beginPath();
         
         if (pt.color.includes("28, 25, 23")) {
-          ctx.arc(pt.x, pt.y, 1.5, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(168, 162, 158, ${0.28 * pulseVal})`;
+          ctx.arc(pt.x, pt.y, 2, 0, Math.PI * 2); // Larger coordinate dot
+          ctx.fillStyle = `rgba(168, 162, 158, ${0.55 * pulseVal})`; // Highly visible gray opacity
         } else {
-          ctx.arc(pt.x, pt.y, 3, 0, Math.PI * 2);
-          ctx.fillStyle = pt.color.replace("0.35", (0.75 * pulseVal).toString());
+          ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2); // Larger category coordinate cluster anchor
+          ctx.fillStyle = pt.color.replace("0.65", (0.95 * pulseVal).toString()); // Vibrant cluster glow
         }
         ctx.fill();
       }
@@ -373,23 +345,23 @@ function HeroCanvas() {
         const currX = p.x + (p.targetX - p.x) * p.progress;
         const currY = p.y + (p.targetY - p.y) * p.progress;
 
-        // Draw connecting trail lines
+        // Draw connecting trail lines (increased line width)
         ctx.beginPath();
         ctx.moveTo(p.path[0].x, p.path[0].y);
         for (let s = 1; s <= p.currentStep; s++) {
           ctx.lineTo(p.path[s].x, p.path[s].y);
         }
         ctx.lineTo(currX, currY);
-        ctx.lineWidth = 1.5;
+        ctx.lineWidth = 2.5; // Thicker pathways
         ctx.strokeStyle = p.color;
         ctx.stroke();
 
         // Draw light head
         ctx.beginPath();
-        ctx.arc(currX, currY, 3, 0, Math.PI * 2);
+        ctx.arc(currX, currY, 4.5, 0, Math.PI * 2); // Larger pulse head
         ctx.fillStyle = "#ffffff";
         ctx.shadowColor = p.color;
-        ctx.shadowBlur = 6;
+        ctx.shadowBlur = 10; // More intense glow
         ctx.fill();
         ctx.shadowBlur = 0;
 
@@ -416,16 +388,16 @@ function HeroCanvas() {
         }
       }
 
-      // Render expansion rings
+      // Render expansion rings (expand faster and thicker rings)
       for (let i = ripples.length - 1; i >= 0; i--) {
         const r = ripples[i];
-        r.r += 0.8;
+        r.r += 2.0; // Faster expansion speed
         r.opacity -= 0.02;
 
         ctx.beginPath();
         ctx.arc(r.x, r.y, r.r, 0, Math.PI * 2);
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = r.color.replace("0.4", r.opacity.toString());
+        ctx.lineWidth = 1.5; // Thicker ring width
+        ctx.strokeStyle = r.color.replace("0.9", r.opacity.toString());
         ctx.stroke();
 
         if (r.opacity <= 0) {
@@ -442,8 +414,6 @@ function HeroCanvas() {
       cancelAnimationFrame(animationId);
       clearInterval(pulseInterval);
       window.removeEventListener("resize", resize);
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseleave", handleMouseLeave);
     };
   }, []);
 
