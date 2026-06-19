@@ -794,14 +794,31 @@ export default function LandingPage() {
       </motion.section>
 
       {/* ═══════ INBOX CHAOS ANIMATION ═══════ */}
-      <section style={{ ...sectionWhite, position: "relative", zIndex: 2, padding: "80px 32px" }}>
+      <section style={{ ...sectionWhite, position: "relative", zIndex: 2, padding: "120px 32px 80px 32px" }}>
         <motion.div
           variants={scaleIn} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }}
           style={{ maxWidth: "1100px", margin: "0 auto" }}
         >
           <div style={{ textAlign: "center", marginBottom: "48px" }}>
-            <div style={{ fontSize: "12px", fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--color-text-tertiary)", marginBottom: "12px" }}>See It In Action</div>
-            <h2 style={{ fontSize: "clamp(28px, 4vw, 40px)", fontWeight: 800, letterSpacing: "-0.03em", color: "var(--color-text-primary)" }}>From chaos to <span style={{ fontStyle: "italic", color: "var(--color-slate)" }}>organized intelligence.</span></h2>
+            <div style={{
+              display: "inline-block",
+              fontSize: "11px",
+              fontWeight: 800,
+              textTransform: "uppercase",
+              letterSpacing: "0.08em",
+              color: "#000",
+              border: "2px solid #000",
+              boxShadow: "2.5px 2.5px 0px #000",
+              background: "#FEF08A", // bright neubrutalist yellow
+              padding: "6px 14px",
+              borderRadius: "6px",
+              marginBottom: "20px"
+            }}>
+              See It In Action
+            </div>
+            <h2 style={{ fontSize: "clamp(28px, 4vw, 40px)", fontWeight: 900, letterSpacing: "-0.03em", color: "#000", lineHeight: 1.2 }}>
+              From chaos to <span style={{ fontStyle: "italic", textDecoration: "underline", textDecorationColor: "#000", textDecorationThickness: "2px", color: "#000" }}>organized intelligence.</span>
+            </h2>
           </div>
           <InboxChaosAnimation />
         </motion.div>

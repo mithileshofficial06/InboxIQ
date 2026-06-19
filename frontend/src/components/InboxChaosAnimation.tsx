@@ -10,13 +10,13 @@ import {
 } from "lucide-react";
 
 /* ─── Category Theme Mapping ─── */
-const CATEGORY_THEMES: Record<string, { bg: string; text: string; border: string }> = {
-  Orders: { bg: "bg-emerald-50", text: "text-emerald-600", border: "border-emerald-100/50" },
-  Jobs: { bg: "bg-blue-50", text: "text-blue-600", border: "border-blue-100/50" },
-  Academic: { bg: "bg-indigo-50", text: "text-indigo-600", border: "border-indigo-100/50" },
-  Bills: { bg: "bg-amber-50", text: "text-amber-600", border: "border-amber-100/50" },
-  Travel: { bg: "bg-cyan-50", text: "text-cyan-600", border: "border-cyan-100/50" },
-  Personal: { bg: "bg-slate-50", text: "text-slate-700", border: "border-slate-200/50" },
+const CATEGORY_THEMES: Record<string, { bg: string; text: string; border: string; hex: string }> = {
+  Orders: { bg: "bg-[#FDE047]", text: "text-black", border: "border-black", hex: "#FDE047" },
+  Jobs: { bg: "bg-[#93C5FD]", text: "text-black", border: "border-black", hex: "#93C5FD" },
+  Academic: { bg: "bg-[#A7F3D0]", text: "text-black", border: "border-black", hex: "#A7F3D0" },
+  Bills: { bg: "bg-[#FCA5A5]", text: "text-black", border: "border-black", hex: "#FCA5A5" },
+  Travel: { bg: "bg-[#C084FC]", text: "text-black", border: "border-black", hex: "#C084FC" },
+  Personal: { bg: "bg-[#F472B6]", text: "text-black", border: "border-black", hex: "#F472B6" },
 };
 
 /* ═══════════════════════════════════════════
@@ -43,31 +43,31 @@ interface CategoryBucketData {
    DATA
    ═══════════════════════════════════════════ */
 const EMAIL_PILLS: EmailPillData[] = [
-  { id: 1, label: "Amazon Order", category: "Orders", icon: ShoppingCart, color: "#c99a5c", gradient: "linear-gradient(135deg, rgba(201,154,92,0.15), rgba(201,154,92,0.05))" },
-  { id: 2, label: "OTP Code", category: "Personal", icon: Key, color: "#a8a29e", gradient: "linear-gradient(135deg, rgba(168,162,158,0.15), rgba(168,162,158,0.05))" },
-  { id: 3, label: "LinkedIn Update", category: "Jobs", icon: Briefcase, color: "#6b7a8f", gradient: "linear-gradient(135deg, rgba(107,122,143,0.15), rgba(107,122,143,0.05))" },
-  { id: 4, label: "Interview Invite", category: "Jobs", icon: Briefcase, color: "#6b7a8f", gradient: "linear-gradient(135deg, rgba(107,122,143,0.15), rgba(107,122,143,0.05))" },
-  { id: 5, label: "Newsletter", category: "Personal", icon: Newspaper, color: "#a8a29e", gradient: "linear-gradient(135deg, rgba(168,162,158,0.15), rgba(168,162,158,0.05))" },
-  { id: 6, label: "Bank Statement", category: "Bills", icon: CreditCard, color: "#c46b5a", gradient: "linear-gradient(135deg, rgba(196,107,90,0.15), rgba(196,107,90,0.05))" },
-  { id: 7, label: "GitHub PR Link", category: "Personal", icon: GitPullRequest, color: "#a8a29e", gradient: "linear-gradient(135deg, rgba(168,162,158,0.15), rgba(168,162,158,0.05))" },
-  { id: 8, label: "College Circular", category: "Academic", icon: GraduationCap, color: "#849b87", gradient: "linear-gradient(135deg, rgba(132,155,135,0.15), rgba(132,155,135,0.05))" },
-  { id: 9, label: "Flight Booking", category: "Travel", icon: Plane, color: "#b5838d", gradient: "linear-gradient(135deg, rgba(181,131,141,0.15), rgba(181,131,141,0.05))" },
-  { id: 10, label: "Recruiter Email", category: "Jobs", icon: Briefcase, color: "#6b7a8f", gradient: "linear-gradient(135deg, rgba(107,122,143,0.15), rgba(107,122,143,0.05))" },
-  { id: 11, label: "Electricity Bill", category: "Bills", icon: CreditCard, color: "#c46b5a", gradient: "linear-gradient(135deg, rgba(196,107,90,0.15), rgba(196,107,90,0.05))" },
-  { id: 12, label: "Exam Results", category: "Academic", icon: GraduationCap, color: "#849b87", gradient: "linear-gradient(135deg, rgba(132,155,135,0.15), rgba(132,155,135,0.05))" },
-  { id: 13, label: "Flipkart Delivery", category: "Orders", icon: ShoppingCart, color: "#c99a5c", gradient: "linear-gradient(135deg, rgba(201,154,92,0.15), rgba(201,154,92,0.05))" },
-  { id: 14, label: "Hotel Confirm", category: "Travel", icon: Plane, color: "#b5838d", gradient: "linear-gradient(135deg, rgba(181,131,141,0.15), rgba(181,131,141,0.05))" },
-  { id: 15, label: "Internship Update", category: "Jobs", icon: Briefcase, color: "#6b7a8f", gradient: "linear-gradient(135deg, rgba(107,122,143,0.15), rgba(107,122,143,0.05))" },
-  { id: 16, label: "Credit Card Due", category: "Bills", icon: CreditCard, color: "#c46b5a", gradient: "linear-gradient(135deg, rgba(196,107,90,0.15), rgba(196,107,90,0.05))" },
+  { id: 1, label: "Amazon Order", category: "Orders", icon: ShoppingCart, color: "#FDE047", gradient: "#FDE047" },
+  { id: 2, label: "OTP Code", category: "Personal", icon: Key, color: "#F472B6", gradient: "#F472B6" },
+  { id: 3, label: "LinkedIn Update", category: "Jobs", icon: Briefcase, color: "#93C5FD", gradient: "#93C5FD" },
+  { id: 4, label: "Interview Invite", category: "Jobs", icon: Briefcase, color: "#93C5FD", gradient: "#93C5FD" },
+  { id: 5, label: "Newsletter", category: "Personal", icon: Newspaper, color: "#F472B6", gradient: "#F472B6" },
+  { id: 6, label: "Bank Statement", category: "Bills", icon: CreditCard, color: "#FCA5A5", gradient: "#FCA5A5" },
+  { id: 7, label: "GitHub PR Link", category: "Personal", icon: GitPullRequest, color: "#F472B6", gradient: "#F472B6" },
+  { id: 8, label: "College Circular", category: "Academic", icon: GraduationCap, color: "#A7F3D0", gradient: "#A7F3D0" },
+  { id: 9, label: "Flight Booking", category: "Travel", icon: Plane, color: "#C084FC", gradient: "#C084FC" },
+  { id: 10, label: "Recruiter Email", category: "Jobs", icon: Briefcase, color: "#93C5FD", gradient: "#93C5FD" },
+  { id: 11, label: "Electricity Bill", category: "Bills", icon: CreditCard, color: "#FCA5A5", gradient: "#FCA5A5" },
+  { id: 12, label: "Exam Results", category: "Academic", icon: GraduationCap, color: "#A7F3D0", gradient: "#A7F3D0" },
+  { id: 13, label: "Flipkart Delivery", category: "Orders", icon: ShoppingCart, color: "#FDE047", gradient: "#FDE047" },
+  { id: 14, label: "Hotel Confirm", category: "Travel", icon: Plane, color: "#C084FC", gradient: "#C084FC" },
+  { id: 15, label: "Internship Update", category: "Jobs", icon: Briefcase, color: "#93C5FD", gradient: "#93C5FD" },
+  { id: 16, label: "Credit Card Due", category: "Bills", icon: CreditCard, color: "#FCA5A5", gradient: "#FCA5A5" },
 ];
 
 const CATEGORIES: CategoryBucketData[] = [
-  { name: "Orders", icon: ShoppingCart, color: "#c99a5c", gradient: "linear-gradient(135deg, rgba(201,154,92,0.12), rgba(201,154,92,0.04))", lightBg: "rgba(201,154,92,0.06)" },
-  { name: "Jobs", icon: Briefcase, color: "#6b7a8f", gradient: "linear-gradient(135deg, rgba(107,122,143,0.12), rgba(107,122,143,0.04))", lightBg: "rgba(107,122,143,0.06)" },
-  { name: "Academic", icon: GraduationCap, color: "#849b87", gradient: "linear-gradient(135deg, rgba(132,155,135,0.12), rgba(132,155,135,0.04))", lightBg: "rgba(132,155,135,0.06)" },
-  { name: "Bills", icon: CreditCard, color: "#c46b5a", gradient: "linear-gradient(135deg, rgba(196,107,90,0.12), rgba(196,107,90,0.04))", lightBg: "rgba(196,107,90,0.06)" },
-  { name: "Travel", icon: Plane, color: "#b5838d", gradient: "linear-gradient(135deg, rgba(181,131,141,0.12), rgba(181,131,141,0.04))", lightBg: "rgba(181,131,141,0.06)" },
-  { name: "Personal", icon: User, color: "#a8a29e", gradient: "linear-gradient(135deg, rgba(168,162,158,0.12), rgba(168,162,158,0.04))", lightBg: "rgba(168,162,158,0.06)" },
+  { name: "Orders", icon: ShoppingCart, color: "#000", gradient: "#FDE047", lightBg: "#FFF" },
+  { name: "Jobs", icon: Briefcase, color: "#000", gradient: "#93C5FD", lightBg: "#FFF" },
+  { name: "Academic", icon: GraduationCap, color: "#000", gradient: "#A7F3D0", lightBg: "#FFF" },
+  { name: "Bills", icon: CreditCard, color: "#000", gradient: "#FCA5A5", lightBg: "#FFF" },
+  { name: "Travel", icon: Plane, color: "#000", gradient: "#C084FC", lightBg: "#FFF" },
+  { name: "Personal", icon: User, color: "#000", gradient: "#F472B6", lightBg: "#FFF" },
 ];
 
 /* ═══════════════════════════════════════════
@@ -436,10 +436,10 @@ export default function InboxChaosAnimation() {
       style={{
         maxWidth: "1040px",
         height: "clamp(520px, 60vw, 600px)", // Increased height to make container look spacious and premium
-        borderRadius: "24px",
-        border: "1px solid var(--color-border-default)",
-        background: "var(--color-bg-secondary)",
-        boxShadow: "0 32px 80px -20px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.02)",
+        borderRadius: "12px",
+        border: "3px solid #000",
+        background: "#FFFDF9",
+        boxShadow: "8px 8px 0px 0px #000",
       }}
     >
       {/* ── Vibrating CSS keyframe shake inject ── */}
@@ -460,25 +460,27 @@ export default function InboxChaosAnimation() {
       <div
         className="flex justify-between items-center px-4 sm:px-6 py-3"
         style={{
-          borderBottom: "1px solid var(--color-border-subtle)",
-          background: "var(--color-bg-primary)",
-          borderRadius: "24px 24px 0 0",
+          borderBottom: "3px solid #000",
+          background: "#FEF08A",
+          borderRadius: "9px 9px 0 0",
         }}
       >
         {/* Left: Title */}
         <div className="flex items-center gap-2">
           <div
-            className="flex items-center justify-center rounded-md shadow-sm border border-stone-200"
+            className="flex items-center justify-center"
             style={{
               width: "26px", height: "26px",
               background: "#ffffff",
+              border: "2px solid #000",
+              borderRadius: "4px",
             }}
           >
-            <Mail size={12} className="text-stone-700" />
+            <Mail size={12} className="text-black" />
           </div>
           <span
-            className="text-xs sm:text-sm font-bold"
-            style={{ color: "var(--color-text-primary)", letterSpacing: "-0.01em" }}
+            className="text-xs sm:text-sm font-extrabold text-black"
+            style={{ letterSpacing: "-0.01em" }}
           >
             InboxIQ Classifier
           </span>
@@ -493,16 +495,21 @@ export default function InboxChaosAnimation() {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
-                className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone-100 border border-stone-200"
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1"
+                style={{
+                  background: "#fff",
+                  border: "2px solid #000",
+                  borderRadius: "6px",
+                }}
               >
                 <motion.span
                   animate={{ opacity: [1, 0.3, 1] }}
                   transition={{ duration: 1, repeat: Infinity }}
-                  className="block rounded-full"
-                  style={{ width: "6px", height: "6px", background: "var(--color-sage)" }}
+                  className="block rounded-full bg-emerald-500"
+                  style={{ width: "6px", height: "6px" }}
                 />
                 <span
-                  className="text-[10px] sm:text-[11px] font-bold text-stone-600"
+                  className="text-[10px] sm:text-[11px] font-extrabold text-black"
                 >
                   AI Classifying... {progress}%
                 </span>
@@ -516,13 +523,16 @@ export default function InboxChaosAnimation() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ x: -1, y: -1, boxShadow: "3px 3px 0px #000" }}
+              whileTap={{ x: 1, y: 1, boxShadow: "1px 1px 0px #000" }}
               onClick={handleTrigger}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg cursor-pointer text-[11px] font-bold border-none"
+              className="flex items-center gap-1.5 px-3 py-1.5 cursor-pointer text-[11px] font-extrabold"
               style={{
-                background: "var(--color-accent)",
-                color: "#fff",
+                background: "#FB923C", // Orange
+                color: "#000",
+                border: "2px solid #000",
+                boxShadow: "2px 2px 0px #000",
+                borderRadius: "6px",
               }}
             >
               <Sparkles size={12} />
@@ -535,12 +545,16 @@ export default function InboxChaosAnimation() {
             <motion.button
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ x: -1, y: -1, boxShadow: "3px 3px 0px #000" }}
+              whileTap={{ x: 1, y: 1, boxShadow: "1px 1px 0px #000" }}
               onClick={handleReplay}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-lg cursor-pointer text-[10px] sm:text-[11px] font-bold border border-stone-200 shadow-sm bg-white hover:bg-stone-50"
+              className="flex items-center gap-1.5 px-3 py-1 cursor-pointer text-[10px] sm:text-[11px] font-extrabold"
               style={{
-                color: "var(--color-text-primary)",
+                color: "#000",
+                background: "#fff",
+                border: "2px solid #000",
+                boxShadow: "2px 2px 0px #000",
+                borderRadius: "6px",
               }}
             >
               <RotateCcw size={11} />
@@ -550,17 +564,18 @@ export default function InboxChaosAnimation() {
 
           {/* Phase badge */}
           <div
-            className="px-2.5 py-1 rounded-lg"
+            className="px-2.5 py-1"
             style={{
-              background: (phase === "done" || phase === "burst") ? "rgba(132,155,135,0.1)" : "var(--color-bg-tertiary)",
-              border: `1px solid ${(phase === "done" || phase === "burst") ? "rgba(132,155,135,0.2)" : "var(--color-border-subtle)"}`,
+              background: phase === "chaos" ? "#E5E7EB" : phase === "sorting" ? "#93C5FD" : phase === "burst" ? "#C084FC" : "#86EFAC",
+              border: "2px solid #000",
+              boxShadow: "2px 2px 0px #000",
+              borderRadius: "6px",
             }}
           >
             <span
-              className="text-[10px] font-bold uppercase"
+              className="text-[10px] font-black uppercase text-black"
               style={{
                 letterSpacing: "0.08em",
-                color: (phase === "done" || phase === "burst") ? "var(--color-sage)" : "var(--color-text-tertiary)",
               }}
             >
               {phase === "chaos" ? "Unprocessed" : phase === "sorting" ? "Classifying" : phase === "burst" ? "⚡ Interactive" : "✓ Organized"}
@@ -602,45 +617,55 @@ export default function InboxChaosAnimation() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.8, y: 20 }}
               transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute left-1/2 top-[40%] -translate-x-1/2 -translate-y-1/2 z-40 flex flex-col items-center gap-3 px-10 py-8 rounded-2xl border shadow-2xl min-w-[300px]"
+              className="flex flex-col items-center gap-3 px-8 py-6 rounded-xl min-w-[280px]"
               style={{
-                background: "rgba(255, 255, 255, 0.8)",
-                borderColor: "rgba(132, 155, 135, 0.4)",
-                boxShadow: "0 25px 60px rgba(0, 0, 0, 0.08), 0 0 35px rgba(132, 155, 135, 0.2)",
-                backdropFilter: "blur(12px)",
-                WebkitBackdropFilter: "blur(12px)",
+                position: "absolute",
+                left: "50%",
+                top: "40%",
+                transform: "translate(-50%, -50%)",
+                zIndex: 50,
+                background: "#86EFAC", // Neubrutalist green
+                border: "3px solid #000",
+                boxShadow: "6px 6px 0px #000",
               }}
             >
               <div
-                className="flex items-center justify-center rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100"
-                style={{ width: "44px", height: "44px", boxShadow: "0 0 15px rgba(16, 185, 129, 0.2)" }}
+                className="flex items-center justify-center rounded-full bg-white text-black"
+                style={{
+                  width: "44px",
+                  height: "44px",
+                  border: "2px solid #000",
+                  boxShadow: "2.5px 2.5px 0px #000",
+                }}
               >
-                <CheckCircle2 size={22} className="stroke-[2.5] animate-pulse" />
+                <CheckCircle2 size={22} className="stroke-[2.5] animate-bounce" />
               </div>
-              <span className="text-sm sm:text-base font-extrabold text-stone-800 tracking-tight leading-relaxed">
+              <span className="text-sm sm:text-base font-black text-black tracking-tight leading-none mt-1">
                 Scanning Successful!
               </span>
-              <span className="text-[10px] sm:text-xs font-semibold text-stone-500 uppercase tracking-widest leading-none whitespace-nowrap mt-3">
+              <div
+                className="px-3 py-1 mt-2 bg-white border-2 border-black rounded text-[9px] sm:text-[10px] font-black text-black uppercase tracking-wider shadow-[1.5px_1.5px_0px_#000]"
+              >
                 AI Pipeline Complete
-              </span>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* ── AI Processing Core (Glass Prism Centerpiece) ── */}
+        {/* ── AI Processing Core (Neubrutalist Centerpiece) ── */}
         <AnimatePresence>
           {phase !== "done" && phase !== "burst" && (
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.8 }}
-              className="absolute left-1/2 top-[40%] -translate-x-1/2 -translate-y-1/2 z-0 flex flex-col items-center justify-center"
+              className="absolute left-1/2 top-[40%] -translate-x-1/2 -translate-y-1/2 z-10 flex flex-col items-center justify-center"
             >
               {/* Rotating outer scanner line */}
               <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-                className="absolute border border-dashed border-stone-200/80 rounded-full"
+                className="absolute border-2 border-dashed border-black rounded-full"
                 style={{ width: "150px", height: "150px" }}
               />
 
@@ -654,23 +679,24 @@ export default function InboxChaosAnimation() {
                 className="absolute w-24 h-24 rounded-full bg-gradient-to-tr from-emerald-400 via-blue-500 to-indigo-500 blur-xl"
               />
 
-              {/* The Glass Prism Core (Hexagonal Cut glassmorphic diamond) */}
+              {/* The Neubrutalist Core (Diamond shape) */}
               <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ duration: 24, repeat: Infinity, ease: "linear" }}
-                className="relative z-10 w-16 h-16 bg-white/20 border border-white/40 shadow-[0_8px_32px_rgba(31,38,135,0.08)] backdrop-blur-md flex flex-col items-center justify-center"
+                className="relative z-10 w-16 h-16 flex flex-col items-center justify-center"
                 style={{
-                  clipPath: "polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%)",
+                  background: "#FEF08A", // Neubrutalist yellow
+                  border: "3px solid #000",
+                  boxShadow: "4px 4px 0px #000",
+                  borderRadius: "8px",
                 }}
               >
-                {/* Internal spectrum core */}
-                <div className="absolute inset-[2px] bg-gradient-to-tr from-emerald-500/20 via-blue-500/20 to-indigo-500/20 mix-blend-color-dodge rounded-full animate-pulse" />
-                
                 <Sparkles
-                  size={20}
-                  className={`relative z-20 transition-transform duration-300 ${
-                    phase === "sorting" ? "text-stone-700 animate-pulse scale-110" : "text-stone-400"
-                  }`}
+                  size={24}
+                  className="relative z-20 text-black transition-transform duration-300 stroke-[2.5]"
+                  style={{
+                    transform: "rotate(-360deg)",
+                  }}
                 />
               </motion.div>
 
@@ -679,21 +705,25 @@ export default function InboxChaosAnimation() {
                 {isRefracting && refractingColor && (
                   <motion.div
                     initial={{ scale: 0.5, opacity: 0 }}
-                    animate={{ scale: [0.5, 2, 0.5], opacity: [0, 0.9, 0] }}
+                    animate={{ scale: [0.5, 1.8, 0.5], opacity: [0, 1, 0] }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.35, ease: "easeOut" }}
-                    className="absolute z-20 w-12 h-12 rounded-full blur-sm"
+                    className="absolute z-20 w-14 h-14"
                     style={{
                       background: refractingColor,
-                      boxShadow: `0 0 24px ${refractingColor}`,
+                      border: "2px solid #000",
+                      borderRadius: "9999px",
+                      boxShadow: "3px 3px 0px #000",
                     }}
                   />
                 )}
               </AnimatePresence>
               
-              <span className="relative z-20 text-[9px] font-bold text-stone-500 uppercase tracking-wider mt-3">
+              <div 
+                className="relative z-20 text-[9px] font-black text-black uppercase tracking-wider px-2 py-0.5 border-2 border-black rounded bg-white shadow-[2px_2px_0px_#000] mt-5 whitespace-nowrap"
+              >
                 {phase === "sorting" ? (showSuccessBanner ? "Successful" : "Scanning") : "AI Prism"}
-              </span>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -780,22 +810,22 @@ export default function InboxChaosAnimation() {
                       }
                     : { duration: 0.3 }
                 }
-                className={`absolute z-10 flex items-center bg-white border border-gray-100 shadow-[0_8px_24px_rgba(0,0,0,0.04)] cursor-default whitespace-nowrap transition-shadow duration-300 hover:shadow-[0_12px_32px_rgba(0,0,0,0.08)] ${
+                className={`absolute z-10 flex items-center bg-white border-2 border-black shadow-[3px_3px_0px_#000] cursor-default whitespace-nowrap ${
                   isMobile
-                    ? "px-2 py-1.5 rounded-lg text-[10px] gap-1.5"
-                    : "px-3 py-2 rounded-xl text-xs gap-2.5"
+                    ? "px-2 py-1 rounded-md text-[10px] gap-1.5"
+                    : "px-3 py-1.5 rounded-lg text-xs gap-2.5"
                 }`}
               >
                 {(() => {
                   const theme = CATEGORY_THEMES[pill.category] || CATEGORY_THEMES.Personal;
                   return (
                     <>
-                      <div className={`flex items-center justify-center rounded-lg border ${theme.bg} ${theme.text} ${theme.border} flex-shrink-0 ${
-                        isMobile ? "h-6 w-6 rounded-md" : "h-8 w-8 rounded-lg"
-                      }`}>
-                        <PillIcon size={isMobile ? 12 : 14} className="stroke-[1.75]" />
+                      <div className={`flex items-center justify-center border border-black flex-shrink-0 ${
+                        isMobile ? "h-5 w-5 rounded" : "h-7 w-7 rounded-md"
+                      } ${theme.bg} ${theme.text} ${theme.border}`}>
+                        <PillIcon size={isMobile ? 11 : 13} className="stroke-[2.5]" />
                       </div>
-                      <span className="font-semibold tracking-tight text-gray-700">
+                      <span className="font-bold tracking-tight text-black">
                         {pill.label}
                       </span>
                     </>
@@ -817,10 +847,10 @@ export default function InboxChaosAnimation() {
                 <div
                   key={pill.id}
                   id={`burst-pill-${pill.id}`}
-                  className={`absolute z-30 flex items-center bg-white border border-gray-150 shadow-[0_6px_20px_rgba(0,0,0,0.04)] whitespace-nowrap ${
+                  className={`absolute z-30 flex items-center bg-white border-2 border-black shadow-[3px_3px_0px_#000] whitespace-nowrap ${
                     isMobile
-                      ? "px-2 py-1.5 rounded-lg text-[10px] gap-1.5"
-                      : "px-3 py-2 rounded-xl text-xs gap-2.5"
+                      ? "px-2 py-1 rounded-md text-[10px] gap-1.5"
+                      : "px-3 py-1.5 rounded-lg text-xs gap-2.5"
                   }`}
                   style={{
                     left: 0,
@@ -828,12 +858,12 @@ export default function InboxChaosAnimation() {
                     transform: "translate3d(0, 0, 0)",
                   }}
                 >
-                  <div className={`flex items-center justify-center rounded-lg border ${theme.bg} ${theme.text} ${theme.border} flex-shrink-0 ${
-                    isMobile ? "h-6 w-6 rounded-md" : "h-8 w-8 rounded-lg"
-                  }`}>
-                    <PillIcon size={isMobile ? 12 : 14} className="stroke-[1.75]" />
+                  <div className={`flex items-center justify-center border border-black flex-shrink-0 ${
+                    isMobile ? "h-5 w-5 pr-0 rounded" : "h-7 w-7 pr-0 rounded-md"
+                  } ${theme.bg} ${theme.text} ${theme.border}`}>
+                    <PillIcon size={isMobile ? 11 : 13} className="stroke-[2.5]" />
                   </div>
-                  <span className="font-semibold tracking-tight text-gray-700">
+                  <span className="font-bold tracking-tight text-black">
                     {pill.label}
                   </span>
                 </div>
@@ -844,11 +874,11 @@ export default function InboxChaosAnimation() {
 
         {/* ── Category Buckets ── */}
         <div
-          className="absolute bottom-0 left-0 right-0 grid gap-2 sm:gap-3 p-4 sm:p-5 pb-5 sm:pb-6"
+          className="absolute bottom-0 left-0 right-0 grid gap-2 sm:gap-3 p-4 sm:p-5 pb-5 sm:pb-6 z-20"
           style={{
             gridTemplateColumns: "repeat(6, 1fr)",
-            background: "var(--color-bg-primary)",
-            borderTop: "1px solid var(--color-border-subtle)",
+            background: "#FFFDF9",
+            borderTop: "3px solid #000",
           }}
         >
           {CATEGORIES.map((cat) => {
@@ -860,38 +890,36 @@ export default function InboxChaosAnimation() {
               <div
                 key={cat.name}
                 ref={(el) => { bucketRefs.current[cat.name] = el; }}
-                className={`flex flex-col items-center justify-center rounded-xl transition-all duration-300 ${
-                  isMobile ? "py-2.5 px-1.5 gap-1.5" : "py-5 px-3 gap-2.5"
-                } ${
-                  isFlashing ? "scale-105 border-stone-400" : "border-stone-200/40"
+                className={`flex flex-col items-center justify-center transition-all duration-200 ${
+                  isMobile ? "py-2 px-1 gap-1" : "py-3 px-2 gap-2"
                 }`}
                 style={{
-                  borderWidth: "1px",
-                  borderStyle: "solid",
-                  borderColor: isFlashing ? cat.color : undefined,
-                  boxShadow: isFlashing
-                    ? `0 0 24px ${cat.color}25, inset 0 0 20px ${cat.color}08`
-                    : `0 2px 8px rgba(0,0,0,0.02)`,
-                  background: count > 0 ? cat.gradient : "var(--color-bg-secondary)",
+                  borderRadius: "8px",
+                  border: "2px solid #000",
+                  boxShadow: isFlashing ? "4px 4px 0px #000" : "2px 2px 0px #000",
+                  transform: isFlashing ? "translate(-2px, -2px)" : "none",
+                  background: count > 0 ? cat.gradient : "#FFF",
+                  transition: "background-color 0.2s, transform 0.1s, box-shadow 0.1s",
                 }}
               >
                 <div
-                  className="flex items-center justify-center rounded-lg"
+                  className="flex items-center justify-center"
                   style={{
                     width: isMobile ? "24px" : "32px",
                     height: isMobile ? "24px" : "32px",
-                    background: count > 0 ? `${cat.color}15` : "var(--color-bg-tertiary)",
-                    transition: "background 0.3s",
+                    background: "#FFF",
+                    border: "1.5px solid #000",
+                    borderRadius: "4px",
                   }}
                 >
                   <CatIcon
                     size={isMobile ? 12 : 15}
-                    style={{ color: cat.color }}
-                    strokeWidth={1.5}
+                    style={{ color: "#000" }}
+                    strokeWidth={2.5}
                   />
                 </div>
                 <span
-                  className="font-bold text-center leading-tight tracking-tight text-gray-500"
+                  className="font-extrabold text-center leading-none tracking-tight text-black"
                   style={{ fontSize: isMobile ? "8px" : "10px" }}
                 >
                   {cat.name}
@@ -903,10 +931,9 @@ export default function InboxChaosAnimation() {
                     animate={{ scale: 1, opacity: 1, y: 0 }}
                     exit={{ scale: 0.5, opacity: 0 }}
                     transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                    className="font-extrabold tabular-nums leading-none"
+                    className="font-black tabular-nums leading-none text-black"
                     style={{
-                      fontSize: isMobile ? "11px" : "14px",
-                      color: count > 0 ? cat.color : "var(--color-text-tertiary)",
+                      fontSize: isMobile ? "11px" : "15px",
                     }}
                   >
                     {count}
@@ -924,15 +951,24 @@ export default function InboxChaosAnimation() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute bottom-[120px] sm:bottom-[160px] left-4 right-4 sm:left-6 sm:right-6"
+              className="absolute bottom-[110px] sm:bottom-[150px] left-4 right-4 sm:left-6 sm:right-6 z-20"
             >
               <div
-                className="h-1 rounded-full overflow-hidden"
-                style={{ background: "var(--color-border-default)" }}
+                className="overflow-hidden"
+                style={{
+                  height: isMobile ? "10px" : "16px",
+                  background: "#FFF",
+                  border: "2px solid #000",
+                  borderRadius: "4px",
+                  boxShadow: "2px 2px 0px #000",
+                }}
               >
                 <motion.div
-                  className="h-full rounded-full"
-                  style={{ background: "var(--color-sage)" }}
+                  className="h-full"
+                  style={{
+                    background: "#86EFAC",
+                    borderRight: progress > 0 ? "2px solid #000" : "none",
+                  }}
                   initial={{ width: "0%" }}
                   animate={{ width: `${progress}%` }}
                   transition={{ duration: 0.3, ease: "easeOut" }}
@@ -950,62 +986,75 @@ export default function InboxChaosAnimation() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute flex flex-col justify-start p-6 sm:p-8"
+              className="absolute flex flex-col justify-start px-8 sm:px-12 py-6 sm:py-8"
               style={{
                 top: isMobile ? "16px" : "24px",
                 bottom: isMobile ? "110px" : "170px",
                 left: 0,
                 right: 0,
-                overflow: "hidden"
+                overflow: "hidden",
+                zIndex: 25
               }}
             >
               {/* Dashboard Content Container */}
-              <div className="flex-1 flex flex-col gap-4 sm:gap-5 max-w-[720px] mx-auto w-full">
+              <div className="flex-1 flex flex-col gap-4 sm:gap-5 max-w-[680px] mx-auto w-full">
                 
                 {/* Search Bar / Header */}
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
-                  className="flex items-center justify-between border border-stone-200 rounded-xl bg-white px-4 sm:px-5 py-3.5 shadow-[0_4px_12px_rgba(0,0,0,0.02)] mb-4 sm:mb-6"
+                  className="flex items-center justify-between bg-white px-5 sm:px-6 py-3"
+                  style={{
+                    border: "2px solid #000",
+                    borderRadius: "8px",
+                    boxShadow: "2px 2px 0px #000",
+                    marginBottom: isMobile ? "4px" : "10px",
+                  }}
                 >
-                  <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <Search size={14} className="text-stone-400 flex-shrink-0" />
-                    <span className="text-[11px] sm:text-xs text-stone-400 font-semibold truncate mr-2">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <Search size={14} className="text-black flex-shrink-0" />
+                    <span className="text-[11px] sm:text-xs text-stone-500 font-extrabold truncate mr-2">
                       Ask AI to search and analyze your sorted emails...
                     </span>
                   </div>
-                  <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-md border border-emerald-100 text-[9px] sm:text-[10px] font-bold flex-shrink-0">
+                  <div className="flex items-center gap-1.5 bg-[#86EFAC] text-black px-2.5 py-1 border-2 border-black text-[9px] sm:text-[10px] font-black flex-shrink-0 shadow-[1.5px_1.5px_0px_#000] rounded">
                     <CheckCircle2 size={10} className="stroke-[2.5]" />
                     <span>Real-time</span>
                   </div>
                 </motion.div>
 
                 {/* Staggered Stats Cards */}
-                <div className="grid grid-cols-4 gap-4 sm:gap-6"> {/* Increased gap between stat cards to gap-6 */}
+                <div className="grid grid-cols-4 gap-3 sm:gap-5">
                   {[
-                    { icon: TrendingUp, label: "Sorted", value: "16", color: "var(--color-sage)" },
-                    { icon: PieChart, label: "Buckets", value: "6", color: "var(--color-slate)" },
-                    { icon: BarChart3, label: "Accuracy", value: "98.5%", color: "var(--color-ochre)" },
-                    { icon: Zap, label: "Scan Time", value: "0.8s", color: "var(--color-terracotta)" },
+                    { icon: TrendingUp, label: "Sorted", value: "16", bg: "#A7F3D0" },
+                    { icon: PieChart, label: "Buckets", value: "6", bg: "#C084FC" },
+                    { icon: BarChart3, label: "Accuracy", value: "98.5%", bg: "#FDE047" },
+                    { icon: Zap, label: "Scan Time", value: "0.8s", bg: "#FCA5A5" },
                   ].map((stat, i) => (
                     <motion.div
                       key={stat.label}
                       initial={{ opacity: 0, y: 15 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.2 + i * 0.08, duration: 0.5 }}
-                      className="flex flex-col items-center justify-center py-4 px-3 sm:py-5 sm:px-6 rounded-xl bg-white border border-stone-200/80 shadow-[0_4px_12px_rgba(0,0,0,0.02)] text-center gap-1"
+                      className="flex flex-col items-center justify-center py-2 px-1 sm:py-3 sm:px-3 text-center gap-0.5"
+                      style={{
+                        background: stat.bg,
+                        border: "2px solid #000",
+                        borderRadius: "8px",
+                        boxShadow: "3px 3px 0px #000",
+                      }}
                     >
-                      <stat.icon size={16} style={{ color: stat.color }} className="flex-shrink-0" />
-                      <span className="text-sm sm:text-lg font-extrabold text-stone-800 leading-tight mt-1">{stat.value}</span>
-                      <span className="text-[8px] sm:text-[10px] font-bold uppercase text-stone-400 tracking-widest mt-0.5 leading-none">{stat.label}</span>
+                      <stat.icon size={15} style={{ color: "#000" }} className="flex-shrink-0 stroke-[2.5]" />
+                      <span className="text-xs sm:text-base font-black text-black leading-none mt-1.5">{stat.value}</span>
+                      <span className="text-[8px] sm:text-[9px] font-black uppercase text-black tracking-wider mt-1 leading-none">{stat.label}</span>
                     </motion.div>
                   ))}
                 </div>
 
                 {/* Recently Sorted Emails Stream (Fills the space beautifully!) */}
-                <div className="flex-1 flex flex-col gap-2 overflow-hidden mt-6 sm:mt-8"> {/* Added mt-8 top margin separator */}
-                  <div className="text-[9px] sm:text-[10px] font-bold uppercase text-stone-400 tracking-widest mb-1">Classified Activity Stream</div>
+                <div className="flex-1 flex flex-col gap-2 overflow-hidden mt-4 sm:mt-6">
+                  <div className="text-[9px] sm:text-[10px] font-black text-black uppercase tracking-wider mb-1 px-1">Classified Activity Stream</div>
                   <div className="flex flex-col gap-2">
                     {activeEmails.map((email, i) => {
                       const theme = CATEGORY_THEMES[email.cat] || CATEGORY_THEMES.Personal;
@@ -1015,15 +1064,18 @@ export default function InboxChaosAnimation() {
                           initial={{ opacity: 0, x: -10 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: 0.4 + i * 0.1, duration: 0.5 }}
-                          className="flex items-center justify-between py-3.5 px-4 rounded-lg bg-stone-50/50 hover:bg-stone-50 border border-stone-100 text-[11px] sm:text-xs transition-colors"
+                          className="flex items-center justify-between py-2 px-3 sm:py-2.5 sm:px-4 rounded bg-white border-2 border-black text-[11px] sm:text-xs transition-colors hover:bg-stone-50"
+                          style={{
+                            boxShadow: "2px 2px 0px #000",
+                          }}
                         >
-                          <div className="flex items-center gap-2 overflow-hidden mr-2">
-                            <span className="font-semibold text-stone-700 truncate w-[70px] sm:w-[120px]">{email.sender}</span>
-                            <span className="text-stone-500 truncate text-[10px] sm:text-xs">{email.subject}</span>
+                          <div className="flex items-center gap-2 sm:gap-3 overflow-hidden mr-3">
+                            <span className="font-extrabold text-black truncate w-[70px] sm:w-[120px]">{email.sender}</span>
+                            <span className="text-stone-700 font-bold truncate text-[10px] sm:text-xs">{email.subject}</span>
                           </div>
                           <div className="flex items-center gap-2 flex-shrink-0">
-                            <span className="text-[9px] text-stone-400">{email.time}</span>
-                            <span className={`px-2.5 py-1 rounded text-[8px] sm:text-[10px] font-bold border ${theme.bg} ${theme.text} ${theme.border}`}> {/* Smaller cleaner badges */}
+                            <span className="text-[9px] font-black text-black">{email.time}</span>
+                            <span className={`px-2 py-0.5 rounded text-[8px] sm:text-[9px] font-black border-2 border-black ${theme.bg} ${theme.text} shadow-[1px_1px_0px_#000]`}>
                               {email.cat}
                             </span>
                           </div>
@@ -1038,11 +1090,17 @@ export default function InboxChaosAnimation() {
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.8, duration: 0.6 }}
-                  className="flex items-center justify-center gap-2 mt-1 py-2 px-3 sm:py-2.5 sm:px-4 rounded-lg bg-[rgba(132,155,135,0.06)] border border-[rgba(132,155,135,0.12)]"
+                  className="flex items-center justify-center gap-2 mt-1 py-2 px-3 sm:py-2.5 sm:px-4"
+                  style={{
+                    background: "#A7F3D0", // pastel green
+                    border: "2px solid #000",
+                    borderRadius: "6px",
+                    boxShadow: "2px 2px 0px #000",
+                  }}
                 >
-                  <ArrowDownToLine size={12} style={{ color: "var(--color-sage)" }} />
+                  <ArrowDownToLine size={12} style={{ color: "#000" }} className="stroke-[2.5] animate-bounce" />
                   <span
-                    className="text-[11px] font-medium text-[var(--color-sage)]"
+                    className="text-[10px] sm:text-[11px] font-black text-black uppercase tracking-wider"
                   >
                     Your inbox is now organized with AI-powered intelligence
                   </span>
