@@ -10,25 +10,17 @@ import toast from "react-hot-toast";
 const NAV_ITEMS = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Overview" },
   { href: "/dashboard/inbox", icon: Inbox, label: "Inbox" },
-  { href: "/dashboard/chat", icon: MessageSquare, label: "Terminal" },
+  { href: "/dashboard/chat", icon: MessageSquare, label: "Assistant" },
   { href: "/dashboard/people", icon: Users, label: "People" },
   { href: "/dashboard/jobs", icon: Briefcase, label: "Jobs" },
-  { href: "/dashboard/subs", icon: Bell, label: "Subs" },
+  { href: "/dashboard/subs", icon: Bell, label: "Subscriptions" },
   { href: "/dashboard/memories", icon: Sparkles, label: "Memories" },
 ];
-
-interface User {
-  id: string;
-  email: string;
-  name: string;
-  sync_status: string;
-  total_emails_synced: number;
-}
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<any>(null);
   const [syncing, setSyncing] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -40,8 +32,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const handleSync = async () => {
     setSyncing(true);
-    try { await emails.triggerSync("incremental"); toast.success("SYNC STARTED"); }
-    catch { toast.error("SYNC FAILED"); }
+    try { await emails.triggerSync("incremental"); toast.success("Sync Started"); }
+    catch { toast.error("Sync Failed"); }
     finally { setTimeout(() => setSyncing(false), 3000); }
   };
 
@@ -51,58 +43,69 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     router.push("/");
   };
 
-  if (loading) return <div style={{ height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#000", color: "#fff", fontFamily: "var(--font-mono)", fontSize: "24px", fontWeight: "bold" }}>LOADING_SYSTEM...</div>;
+  if (loading) return (
+    <div className="mesh-gradient" style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh" }}>
+      <div className="skeleton" style={{ width: "200px", height: "40px", borderRadius: "20px" }} />
+    </div>
+  );
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh" }}>
+    <div style={{ display: "flex", minHeight: "100vh", position: "relative", overflow: "hidden" }}>
+      <div className="mesh-gradient" />
+      
       {/* Sidebar */}
-      <aside className="sidebar">
-        <div style={{ padding: "24px", borderBottom: "4px solid var(--color-border-default)", background: "var(--color-bg-primary)" }}>
-          <h1 className="brutal-text" style={{ fontSize: "24px", display: "flex", alignItems: "center", gap: "10px" }}>
-            <Mail size={24} color="var(--color-accent)" /> INBOXIQ
-          </h1>
+      <aside className="glass-sidebar" style={{ padding: "24px 0", zIndex: 20 }}>
+        <div style={{ padding: "0 24px 32px", display: "flex", alignItems: "center", gap: "12px" }}>
+          <div style={{ width: "36px", height: "36px", background: "linear-gradient(135deg, var(--color-accent), #818cf8)", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 12px rgba(79, 70, 229, 0.3)" }}>
+            <Mail size={18} color="#fff" />
+          </div>
+          <span className="glass-heading" style={{ fontSize: "20px" }}>InboxIQ</span>
         </div>
         
         <nav style={{ flex: 1 }}>
           {NAV_ITEMS.map((item) => {
             const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
             return (
-              <Link key={item.href} href={item.href} className={`sidebar-link ${isActive ? "active" : ""}`}>
-                <item.icon size={20} />
+              <Link key={item.href} href={item.href} className={`glass-nav-link ${isActive ? "active" : ""}`}>
+                <item.icon size={18} />
                 {item.label}
               </Link>
             );
           })}
         </nav>
 
-        {/* User Block */}
-        <div style={{ padding: "20px", borderTop: "4px solid var(--color-border-default)", background: "var(--color-bg-card)" }}>
-          <div style={{ fontFamily: "var(--font-mono)", fontSize: "14px", fontWeight: "bold", wordBreak: "break-all", marginBottom: "16px" }}>
-            USER: {user?.email}
+        <div style={{ padding: "24px 24px 0", borderTop: "1px solid rgba(255,255,255,0.4)", margin: "0 16px" }}>
+          <div style={{ fontSize: "12px", color: "var(--color-text-tertiary)", marginBottom: "4px" }}>Logged in as</div>
+          <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--color-text-primary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginBottom: "16px" }}>
+            {user?.email}
           </div>
-          <button className="brutal-btn-ghost" onClick={handleLogout} style={{ width: "100%", padding: "10px" }}>
-            <LogOut size={16} /> LOGOUT
+          <button className="glass-btn" onClick={handleLogout} style={{ width: "100%", padding: "10px", fontSize: "13px" }}>
+            <LogOut size={14} /> Sign Out
           </button>
         </div>
       </aside>
 
       {/* Main Content */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "var(--color-bg-primary)" }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", zIndex: 10, height: "100vh" }}>
         {/* Topbar */}
-        <header style={{ padding: "16px 32px", borderBottom: "4px solid var(--color-border-default)", background: "var(--color-bg-card)", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: 0, zIndex: 10 }}>
-          <div style={{ fontFamily: "var(--font-mono)", fontWeight: "bold", display: "flex", alignItems: "center", gap: "16px" }}>
-            <span style={{ padding: "6px 12px", background: user?.sync_status === "syncing" ? "var(--color-warning)" : "var(--color-accent)", color: "#000", border: "2px solid #fff" }}>
-              STATE: {user?.sync_status.toUpperCase()}
-            </span>
-            <span>DATA: {user?.total_emails_synced} RECORDS</span>
+        <header style={{ padding: "20px 40px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
+            <div className="glass-badge" style={{ background: user?.sync_status === "syncing" ? "#fef3c7" : "#dcfce7", color: user?.sync_status === "syncing" ? "#d97706" : "#166534", border: "none" }}>
+              <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "currentColor", marginRight: "6px" }} />
+              {user?.sync_status === "syncing" ? "Syncing..." : "Synced"}
+            </div>
+            <div style={{ fontSize: "13px", color: "var(--color-text-secondary)", fontWeight: 500 }}>
+              {user?.total_emails_synced.toLocaleString()} Emails Indexed
+            </div>
           </div>
-          <button className="brutal-btn" onClick={handleSync} disabled={syncing}>
-            <RefreshCw size={16} /> {syncing ? "SYNCING..." : "SYNC NOW"}
+          <button className="glass-btn" onClick={handleSync} disabled={syncing}>
+            <RefreshCw size={14} className={syncing ? "animate-spin" : ""} /> 
+            {syncing ? "Syncing" : "Sync Now"}
           </button>
         </header>
 
         {/* Page Content */}
-        <main style={{ flex: 1, padding: "40px", overflowY: "auto" }}>
+        <main style={{ flex: 1, padding: "0 40px 40px", overflowY: "auto" }}>
           {children}
         </main>
       </div>
