@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
 import { config } from './config';
+import { validateEnvironment } from './config/validation';
 import { startSyncWorker, stopSyncWorker } from './queues/emailSync.worker';
 
 // Route imports
@@ -14,6 +15,9 @@ import analyticsRoutes from './routes/analytics.routes';
 import peopleRoutes from './routes/people.routes';
 import jobsRoutes from './routes/jobs.routes';
 import subsRoutes from './routes/subs.routes';
+
+// Validate environment variables at startup
+validateEnvironment();
 
 const app = express();
 
