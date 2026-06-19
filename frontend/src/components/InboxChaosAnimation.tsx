@@ -4,10 +4,20 @@ import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ShoppingCart, Key, Briefcase, GraduationCap, CreditCard,
-  Plane, User, Mail, Newspaper, Gift, Building2,
+  Plane, User, Mail, Newspaper, GitPullRequest, Building2,
   TrendingUp, BarChart3, PieChart, Sparkles, RotateCcw,
   Zap, CheckCircle2, ArrowDownToLine,
 } from "lucide-react";
+
+/* ─── Category Theme Mapping ─── */
+const CATEGORY_THEMES: Record<string, { bg: string; text: string; border: string }> = {
+  Orders: { bg: "bg-emerald-50", text: "text-emerald-600", border: "border-emerald-100/50" },
+  Jobs: { bg: "bg-blue-50", text: "text-blue-600", border: "border-blue-100/50" },
+  Academic: { bg: "bg-indigo-50", text: "text-indigo-600", border: "border-indigo-100/50" },
+  Bills: { bg: "bg-amber-50", text: "text-amber-600", border: "border-amber-100/50" },
+  Travel: { bg: "bg-cyan-50", text: "text-cyan-600", border: "border-cyan-100/50" },
+  Personal: { bg: "bg-slate-50", text: "text-slate-700", border: "border-slate-200/50" },
+};
 
 /* ═══════════════════════════════════════════
    TYPES
@@ -39,7 +49,7 @@ const EMAIL_PILLS: EmailPillData[] = [
   { id: 4, label: "Interview Invite", category: "Jobs", icon: Briefcase, color: "#6b7a8f", gradient: "linear-gradient(135deg, rgba(107,122,143,0.15), rgba(107,122,143,0.05))" },
   { id: 5, label: "Newsletter", category: "Personal", icon: Newspaper, color: "#a8a29e", gradient: "linear-gradient(135deg, rgba(168,162,158,0.15), rgba(168,162,158,0.05))" },
   { id: 6, label: "Bank Statement", category: "Bills", icon: CreditCard, color: "#c46b5a", gradient: "linear-gradient(135deg, rgba(196,107,90,0.15), rgba(196,107,90,0.05))" },
-  { id: 7, label: "GitHub PR", category: "Personal", icon: Gift, color: "#a8a29e", gradient: "linear-gradient(135deg, rgba(168,162,158,0.15), rgba(168,162,158,0.05))" },
+  { id: 7, label: "GitHub PR", category: "Personal", icon: GitPullRequest, color: "#a8a29e", gradient: "linear-gradient(135deg, rgba(168,162,158,0.15), rgba(168,162,158,0.05))" },
   { id: 8, label: "College Circular", category: "Academic", icon: GraduationCap, color: "#849b87", gradient: "linear-gradient(135deg, rgba(132,155,135,0.15), rgba(132,155,135,0.05))" },
   { id: 9, label: "Flight Booking", category: "Travel", icon: Plane, color: "#b5838d", gradient: "linear-gradient(135deg, rgba(181,131,141,0.15), rgba(181,131,141,0.05))" },
   { id: 10, label: "Recruiter Email", category: "Jobs", icon: Briefcase, color: "#6b7a8f", gradient: "linear-gradient(135deg, rgba(107,122,143,0.15), rgba(107,122,143,0.05))" },
@@ -382,21 +392,21 @@ export default function InboxChaosAnimation() {
                       }
                     : { duration: 0.3 }
                 }
-                className="absolute z-10 flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg cursor-default whitespace-nowrap"
-                style={{
-                  background: pill.gradient,
-                  border: `1px solid ${pill.color}22`,
-                  boxShadow: `0 4px 16px ${pill.color}10, 0 1px 3px rgba(0,0,0,0.04)`,
-                  backdropFilter: "blur(8px)",
-                }}
+                className="absolute z-10 flex items-center gap-2.5 px-3 py-2 rounded-xl bg-white border border-gray-100 shadow-[0_8px_24px_rgba(0,0,0,0.04)] cursor-default whitespace-nowrap"
               >
-                <PillIcon size={12} style={{ color: pill.color, flexShrink: 0 }} />
-                <span
-                  className="text-[10px] sm:text-[11px] font-semibold"
-                  style={{ color: "var(--color-text-primary)" }}
-                >
-                  {pill.label}
-                </span>
+                {(() => {
+                  const theme = CATEGORY_THEMES[pill.category] || CATEGORY_THEMES.Personal;
+                  return (
+                    <>
+                      <div className={`flex items-center justify-center h-8 w-8 rounded-lg border ${theme.bg} ${theme.text} ${theme.border} flex-shrink-0`}>
+                        <PillIcon size={14} className="stroke-[1.75]" />
+                      </div>
+                      <span className="text-xs font-medium tracking-tight text-gray-800">
+                        {pill.label}
+                      </span>
+                    </>
+                  );
+                })()}
               </motion.div>
             );
           })}

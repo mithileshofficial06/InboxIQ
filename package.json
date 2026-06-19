@@ -12,5 +12,9 @@
     "dev:backend": "cd backend && npm run dev",
     "dev:ai": "cd ai-service && uvicorn app.main:app --reload --port 8000",
     "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\""
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.12.0",
+    "@supabase/supabase-js": "^2.108.2"
   }
 }
