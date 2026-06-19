@@ -11,6 +11,7 @@ import {
   BarChart3, Globe, FileText, Layers, Clock
 } from "lucide-react";
 import { auth } from "@/lib/api";
+import InboxChaosAnimation from "@/components/InboxChaosAnimation";
 
 /* ─── Animation Variants ─── */
 const fadeUp = {
@@ -129,105 +130,7 @@ function Typewriter({ queries }: { queries: string[] }) {
   );
 }
 
-/* ─── Live Hero Canvas ─── */
-function HeroCanvas() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    let animationId: number;
-    const dpr = window.devicePixelRatio || 1;
-
-    const resize = () => {
-      canvas.width = window.innerWidth * dpr;
-      canvas.height = window.innerHeight * dpr;
-      canvas.style.width = window.innerWidth + "px";
-      canvas.style.height = window.innerHeight + "px";
-      ctx.scale(dpr, dpr);
-    };
-    resize();
-    window.addEventListener("resize", resize);
-
-    // Floating envelope nodes
-    const nodes: { x: number; y: number; vx: number; vy: number; size: number; opacity: number; label: string }[] = [];
-    const labels = ["Bills", "Jobs", "People", "Subs", "News", "OTP", "Orders", "Travel", "Academic", "Promos", "AI", "RAG"];
-    for (let i = 0; i < 40; i++) {
-      nodes.push({
-        x: Math.random() * window.innerWidth,
-        y: Math.random() * window.innerHeight,
-        vx: (Math.random() - 0.5) * 0.4,
-        vy: (Math.random() - 0.5) * 0.4,
-        size: 3 + Math.random() * 4,
-        opacity: 0.08 + Math.random() * 0.15,
-        label: labels[i % labels.length],
-      });
-    }
-
-    const draw = () => {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      ctx.clearRect(0, 0, w, h);
-
-      // Draw connections
-      for (let i = 0; i < nodes.length; i++) {
-        for (let j = i + 1; j < nodes.length; j++) {
-          const dx = nodes[i].x - nodes[j].x;
-          const dy = nodes[i].y - nodes[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 200) {
-            ctx.beginPath();
-            ctx.moveTo(nodes[i].x, nodes[i].y);
-            ctx.lineTo(nodes[j].x, nodes[j].y);
-            ctx.strokeStyle = `rgba(168, 162, 158, ${0.06 * (1 - dist / 200)})`;
-            ctx.lineWidth = 1;
-            ctx.stroke();
-          }
-        }
-      }
-
-      // Draw nodes
-      for (const node of nodes) {
-        node.x += node.vx;
-        node.y += node.vy;
-        if (node.x < 0 || node.x > w) node.vx *= -1;
-        if (node.y < 0 || node.y > h) node.vy *= -1;
-
-        // Node dot
-        ctx.beginPath();
-        ctx.arc(node.x, node.y, node.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(28, 25, 23, ${node.opacity})`;
-        ctx.fill();
-
-        // Label
-        ctx.font = "500 9px Inter, system-ui, sans-serif";
-        ctx.fillStyle = `rgba(168, 162, 158, ${node.opacity * 0.8})`;
-        ctx.fillText(node.label, node.x + node.size + 4, node.y + 3);
-      }
-
-      animationId = requestAnimationFrame(draw);
-    };
-    draw();
-
-    return () => {
-      cancelAnimationFrame(animationId);
-      window.removeEventListener("resize", resize);
-    };
-  }, []);
-
-  return (
-    <canvas
-      ref={canvasRef}
-      style={{
-        position: "absolute", inset: 0, zIndex: 0,
-        pointerEvents: "none", opacity: 0.7,
-      }}
-    />
-  );
-}
+/* HeroCanvas removed — replaced by InboxChaosAnimation component */
 
 /* ═══════════════════════════════
    MAIN PAGE
@@ -333,7 +236,6 @@ export default function LandingPage() {
 
       {/* ═══════ HERO SECTION (with live canvas) ═══════ */}
       <motion.section style={{ y: heroY, opacity: heroOpacity, position: "relative", zIndex: 2, paddingTop: "140px", paddingBottom: "60px", textAlign: "center", overflow: "hidden" }}>
-        <HeroCanvas />
         <div style={{ maxWidth: "900px", margin: "0 auto", padding: "0 32px", position: "relative", zIndex: 1 }}>
 
           <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0}
@@ -397,69 +299,17 @@ export default function LandingPage() {
         </div>
       </motion.section>
 
-      {/* ═══════ DASHBOARD PREVIEW ═══════ */}
+      {/* ═══════ INBOX CHAOS ANIMATION ═══════ */}
       <section style={{ ...sectionWhite, position: "relative", zIndex: 2, padding: "80px 32px" }}>
         <motion.div
           variants={scaleIn} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }}
           style={{ maxWidth: "1100px", margin: "0 auto" }}
         >
           <div style={{ textAlign: "center", marginBottom: "48px" }}>
-            <div style={{ fontSize: "12px", fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--color-text-tertiary)", marginBottom: "12px" }}>Product Preview</div>
-            <h2 style={{ fontSize: "clamp(28px, 4vw, 40px)", fontWeight: 800, letterSpacing: "-0.03em", color: "var(--color-text-primary)" }}>See your inbox transformed</h2>
+            <div style={{ fontSize: "12px", fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--color-text-tertiary)", marginBottom: "12px" }}>See It In Action</div>
+            <h2 style={{ fontSize: "clamp(28px, 4vw, 40px)", fontWeight: 800, letterSpacing: "-0.03em", color: "var(--color-text-primary)" }}>From chaos to <span style={{ fontStyle: "italic", color: "var(--color-slate)" }}>organized intelligence.</span></h2>
           </div>
-
-          <div className="dashboard-preview" style={{ padding: "28px" }}>
-            <div style={{ display: "flex", gap: "8px", marginBottom: "20px", paddingBottom: "16px", borderBottom: "1px solid var(--color-border-subtle)" }}>
-              <div style={{ width: "12px", height: "12px", borderRadius: "50%", background: "#f87171" }} />
-              <div style={{ width: "12px", height: "12px", borderRadius: "50%", background: "#fbbf24" }} />
-              <div style={{ width: "12px", height: "12px", borderRadius: "50%", background: "#4ade80" }} />
-              <div style={{ flex: 1, textAlign: "center", fontSize: "12px", color: "var(--color-text-tertiary)", fontWeight: 500 }}>inboxiq.app/dashboard</div>
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px", marginBottom: "16px" }}>
-              {[
-                { label: "Total Indexed", val: "12,847", color: "var(--color-text-primary)" },
-                { label: "Received Today", val: "34", color: "var(--color-slate)" },
-                { label: "Daily Average", val: "47", color: "var(--color-sage)" },
-                { label: "Unread", val: "128", color: "var(--color-ochre)" },
-              ].map(s => (
-                <div key={s.label} style={{ padding: "20px 16px", background: "var(--color-bg-primary)", borderRadius: "6px", border: "1px solid var(--color-border-subtle)" }}>
-                  <div style={{ fontSize: "10px", fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--color-text-tertiary)", marginBottom: "6px" }}>{s.label}</div>
-                  <div style={{ fontSize: "24px", fontWeight: 700, letterSpacing: "-0.03em", color: s.color }}>{s.val}</div>
-                </div>
-              ))}
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "12px" }}>
-              <div style={{ padding: "20px", background: "var(--color-bg-primary)", borderRadius: "6px", border: "1px solid var(--color-border-subtle)", height: "160px", display: "flex", alignItems: "flex-end", gap: "4px" }}>
-                {[40, 55, 38, 62, 48, 70, 58, 75, 52, 80, 65, 90, 72, 85, 78, 68, 88, 60, 72, 95].map((h, i) => (
-                  <motion.div key={i} initial={{ height: 0 }} whileInView={{ height: `${h}%` }} viewport={{ once: true }}
-                    transition={{ duration: 0.8, delay: i * 0.04, ease: [0.16, 1, 0.3, 1] }}
-                    style={{ flex: 1, background: i === 19 ? "var(--color-text-primary)" : "var(--color-border-default)", borderRadius: "2px 2px 0 0" }}
-                  />
-                ))}
-              </div>
-              <div style={{ padding: "20px", background: "var(--color-bg-primary)", borderRadius: "6px", border: "1px solid var(--color-border-subtle)", display: "flex", flexDirection: "column", gap: "10px" }}>
-                {[
-                  { cat: "Real People", pct: 32, color: "var(--color-text-primary)" },
-                  { cat: "Newsletters", pct: 24, color: "var(--color-slate)" },
-                  { cat: "Promotions", pct: 18, color: "var(--color-terracotta)" },
-                  { cat: "Bills", pct: 14, color: "var(--color-ochre)" },
-                  { cat: "Jobs", pct: 12, color: "var(--color-sage)" },
-                ].map(c => (
-                  <div key={c.cat}>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", fontWeight: 500, color: "var(--color-text-secondary)", marginBottom: "4px" }}>
-                      <span>{c.cat}</span><span>{c.pct}%</span>
-                    </div>
-                    <div style={{ height: "3px", background: "var(--color-border-subtle)", borderRadius: "2px", overflow: "hidden" }}>
-                      <motion.div initial={{ width: 0 }} whileInView={{ width: `${c.pct}%` }} viewport={{ once: true }}
-                        transition={{ duration: 1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                        style={{ height: "100%", background: c.color, borderRadius: "2px" }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          <InboxChaosAnimation />
         </motion.div>
       </section>
 
