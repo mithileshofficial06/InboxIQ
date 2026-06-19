@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef, useMemo, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useInView } from "framer-motion";
 import {
   ShoppingCart, Key, Briefcase, GraduationCap, CreditCard,
   Plane, User, Mail, Newspaper, GitPullRequest, Building2,
@@ -108,6 +108,8 @@ export default function InboxChaosAnimation() {
   const [flashBucket, setFlashBucket] = useState<string | null>(null);
   const [containerWidth, setContainerWidth] = useState(1040);
   const [isShaking, setIsShaking] = useState(false);
+  const [isRefracting, setIsRefracting] = useState(false);
+  const [refractingColor, setRefractingColor] = useState<string | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const bucketRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -142,32 +144,51 @@ export default function InboxChaosAnimation() {
   const isMobile = containerWidth < 640;
   const chaosPositions = useChaosPositions(EMAIL_PILLS.length, containerWidth);
 
-  /* ─── Auto-trigger sorting after 3.5s ─── */
+  // Monitor if section is scrolled into view (sorting starts only when reached)
+  const isInView = useInView(containerRef, { once: true, margin: "-100px" });
+
+  /* ─── Auto-trigger sorting only when scrolled reached ─── */
   useEffect(() => {
+    if (!isInView || phase !== "chaos") return;
+
     const timer = setTimeout(() => {
-      if (phase === "chaos") {
-        setPhase("sorting");
-      }
-    }, 3500);
+      setPhase("sorting");
+    }, 1500); // 1.5s delay after scroll entering before sorting starts
+
     return () => clearTimeout(timer);
-  }, [phase]);
+  }, [isInView, phase]);
 
   /* ─── Sorting sequence ─── */
   useEffect(() => {
     if (phase !== "sorting") return;
 
     let i = 0;
+    const timeouts: NodeJS.Timeout[] = [];
+
     const interval = setInterval(() => {
       if (i >= EMAIL_PILLS.length) {
         clearInterval(interval);
-        setTimeout(() => setPhase("done"), 800);
+        const t = setTimeout(() => setPhase("done"), 800);
+        timeouts.push(t);
         return;
       }
 
       const pill = EMAIL_PILLS[i];
       setFlyingPill(pill.id);
 
-      setTimeout(() => {
+      // Trigger glass prism refraction event at 350ms (when pill reaches center)
+      const t1 = setTimeout(() => {
+        setRefractingColor(pill.color);
+        setIsRefracting(true);
+        const t2 = setTimeout(() => {
+          setIsRefracting(false);
+          setRefractingColor(null);
+        }, 300);
+        timeouts.push(t2);
+      }, 350);
+      timeouts.push(t1);
+
+      const t3 = setTimeout(() => {
         setSortedIds(prev => new Set(prev).add(pill.id));
         setBucketCounts(prev => ({
           ...prev,
@@ -175,13 +196,20 @@ export default function InboxChaosAnimation() {
         }));
         setFlashBucket(pill.category);
         setFlyingPill(null);
-        setTimeout(() => setFlashBucket(null), 500);
+        const t4 = setTimeout(() => setFlashBucket(null), 500);
+        timeouts.push(t4);
       }, 750); // Center scanner scan flow duration
+      timeouts.push(t3);
 
       i++;
     }, 280);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      timeouts.forEach(clearTimeout);
+      setIsRefracting(false);
+      setRefractingColor(null);
+    };
   }, [phase]);
 
   /* ─── Done State: Timer to shake and burst ─── */
@@ -203,6 +231,21 @@ export default function InboxChaosAnimation() {
       clearTimeout(shakeTimer);
       clearTimeout(burstTimer);
     };
+  }, [phase]);
+
+  /* ─── Burst State: Timer to auto-restart sorting 10s after bursting ─── */
+  useEffect(() => {
+    if (phase !== "burst") return;
+
+    const restartTimer = setTimeout(() => {
+      setPhase("sorting");
+      setSortedIds(new Set());
+      setBucketCounts({});
+      setFlyingPill(null);
+      setFlashBucket(null);
+    }, 10000);
+
+    return () => clearTimeout(restartTimer);
   }, [phase]);
 
   /* ─── Physics Particle Initialization (Burst Phase) ─── */
@@ -804,13 +847,13 @@ export default function InboxChaosAnimation() {
           )}
         </AnimatePresence>
 
-        {/* ══════════ DONE/BURST STATE: MINI ANALYTICS DASHBOARD ══════════ */}
+        {/* ══════════ DONE STATE: MINI ANALYTICS DASHBOARD ══════════ */}
         <AnimatePresence>
-          {(phase === "done" || phase === "burst") && (
+          {phase === "done" && (
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
+              exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
               className="absolute flex flex-col justify-start p-4 sm:p-6"
               style={{
@@ -900,24 +943,13 @@ export default function InboxChaosAnimation() {
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.8, duration: 0.6 }}
-                  className="flex items-center justify-center gap-2 mt-1 py-2 px-3 sm:py-2.5 sm:px-4 rounded-lg"
-                  style={{
-                    background: phase === "burst" ? "rgba(107, 122, 143, 0.06)" : "rgba(132,155,135,0.06)",
-                    border: phase === "burst" ? "1px solid rgba(107, 122, 143, 0.12)" : "1px solid rgba(132,155,135,0.12)",
-                  }}
+                  className="flex items-center justify-center gap-2 mt-1 py-2 px-3 sm:py-2.5 sm:px-4 rounded-lg bg-[rgba(132,155,135,0.06)] border border-[rgba(132,155,135,0.12)]"
                 >
-                  {phase === "burst" ? (
-                    <Sparkles size={12} className="text-stone-500 animate-pulse" />
-                  ) : (
-                    <ArrowDownToLine size={12} style={{ color: "var(--color-sage)" }} />
-                  )}
+                  <ArrowDownToLine size={12} style={{ color: "var(--color-sage)" }} />
                   <span
-                    className="text-[11px] font-medium"
-                    style={{ color: phase === "burst" ? "var(--color-text-secondary)" : "var(--color-sage)" }}
+                    className="text-[11px] font-medium text-[var(--color-sage)]"
                   >
-                    {phase === "burst" 
-                      ? "Scanner energy burst active! Hover your cursor over the container to repel floating emails." 
-                      : "Your inbox is now organized with AI-powered intelligence"}
+                    Your inbox is now organized with AI-powered intelligence
                   </span>
                 </motion.div>
 
