@@ -83,8 +83,8 @@ function useChaosPositions(count: number, width: number) {
         : 8 + ((i * 17 + 11) % 80); // wider X limits on desktop
       
       const y = isMobile
-        ? 6 + ((i * 13 + 3) % 36)   // upper half Y limits on mobile
-        : 6 + ((i * 11 + 5) % 42);  // upper/mid Y limits on desktop
+        ? 6 + ((i * 11 + 3) % 24)   // Restricted Y range to avoid touching category boxes
+        : 6 + ((i * 9 + 5) % 32);   // Restricted Y range to avoid touching category boxes
 
       return {
         x,
@@ -113,6 +113,7 @@ export default function InboxChaosAnimation() {
   const [showSuccessBanner, setShowSuccessBanner] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const bucketsContainerRef = useRef<HTMLDivElement>(null);
   const bucketRefs = useRef<Record<string, HTMLDivElement | null>>({});
   
   // Physics reference objects for burst phase
@@ -292,6 +293,15 @@ export default function InboxChaosAnimation() {
       const w = containerRef.current?.clientWidth || containerWidth;
       const h = containerRef.current?.clientHeight || 500;
       
+      const headerEl = containerRef.current?.querySelector("div");
+      const headerHeight = headerEl ? headerEl.offsetHeight : 64;
+      const mainAreaHeight = h - headerHeight;
+
+      const bucketsEl = bucketsContainerRef.current;
+      const bucketsHeight = bucketsEl ? bucketsEl.offsetHeight : (isMobile ? 103 : 146);
+      const pillHeight = isMobile ? 34 : 44;
+      const boundaryY = mainAreaHeight - bucketsHeight - pillHeight;
+
       const particles = particlesRef.current;
       const mouse = mouseRef.current;
 
@@ -348,8 +358,8 @@ export default function InboxChaosAnimation() {
         if (p.y < 10) {
           p.y = 10;
           p.vy = -p.vy * 0.75;
-        } else if (p.y > h - 165) { // boundary to bounce above category buckets
-          p.y = h - 165;
+        } else if (p.y > boundaryY) { // boundary to bounce above category buckets
+          p.y = boundaryY;
           p.vy = -p.vy * 0.75;
         }
 
@@ -458,28 +468,32 @@ export default function InboxChaosAnimation() {
 
       {/* ══════════ HEADER BAR ══════════ */}
       <div
-        className="flex justify-between items-center px-4 sm:px-6 py-3"
+        className="flex justify-between items-center"
         style={{
           borderBottom: "3px solid #000",
           background: "#FEF08A",
           borderRadius: "9px 9px 0 0",
+          paddingLeft: isMobile ? "12px" : "24px",
+          paddingRight: isMobile ? "12px" : "24px",
+          paddingTop: isMobile ? "10px" : "14px",
+          paddingBottom: isMobile ? "10px" : "14px",
         }}
       >
         {/* Left: Title */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <div
             className="flex items-center justify-center"
             style={{
-              width: "26px", height: "26px",
+              width: "32px", height: "32px",
               background: "#ffffff",
               border: "2px solid #000",
-              borderRadius: "4px",
+              borderRadius: "6px",
             }}
           >
-            <Mail size={12} className="text-black" />
+            <Mail size={16} className="text-black stroke-[2.5]" />
           </div>
           <span
-            className="text-xs sm:text-sm font-extrabold text-black"
+            className="text-sm sm:text-base font-extrabold text-black"
             style={{ letterSpacing: "-0.01em" }}
           >
             InboxIQ Classifier
@@ -487,7 +501,7 @@ export default function InboxChaosAnimation() {
         </div>
 
         {/* Right: Status & Controls */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-3 sm:gap-4">
           {/* Processing indicator */}
           <AnimatePresence>
             {phase === "sorting" && (
@@ -495,21 +509,22 @@ export default function InboxChaosAnimation() {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
-                className="hidden sm:flex items-center gap-1.5 px-3 py-1"
+                className="hidden sm:flex items-center gap-2"
                 style={{
                   background: "#fff",
                   border: "2px solid #000",
                   borderRadius: "6px",
+                  padding: isMobile ? "6px 12px" : "8px 16px",
                 }}
               >
                 <motion.span
                   animate={{ opacity: [1, 0.3, 1] }}
                   transition={{ duration: 1, repeat: Infinity }}
                   className="block rounded-full bg-emerald-500"
-                  style={{ width: "6px", height: "6px" }}
+                  style={{ width: "8px", height: "8px" }}
                 />
                 <span
-                  className="text-[10px] sm:text-[11px] font-extrabold text-black"
+                  className="text-xs font-extrabold text-black"
                 >
                   AI Classifying... {progress}%
                 </span>
@@ -526,16 +541,17 @@ export default function InboxChaosAnimation() {
               whileHover={{ x: -1, y: -1, boxShadow: "3px 3px 0px #000" }}
               whileTap={{ x: 1, y: 1, boxShadow: "1px 1px 0px #000" }}
               onClick={handleTrigger}
-              className="flex items-center gap-1.5 px-3 py-1.5 cursor-pointer text-[11px] font-extrabold"
+              className="flex items-center gap-2 cursor-pointer text-xs sm:text-sm font-extrabold"
               style={{
                 background: "#FB923C", // Orange
                 color: "#000",
                 border: "2px solid #000",
                 boxShadow: "2px 2px 0px #000",
                 borderRadius: "6px",
+                padding: isMobile ? "6px 12px" : "8px 18px",
               }}
             >
-              <Sparkles size={12} />
+              <Sparkles size={14} className="stroke-[2.5]" />
               <span>Organize Now</span>
             </motion.button>
           )}
@@ -548,32 +564,34 @@ export default function InboxChaosAnimation() {
               whileHover={{ x: -1, y: -1, boxShadow: "3px 3px 0px #000" }}
               whileTap={{ x: 1, y: 1, boxShadow: "1px 1px 0px #000" }}
               onClick={handleReplay}
-              className="flex items-center gap-1.5 px-3 py-1 cursor-pointer text-[10px] sm:text-[11px] font-extrabold"
+              className="flex items-center gap-2 cursor-pointer text-xs sm:text-sm font-extrabold"
               style={{
                 color: "#000",
                 background: "#fff",
                 border: "2px solid #000",
                 boxShadow: "2px 2px 0px #000",
                 borderRadius: "6px",
+                padding: isMobile ? "6px 12px" : "8px 18px",
               }}
             >
-              <RotateCcw size={11} />
+              <RotateCcw size={13} className="stroke-[2.5]" />
               Replay
             </motion.button>
           )}
 
           {/* Phase badge */}
           <div
-            className="px-2.5 py-1"
+            className="flex items-center justify-center"
             style={{
               background: phase === "chaos" ? "#E5E7EB" : phase === "sorting" ? "#93C5FD" : phase === "burst" ? "#C084FC" : "#86EFAC",
               border: "2px solid #000",
               boxShadow: "2px 2px 0px #000",
               borderRadius: "6px",
+              padding: isMobile ? "6px 12px" : "8px 18px",
             }}
           >
             <span
-              className="text-[10px] font-black uppercase text-black"
+              className="text-[10px] sm:text-xs font-black uppercase text-black"
               style={{
                 letterSpacing: "0.08em",
               }}
@@ -720,7 +738,10 @@ export default function InboxChaosAnimation() {
               </AnimatePresence>
               
               <div 
-                className="relative z-20 text-[9px] font-black text-black uppercase tracking-wider px-2 py-0.5 border-2 border-black rounded bg-white shadow-[2px_2px_0px_#000] mt-5 whitespace-nowrap"
+                className="relative z-20 text-[10px] sm:text-xs font-black text-black uppercase tracking-wider border-2 border-black rounded bg-white shadow-[2px_2px_0px_#000] mt-5 whitespace-nowrap"
+                style={{
+                  padding: isMobile ? "5px 12px" : "8px 18px",
+                }}
               >
                 {phase === "sorting" ? (showSuccessBanner ? "Successful" : "Scanning") : "AI Prism"}
               </div>
@@ -812,9 +833,15 @@ export default function InboxChaosAnimation() {
                 }
                 className={`absolute z-10 flex items-center bg-white border-2 border-black shadow-[3px_3px_0px_#000] cursor-default whitespace-nowrap ${
                   isMobile
-                    ? "px-2 py-1 rounded-md text-[10px] gap-1.5"
-                    : "px-3 py-1.5 rounded-lg text-xs gap-2.5"
+                    ? "rounded-md text-[11px] gap-1.5"
+                    : "rounded-lg text-xs sm:text-sm gap-2.5"
                 }`}
+                style={{
+                  paddingLeft: isMobile ? "6px" : "10px",
+                  paddingRight: isMobile ? "14px" : "20px",
+                  paddingTop: isMobile ? "6px" : "8px",
+                  paddingBottom: isMobile ? "6px" : "8px",
+                }}
               >
                 {(() => {
                   const theme = CATEGORY_THEMES[pill.category] || CATEGORY_THEMES.Personal;
@@ -825,7 +852,7 @@ export default function InboxChaosAnimation() {
                       } ${theme.bg} ${theme.text} ${theme.border}`}>
                         <PillIcon size={isMobile ? 11 : 13} className="stroke-[2.5]" />
                       </div>
-                      <span className="font-bold tracking-tight text-black">
+                      <span className="font-extrabold tracking-tight text-black text-[11px] sm:text-[13px]">
                         {pill.label}
                       </span>
                     </>
@@ -849,13 +876,17 @@ export default function InboxChaosAnimation() {
                   id={`burst-pill-${pill.id}`}
                   className={`absolute z-30 flex items-center bg-white border-2 border-black shadow-[3px_3px_0px_#000] whitespace-nowrap ${
                     isMobile
-                      ? "px-2 py-1 rounded-md text-[10px] gap-1.5"
-                      : "px-3 py-1.5 rounded-lg text-xs gap-2.5"
+                      ? "rounded-md text-[11px] gap-1.5"
+                      : "rounded-lg text-xs sm:text-sm gap-2.5"
                   }`}
                   style={{
                     left: 0,
                     top: 0,
                     transform: "translate3d(0, 0, 0)",
+                    paddingLeft: isMobile ? "6px" : "10px",
+                    paddingRight: isMobile ? "14px" : "20px",
+                    paddingTop: isMobile ? "6px" : "8px",
+                    paddingBottom: isMobile ? "6px" : "8px",
                   }}
                 >
                   <div className={`flex items-center justify-center border border-black flex-shrink-0 ${
@@ -863,7 +894,7 @@ export default function InboxChaosAnimation() {
                   } ${theme.bg} ${theme.text} ${theme.border}`}>
                     <PillIcon size={isMobile ? 11 : 13} className="stroke-[2.5]" />
                   </div>
-                  <span className="font-bold tracking-tight text-black">
+                  <span className="font-extrabold tracking-tight text-black text-[11px] sm:text-[13px]">
                     {pill.label}
                   </span>
                 </div>
@@ -874,11 +905,16 @@ export default function InboxChaosAnimation() {
 
         {/* ── Category Buckets ── */}
         <div
-          className="absolute bottom-0 left-0 right-0 grid gap-2 sm:gap-3 p-4 sm:p-5 pb-5 sm:pb-6 z-20"
+          ref={bucketsContainerRef}
+          className="absolute bottom-0 left-0 right-0 grid gap-2 sm:gap-4 z-20"
           style={{
             gridTemplateColumns: "repeat(6, 1fr)",
             background: "#FFFDF9",
             borderTop: "3px solid #000",
+            paddingLeft: isMobile ? "18px" : "28px",
+            paddingRight: isMobile ? "18px" : "28px",
+            paddingBottom: isMobile ? "20px" : "30px",
+            paddingTop: isMobile ? "14px" : "22px",
           }}
         >
           {CATEGORIES.map((cat) => {
@@ -919,8 +955,7 @@ export default function InboxChaosAnimation() {
                   />
                 </div>
                 <span
-                  className="font-extrabold text-center leading-none tracking-tight text-black"
-                  style={{ fontSize: isMobile ? "8px" : "10px" }}
+                  className="font-black text-center leading-none tracking-tight text-black text-[11px] sm:text-[14px]"
                 >
                   {cat.name}
                 </span>
@@ -931,10 +966,7 @@ export default function InboxChaosAnimation() {
                     animate={{ scale: 1, opacity: 1, y: 0 }}
                     exit={{ scale: 0.5, opacity: 0 }}
                     transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                    className="font-black tabular-nums leading-none text-black"
-                    style={{
-                      fontSize: isMobile ? "11px" : "15px",
-                    }}
+                    className="font-black tabular-nums leading-none text-black text-sm sm:text-2xl mt-0.5"
                   >
                     {count}
                   </motion.span>
@@ -986,39 +1018,47 @@ export default function InboxChaosAnimation() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute flex flex-col justify-start px-8 sm:px-12 py-6 sm:py-8"
+              className="absolute flex flex-col justify-start"
               style={{
                 top: isMobile ? "16px" : "24px",
                 bottom: isMobile ? "110px" : "170px",
-                left: 0,
-                right: 0,
+                left: isMobile ? "12px" : "24px",
+                right: isMobile ? "12px" : "24px",
                 overflow: "hidden",
-                zIndex: 25
+                zIndex: 25,
+                paddingTop: isMobile ? "12px" : "18px",
+                paddingBottom: isMobile ? "12px" : "18px",
               }}
             >
               {/* Dashboard Content Container */}
-              <div className="flex-1 flex flex-col gap-4 sm:gap-5 max-w-[680px] mx-auto w-full">
+              <div className="flex-1 flex flex-col gap-4 sm:gap-5 w-full mx-auto" style={{ maxWidth: "1000px" }}>
                 
                 {/* Search Bar / Header */}
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
-                  className="flex items-center justify-between bg-white px-5 sm:px-6 py-3"
+                  className="flex items-center justify-between bg-white"
                   style={{
                     border: "2px solid #000",
                     borderRadius: "8px",
                     boxShadow: "2px 2px 0px #000",
                     marginBottom: isMobile ? "4px" : "10px",
+                    padding: isMobile ? "10px 16px" : "12px 24px",
                   }}
                 >
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <Search size={14} className="text-black flex-shrink-0" />
-                    <span className="text-[11px] sm:text-xs text-stone-500 font-extrabold truncate mr-2">
+                    <span className="text-[11px] sm:text-xs text-stone-800 font-extrabold truncate mr-2">
                       Ask AI to search and analyze your sorted emails...
                     </span>
                   </div>
-                  <div className="flex items-center gap-1.5 bg-[#86EFAC] text-black px-2.5 py-1 border-2 border-black text-[9px] sm:text-[10px] font-black flex-shrink-0 shadow-[1.5px_1.5px_0px_#000] rounded">
+                  <div 
+                    className="flex items-center gap-1.5 bg-[#86EFAC] text-black border-2 border-black text-[10px] sm:text-[11px] font-black flex-shrink-0 shadow-[1.5px_1.5px_0px_#000] rounded"
+                    style={{
+                      padding: "4px 8px",
+                    }}
+                  >
                     <CheckCircle2 size={10} className="stroke-[2.5]" />
                     <span>Real-time</span>
                   </div>
@@ -1037,24 +1077,25 @@ export default function InboxChaosAnimation() {
                       initial={{ opacity: 0, y: 15 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.2 + i * 0.08, duration: 0.5 }}
-                      className="flex flex-col items-center justify-center py-2 px-1 sm:py-3 sm:px-3 text-center gap-0.5"
+                      className="flex flex-col items-center justify-center text-center gap-0.5"
                       style={{
                         background: stat.bg,
                         border: "2px solid #000",
                         borderRadius: "8px",
                         boxShadow: "3px 3px 0px #000",
+                        padding: isMobile ? "8px 4px" : "14px 8px",
                       }}
                     >
                       <stat.icon size={15} style={{ color: "#000" }} className="flex-shrink-0 stroke-[2.5]" />
-                      <span className="text-xs sm:text-base font-black text-black leading-none mt-1.5">{stat.value}</span>
-                      <span className="text-[8px] sm:text-[9px] font-black uppercase text-black tracking-wider mt-1 leading-none">{stat.label}</span>
+                      <span className="text-sm sm:text-lg font-black text-black leading-none mt-1.5">{stat.value}</span>
+                      <span className="text-[9px] sm:text-[10px] font-black uppercase text-black tracking-wider mt-1 leading-none">{stat.label}</span>
                     </motion.div>
                   ))}
                 </div>
 
                 {/* Recently Sorted Emails Stream (Fills the space beautifully!) */}
                 <div className="flex-1 flex flex-col gap-2 overflow-hidden mt-4 sm:mt-6">
-                  <div className="text-[9px] sm:text-[10px] font-black text-black uppercase tracking-wider mb-1 px-1">Classified Activity Stream</div>
+                  <div className="text-[10px] sm:text-[11px] font-black text-black uppercase tracking-wider mb-1 px-1">Classified Activity Stream</div>
                   <div className="flex flex-col gap-2">
                     {activeEmails.map((email, i) => {
                       const theme = CATEGORY_THEMES[email.cat] || CATEGORY_THEMES.Personal;
@@ -1064,18 +1105,24 @@ export default function InboxChaosAnimation() {
                           initial={{ opacity: 0, x: -10 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: 0.4 + i * 0.1, duration: 0.5 }}
-                          className="flex items-center justify-between py-2 px-3 sm:py-2.5 sm:px-4 rounded bg-white border-2 border-black text-[11px] sm:text-xs transition-colors hover:bg-stone-50"
+                          className="flex items-center justify-between rounded bg-white border-2 border-black text-xs sm:text-sm transition-colors hover:bg-stone-50"
                           style={{
                             boxShadow: "2px 2px 0px #000",
+                            padding: isMobile ? "8px 12px" : "12px 18px",
                           }}
                         >
                           <div className="flex items-center gap-2 sm:gap-3 overflow-hidden mr-3">
-                            <span className="font-extrabold text-black truncate w-[70px] sm:w-[120px]">{email.sender}</span>
-                            <span className="text-stone-700 font-bold truncate text-[10px] sm:text-xs">{email.subject}</span>
+                            <span className="font-extrabold text-black truncate text-[11px] sm:text-xs w-[70px] sm:w-[120px]">{email.sender}</span>
+                            <span className="text-black font-extrabold truncate text-[10px] sm:text-xs">{email.subject}</span>
                           </div>
                           <div className="flex items-center gap-2 flex-shrink-0">
-                            <span className="text-[9px] font-black text-black">{email.time}</span>
-                            <span className={`px-2 py-0.5 rounded text-[8px] sm:text-[9px] font-black border-2 border-black ${theme.bg} ${theme.text} shadow-[1px_1px_0px_#000]`}>
+                            <span className="text-[10px] sm:text-[11px] font-black text-black">{email.time}</span>
+                            <span 
+                              className={`rounded text-[9px] sm:text-[10px] font-black border-2 border-black ${theme.bg} ${theme.text} shadow-[1px_1px_0px_#000]`}
+                              style={{
+                                padding: "3px 8px",
+                              }}
+                            >
                               {email.cat}
                             </span>
                           </div>
@@ -1090,17 +1137,18 @@ export default function InboxChaosAnimation() {
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.8, duration: 0.6 }}
-                  className="flex items-center justify-center gap-2 mt-1 py-2 px-3 sm:py-2.5 sm:px-4"
+                  className="flex items-center justify-center gap-2 mt-1"
                   style={{
                     background: "#A7F3D0", // pastel green
                     border: "2px solid #000",
                     borderRadius: "6px",
                     boxShadow: "2px 2px 0px #000",
+                    padding: isMobile ? "8px 12px" : "12px 18px",
                   }}
                 >
                   <ArrowDownToLine size={12} style={{ color: "#000" }} className="stroke-[2.5] animate-bounce" />
                   <span
-                    className="text-[10px] sm:text-[11px] font-black text-black uppercase tracking-wider"
+                    className="text-[11px] sm:text-xs font-black text-black uppercase tracking-wider"
                   >
                     Your inbox is now organized with AI-powered intelligence
                   </span>
