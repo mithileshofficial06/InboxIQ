@@ -435,7 +435,7 @@ export default function InboxChaosAnimation() {
       className={`relative w-full mx-auto overflow-hidden select-none transition-all duration-300 ${isShaking ? "shake-active" : ""}`}
       style={{
         maxWidth: "1040px",
-        height: "clamp(460px, 60vw, 540px)",
+        height: "clamp(520px, 60vw, 600px)", // Increased height to make container look spacious and premium
         borderRadius: "24px",
         border: "1px solid var(--color-border-default)",
         background: "var(--color-bg-secondary)",
@@ -580,7 +580,7 @@ export default function InboxChaosAnimation() {
               animate={{ opacity: [0.15, 0.4, 0.15] }}
               exit={{ opacity: 0 }}
               transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute top-0 bottom-[90px] sm:bottom-[120px] left-1/2 -translate-x-1/2 w-[2px] z-0 pointer-events-none"
+              className="absolute top-0 bottom-[96px] sm:bottom-[148px] left-1/2 -translate-x-1/2 w-[2px] z-0 pointer-events-none"
               style={{
                 background: refractingColor
                   ? `linear-gradient(to bottom, transparent, ${refractingColor}, transparent)`
@@ -602,25 +602,25 @@ export default function InboxChaosAnimation() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.8, y: 20 }}
               transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute left-1/2 top-[40%] -translate-x-1/2 -translate-y-1/2 z-40 flex flex-col items-center gap-3 px-6 py-5 rounded-2xl border"
+              className="absolute left-1/2 top-[40%] -translate-x-1/2 -translate-y-1/2 z-40 flex flex-col items-center gap-3 px-10 py-8 rounded-2xl border shadow-2xl min-w-[300px]"
               style={{
-                background: "rgba(255, 255, 255, 0.75)",
+                background: "rgba(255, 255, 255, 0.8)",
                 borderColor: "rgba(132, 155, 135, 0.4)",
-                boxShadow: "0 20px 50px rgba(0, 0, 0, 0.05), 0 0 30px rgba(132, 155, 135, 0.15)",
+                boxShadow: "0 25px 60px rgba(0, 0, 0, 0.08), 0 0 35px rgba(132, 155, 135, 0.2)",
                 backdropFilter: "blur(12px)",
                 WebkitBackdropFilter: "blur(12px)",
               }}
             >
               <div
                 className="flex items-center justify-center rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100"
-                style={{ width: "40px", height: "40px", boxShadow: "0 0 15px rgba(16, 185, 129, 0.2)" }}
+                style={{ width: "44px", height: "44px", boxShadow: "0 0 15px rgba(16, 185, 129, 0.2)" }}
               >
                 <CheckCircle2 size={22} className="stroke-[2.5] animate-pulse" />
               </div>
-              <span className="text-sm font-extrabold text-stone-800 tracking-tight">
+              <span className="text-sm sm:text-base font-extrabold text-stone-800 tracking-tight leading-relaxed">
                 Scanning Successful!
               </span>
-              <span className="text-[10px] font-semibold text-stone-500 uppercase tracking-widest leading-none">
+              <span className="text-[10px] sm:text-xs font-semibold text-stone-500 uppercase tracking-widest leading-none whitespace-nowrap mt-3">
                 AI Pipeline Complete
               </span>
             </motion.div>
@@ -844,7 +844,7 @@ export default function InboxChaosAnimation() {
 
         {/* ── Category Buckets ── */}
         <div
-          className="absolute bottom-0 left-0 right-0 grid gap-1.5 sm:gap-2 p-3 sm:p-4 pb-4 sm:pb-5"
+          className="absolute bottom-0 left-0 right-0 grid gap-2 sm:gap-3 p-4 sm:p-5 pb-5 sm:pb-6"
           style={{
             gridTemplateColumns: "repeat(6, 1fr)",
             background: "var(--color-bg-primary)",
@@ -861,7 +861,7 @@ export default function InboxChaosAnimation() {
                 key={cat.name}
                 ref={(el) => { bucketRefs.current[cat.name] = el; }}
                 className={`flex flex-col items-center justify-center rounded-xl transition-all duration-300 ${
-                  isMobile ? "py-1.5 px-0.5 gap-0.5" : "py-3 px-2 gap-1.5"
+                  isMobile ? "py-2.5 px-1.5 gap-1.5" : "py-5 px-3 gap-2.5"
                 } ${
                   isFlashing ? "scale-105 border-stone-400" : "border-stone-200/40"
                 }`}
@@ -924,7 +924,7 @@ export default function InboxChaosAnimation() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute bottom-[100px] sm:bottom-[130px] left-4 right-4 sm:left-6 sm:right-6"
+              className="absolute bottom-[120px] sm:bottom-[160px] left-4 right-4 sm:left-6 sm:right-6"
             >
               <div
                 className="h-1 rounded-full overflow-hidden"
@@ -950,24 +950,24 @@ export default function InboxChaosAnimation() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute flex flex-col justify-start p-4 sm:p-6"
+              className="absolute flex flex-col justify-start p-6 sm:p-8"
               style={{
-                top: "49px",
-                bottom: isMobile ? "90px" : "120px", // leaves space for buckets below
+                top: isMobile ? "16px" : "24px",
+                bottom: isMobile ? "110px" : "170px",
                 left: 0,
                 right: 0,
                 overflow: "hidden"
               }}
             >
               {/* Dashboard Content Container */}
-              <div className="flex-1 flex flex-col gap-4 max-w-[720px] mx-auto w-full">
+              <div className="flex-1 flex flex-col gap-4 sm:gap-5 max-w-[720px] mx-auto w-full">
                 
                 {/* Search Bar / Header */}
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
-                  className="flex items-center justify-between border border-stone-200 rounded-xl bg-white px-3 sm:px-4 py-2.5 shadow-[0_4px_12px_rgba(0,0,0,0.02)]"
+                  className="flex items-center justify-between border border-stone-200 rounded-xl bg-white px-4 sm:px-5 py-3.5 shadow-[0_4px_12px_rgba(0,0,0,0.02)] mb-4 sm:mb-6"
                 >
                   <div className="flex items-center gap-2 flex-1 min-w-0">
                     <Search size={14} className="text-stone-400 flex-shrink-0" />
@@ -975,14 +975,14 @@ export default function InboxChaosAnimation() {
                       Ask AI to search and analyze your sorted emails...
                     </span>
                   </div>
-                  <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-md border border-emerald-100 text-[9px] sm:text-[10px] font-bold flex-shrink-0">
+                  <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-md border border-emerald-100 text-[9px] sm:text-[10px] font-bold flex-shrink-0">
                     <CheckCircle2 size={10} className="stroke-[2.5]" />
                     <span>Real-time</span>
                   </div>
                 </motion.div>
 
                 {/* Staggered Stats Cards */}
-                <div className="grid grid-cols-4 gap-2 sm:gap-3">
+                <div className="grid grid-cols-4 gap-4 sm:gap-6"> {/* Increased gap between stat cards to gap-6 */}
                   {[
                     { icon: TrendingUp, label: "Sorted", value: "16", color: "var(--color-sage)" },
                     { icon: PieChart, label: "Buckets", value: "6", color: "var(--color-slate)" },
@@ -994,19 +994,19 @@ export default function InboxChaosAnimation() {
                       initial={{ opacity: 0, y: 15 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.2 + i * 0.08, duration: 0.5 }}
-                      className="flex flex-col items-center justify-center p-2 rounded-xl bg-white border border-stone-200/80 shadow-[0_4px_12px_rgba(0,0,0,0.02)] text-center"
+                      className="flex flex-col items-center justify-center py-4 px-3 sm:py-5 sm:px-6 rounded-xl bg-white border border-stone-200/80 shadow-[0_4px_12px_rgba(0,0,0,0.02)] text-center gap-1"
                     >
-                      <stat.icon size={15} style={{ color: stat.color }} className="mb-1" />
-                      <span className="text-xs sm:text-base font-extrabold text-stone-800 leading-none">{stat.value}</span>
-                      <span className="text-[8px] sm:text-[9px] font-bold uppercase text-stone-400 tracking-wider mt-1">{stat.label}</span>
+                      <stat.icon size={16} style={{ color: stat.color }} className="flex-shrink-0" />
+                      <span className="text-sm sm:text-lg font-extrabold text-stone-800 leading-tight mt-1">{stat.value}</span>
+                      <span className="text-[8px] sm:text-[10px] font-bold uppercase text-stone-400 tracking-widest mt-0.5 leading-none">{stat.label}</span>
                     </motion.div>
                   ))}
                 </div>
 
                 {/* Recently Sorted Emails Stream (Fills the space beautifully!) */}
-                <div className="flex-1 flex flex-col gap-1.5 overflow-hidden">
-                  <div className="text-[9px] sm:text-[10px] font-bold uppercase text-stone-400 tracking-wider">Classified Activity Stream</div>
-                  <div className="flex flex-col gap-1.5">
+                <div className="flex-1 flex flex-col gap-2 overflow-hidden mt-6 sm:mt-8"> {/* Added mt-8 top margin separator */}
+                  <div className="text-[9px] sm:text-[10px] font-bold uppercase text-stone-400 tracking-widest mb-1">Classified Activity Stream</div>
+                  <div className="flex flex-col gap-2">
                     {activeEmails.map((email, i) => {
                       const theme = CATEGORY_THEMES[email.cat] || CATEGORY_THEMES.Personal;
                       return (
@@ -1015,7 +1015,7 @@ export default function InboxChaosAnimation() {
                           initial={{ opacity: 0, x: -10 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: 0.4 + i * 0.1, duration: 0.5 }}
-                          className="flex items-center justify-between p-2 rounded-lg bg-stone-50/50 hover:bg-stone-50 border border-stone-100 text-[11px] sm:text-xs transition-colors"
+                          className="flex items-center justify-between py-3.5 px-4 rounded-lg bg-stone-50/50 hover:bg-stone-50 border border-stone-100 text-[11px] sm:text-xs transition-colors"
                         >
                           <div className="flex items-center gap-2 overflow-hidden mr-2">
                             <span className="font-semibold text-stone-700 truncate w-[70px] sm:w-[120px]">{email.sender}</span>
@@ -1023,7 +1023,7 @@ export default function InboxChaosAnimation() {
                           </div>
                           <div className="flex items-center gap-2 flex-shrink-0">
                             <span className="text-[9px] text-stone-400">{email.time}</span>
-                            <span className={`px-2 py-0.5 rounded text-[8px] sm:text-[9px] font-bold border ${theme.bg} ${theme.text} ${theme.border}`}>
+                            <span className={`px-2.5 py-1 rounded text-[8px] sm:text-[10px] font-bold border ${theme.bg} ${theme.text} ${theme.border}`}> {/* Smaller cleaner badges */}
                               {email.cat}
                             </span>
                           </div>
