@@ -110,6 +110,7 @@ export default function InboxChaosAnimation() {
   const [isShaking, setIsShaking] = useState(false);
   const [isRefracting, setIsRefracting] = useState(false);
   const [refractingColor, setRefractingColor] = useState<string | null>(null);
+  const [showSuccessBanner, setShowSuccessBanner] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const bucketRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -162,53 +163,61 @@ export default function InboxChaosAnimation() {
   useEffect(() => {
     if (phase !== "sorting") return;
 
-    let i = 0;
     const timeouts: NodeJS.Timeout[] = [];
 
-    const interval = setInterval(() => {
-      if (i >= EMAIL_PILLS.length) {
-        clearInterval(interval);
-        const t = setTimeout(() => setPhase("done"), 800);
-        timeouts.push(t);
-        return;
-      }
+    // Loop through each pill to schedule its center-crossover scan event
+    EMAIL_PILLS.forEach((pill, i) => {
+      // 1. Gather starting at i * 50ms (0s to 1.25s)
+      // 2. Train travel starts at 1200ms + i * 220ms.
+      // 3. Center crossover occurs 500ms after starting train travel: 1200 + i * 220 + 500 = 1700 + i * 220.
+      const crossoverTime = 1700 + i * 220;
 
-      const pill = EMAIL_PILLS[i];
-      setFlyingPill(pill.id);
-
-      // Trigger glass prism refraction event at 350ms (when pill reaches center)
+      // Scan event: flash centerpiece, increment count, and flash destination bucket
       const t1 = setTimeout(() => {
         setRefractingColor(pill.color);
         setIsRefracting(true);
-        const t2 = setTimeout(() => {
-          setIsRefracting(false);
-          setRefractingColor(null);
-        }, 300);
-        timeouts.push(t2);
-      }, 350);
-      timeouts.push(t1);
-
-      const t3 = setTimeout(() => {
+        
         setSortedIds(prev => new Set(prev).add(pill.id));
         setBucketCounts(prev => ({
           ...prev,
           [pill.category]: (prev[pill.category] || 0) + 1,
         }));
         setFlashBucket(pill.category);
-        setFlyingPill(null);
-        const t4 = setTimeout(() => setFlashBucket(null), 500);
-        timeouts.push(t4);
-      }, 750); // Center scanner scan flow duration
-      timeouts.push(t3);
 
-      i++;
-    }, 280);
+        const t2 = setTimeout(() => {
+          setIsRefracting(false);
+          setRefractingColor(null);
+        }, 220); // flash duration
+        timeouts.push(t2);
+
+        const t3 = setTimeout(() => {
+          setFlashBucket(null);
+        }, 400); // bucket flash duration
+        timeouts.push(t3);
+      }, crossoverTime);
+      timeouts.push(t1);
+    });
+
+    // Timeout to show Success Banner after all pills have finished train travel
+    // The last pill (index 15) starts train travel at 1200 + 15 * 220 = 4500ms, and reaches left (15%) at 4500 + 1000 = 5500ms.
+    const tSuccess = setTimeout(() => {
+      setShowSuccessBanner(true);
+    }, 5600);
+    timeouts.push(tSuccess);
+
+    // Timeout to hide Success Banner and transition to "done"
+    const tDone = setTimeout(() => {
+      setShowSuccessBanner(false);
+      setPhase("done");
+    }, 7200);
+    timeouts.push(tDone);
 
     return () => {
-      clearInterval(interval);
       timeouts.forEach(clearTimeout);
       setIsRefracting(false);
       setRefractingColor(null);
+      setFlashBucket(null);
+      setShowSuccessBanner(false);
     };
   }, [phase]);
 
@@ -243,6 +252,7 @@ export default function InboxChaosAnimation() {
       setBucketCounts({});
       setFlyingPill(null);
       setFlashBucket(null);
+      setShowSuccessBanner(false);
     }, 10000);
 
     return () => clearTimeout(restartTimer);
@@ -380,6 +390,7 @@ export default function InboxChaosAnimation() {
     setBucketCounts({});
     setFlashBucket(null);
     setFlyingPill(null);
+    setShowSuccessBanner(false);
     setTimeout(() => setPhase("sorting"), 3000);
   }, []);
 
@@ -561,6 +572,61 @@ export default function InboxChaosAnimation() {
       {/* ══════════ MAIN AREA ══════════ */}
       <div className="relative" style={{ height: "calc(100% - 49px)" }}>
 
+        {/* Vertical Scanning Beam Line */}
+        <AnimatePresence>
+          {phase === "sorting" && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0.15, 0.4, 0.15] }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute top-0 bottom-[90px] sm:bottom-[120px] left-1/2 -translate-x-1/2 w-[2px] z-0 pointer-events-none"
+              style={{
+                background: refractingColor
+                  ? `linear-gradient(to bottom, transparent, ${refractingColor}, transparent)`
+                  : "linear-gradient(to bottom, transparent, rgba(168, 162, 158, 0.3), transparent)",
+                boxShadow: refractingColor
+                  ? `0 0 12px ${refractingColor}, 0 0 24px ${refractingColor}`
+                  : "none",
+                transition: "background 0.2s, box-shadow 0.2s",
+              }}
+            />
+          )}
+        </AnimatePresence>
+
+        {/* ── Scanning Successful Badge Overlay ── */}
+        <AnimatePresence>
+          {showSuccessBanner && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8, y: -20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.8, y: 20 }}
+              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              className="absolute left-1/2 top-[40%] -translate-x-1/2 -translate-y-1/2 z-40 flex flex-col items-center gap-3 px-6 py-5 rounded-2xl border"
+              style={{
+                background: "rgba(255, 255, 255, 0.75)",
+                borderColor: "rgba(132, 155, 135, 0.4)",
+                boxShadow: "0 20px 50px rgba(0, 0, 0, 0.05), 0 0 30px rgba(132, 155, 135, 0.15)",
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+              }}
+            >
+              <div
+                className="flex items-center justify-center rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100"
+                style={{ width: "40px", height: "40px", boxShadow: "0 0 15px rgba(16, 185, 129, 0.2)" }}
+              >
+                <CheckCircle2 size={22} className="stroke-[2.5] animate-pulse" />
+              </div>
+              <span className="text-sm font-extrabold text-stone-800 tracking-tight">
+                Scanning Successful!
+              </span>
+              <span className="text-[10px] font-semibold text-stone-500 uppercase tracking-widest leading-none">
+                AI Pipeline Complete
+              </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* ── AI Processing Core (Glass Prism Centerpiece) ── */}
         <AnimatePresence>
           {phase !== "done" && phase !== "burst" && (
@@ -626,7 +692,7 @@ export default function InboxChaosAnimation() {
               </AnimatePresence>
               
               <span className="relative z-20 text-[9px] font-bold text-stone-500 uppercase tracking-wider mt-3">
-                {phase === "sorting" ? "Refracting" : "AI Prism"}
+                {phase === "sorting" ? (showSuccessBanner ? "Successful" : "Scanning") : "AI Prism"}
               </span>
             </motion.div>
           )}
@@ -636,20 +702,18 @@ export default function InboxChaosAnimation() {
         <AnimatePresence>
           {phase !== "done" && phase !== "burst" && EMAIL_PILLS.map((pill, i) => {
             const isSorted = sortedIds.has(pill.id);
-            const isFlying = flyingPill === pill.id;
             const pos = chaosPositions[i];
             const PillIcon = pill.icon;
 
-            if (isSorted) return null;
+            // In sorting phase, keep them rendered so they complete their train journey
+            if (phase === "chaos" && isSorted) return null;
 
-            // Calculate target position when flying
-            let targetPos = { x: pos.x, y: pos.y };
-            if (isFlying) {
-              const bucketPos = getBucketPosition(pill.category);
-              if (bucketPos) {
-                targetPos = bucketPos;
-              }
-            }
+            // 5.6s timeline mapping for Gather & Train animation
+            const duration = 5.6;
+            const t1 = (i * 0.05) / duration;
+            const t2 = (i * 0.05 + 0.5) / duration;
+            const t3 = (1.2 + i * 0.22) / duration;
+            const t4 = (1.2 + i * 0.22 + 1.0) / duration;
 
             return (
               <motion.div
@@ -662,13 +726,20 @@ export default function InboxChaosAnimation() {
                   scale: 0.5,
                 }}
                 animate={
-                  isFlying
+                  phase === "sorting"
                     ? {
-                        left: [`${pos.x}%`, "50%", `${targetPos.x}%`],
-                        top: [`${pos.y}%`, "40%", `${targetPos.y}%`],
-                        rotate: [pos.rotate, 0, 0],
-                        opacity: [1, 1, 0],
-                        scale: [1, 1.15, 0.25],
+                        left: [`${pos.x}%`, `${pos.x}%`, "85%", "85%", "15%", "15%"],
+                        top: [`${pos.y}%`, `${pos.y}%`, "40%", "40%", "40%", "40%"],
+                        rotate: [pos.rotate, pos.rotate, 0, 0, 0, 0],
+                        opacity: [1, 1, 1, 1, 0, 0],
+                        scale: [
+                          isMobile ? 0.8 : 1,
+                          isMobile ? 0.8 : 1,
+                          isMobile ? 0.8 : 0.85,
+                          isMobile ? 0.8 : 0.85,
+                          0.2,
+                          0.2
+                        ],
                       }
                     : phase === "chaos"
                     ? {
@@ -694,12 +765,11 @@ export default function InboxChaosAnimation() {
                   transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] },
                 }}
                 transition={
-                  isFlying
+                  phase === "sorting"
                     ? {
-                        duration: 0.75, // Fly duration
-                        times: [0, 0.4, 1], // Staged timing Chaos -> Center -> Bucket
-                        ease: ["easeOut", "easeIn"],
-                        opacity: { duration: 0.75, ease: "easeIn" },
+                        duration: duration,
+                        times: [0, t1, t2, t3, t4, 1.0],
+                        ease: "easeInOut",
                       }
                     : phase === "chaos"
                     ? {
