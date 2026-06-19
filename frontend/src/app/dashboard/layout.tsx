@@ -11,10 +11,10 @@ const NAV_ITEMS = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Overview" },
   { href: "/dashboard/inbox", icon: Inbox, label: "Inbox" },
   { href: "/dashboard/chat", icon: MessageSquare, label: "Assistant" },
-  { href: "/dashboard/people", icon: Users, label: "People" },
-  { href: "/dashboard/jobs", icon: Briefcase, label: "Jobs" },
+  { href: "/dashboard/people", icon: Users, label: "Network" },
+  { href: "/dashboard/jobs", icon: Briefcase, label: "Careers" },
   { href: "/dashboard/subs", icon: Bell, label: "Subscriptions" },
-  { href: "/dashboard/memories", icon: Sparkles, label: "Memories" },
+  { href: "/dashboard/memories", icon: Sparkles, label: "Archives" },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -32,8 +32,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const handleSync = async () => {
     setSyncing(true);
-    try { await emails.triggerSync("incremental"); toast.success("Sync Started"); }
-    catch { toast.error("Sync Failed"); }
+    try { await emails.triggerSync("incremental"); toast.success("Synchronization Started"); }
+    catch { toast.error("Synchronization Failed"); }
     finally { setTimeout(() => setSyncing(false), 3000); }
   };
 
@@ -44,69 +44,70 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   if (loading) return (
-    <div className="mesh-gradient" style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh" }}>
-      <div className="skeleton" style={{ width: "200px", height: "40px", borderRadius: "20px" }} />
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", background: "var(--color-bg-primary)" }}>
+      <div className="skeleton" style={{ width: "200px", height: "4px" }} />
     </div>
   );
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", position: "relative", overflow: "hidden" }}>
-      <div className="mesh-gradient" />
+    <div style={{ display: "flex", minHeight: "100vh" }}>
       
       {/* Sidebar */}
-      <aside className="glass-sidebar" style={{ padding: "24px 0", zIndex: 20 }}>
-        <div style={{ padding: "0 24px 32px", display: "flex", alignItems: "center", gap: "12px" }}>
-          <div style={{ width: "36px", height: "36px", background: "linear-gradient(135deg, var(--color-accent), #818cf8)", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 12px rgba(79, 70, 229, 0.3)" }}>
-            <Mail size={18} color="#fff" />
+      <aside className="editorial-sidebar" style={{ padding: "32px 0" }}>
+        <div style={{ padding: "0 24px 40px", display: "flex", alignItems: "center", gap: "12px" }}>
+          <div style={{ width: "28px", height: "28px", background: "var(--color-text-primary)", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Mail size={14} color="#fff" />
           </div>
-          <span className="glass-heading" style={{ fontSize: "20px" }}>InboxIQ</span>
+          <span className="editorial-heading" style={{ fontSize: "18px" }}>InboxIQ</span>
         </div>
         
+        <div className="editorial-subheading" style={{ padding: "0 24px 12px" }}>Modules</div>
         <nav style={{ flex: 1 }}>
           {NAV_ITEMS.map((item) => {
             const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
             return (
-              <Link key={item.href} href={item.href} className={`glass-nav-link ${isActive ? "active" : ""}`}>
-                <item.icon size={18} />
+              <Link key={item.href} href={item.href} className={`editorial-nav-link ${isActive ? "active" : ""}`}>
+                <item.icon size={16} strokeWidth={isActive ? 2 : 1.5} />
                 {item.label}
               </Link>
             );
           })}
         </nav>
 
-        <div style={{ padding: "24px 24px 0", borderTop: "1px solid rgba(255,255,255,0.4)", margin: "0 16px" }}>
-          <div style={{ fontSize: "12px", color: "var(--color-text-tertiary)", marginBottom: "4px" }}>Logged in as</div>
-          <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--color-text-primary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginBottom: "16px" }}>
+        <div style={{ padding: "24px 24px 0", borderTop: "1px solid var(--color-border-default)" }}>
+          <div style={{ fontSize: "12px", color: "var(--color-text-tertiary)", marginBottom: "4px" }}>Account</div>
+          <div style={{ fontSize: "13px", fontWeight: 500, color: "var(--color-text-primary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginBottom: "16px" }}>
             {user?.email}
           </div>
-          <button className="glass-btn" onClick={handleLogout} style={{ width: "100%", padding: "10px", fontSize: "13px" }}>
+          <button className="editorial-btn" onClick={handleLogout} style={{ width: "100%", padding: "8px", fontSize: "13px", justifyContent: "flex-start" }}>
             <LogOut size={14} /> Sign Out
           </button>
         </div>
       </aside>
 
       {/* Main Content */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", zIndex: 10, height: "100vh" }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", height: "100vh", background: "var(--color-bg-primary)" }}>
         {/* Topbar */}
-        <header style={{ padding: "20px 40px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
-            <div className="glass-badge" style={{ background: user?.sync_status === "syncing" ? "#fef3c7" : "#dcfce7", color: user?.sync_status === "syncing" ? "#d97706" : "#166534", border: "none" }}>
-              <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "currentColor", marginRight: "6px" }} />
-              {user?.sync_status === "syncing" ? "Syncing..." : "Synced"}
+        <header style={{ padding: "24px 48px", display: "flex", justifyContent: "flex-end", alignItems: "center", borderBottom: "1px solid var(--color-border-default)", background: "var(--color-bg-secondary)" }}>
+          <div style={{ display: "flex", gap: "24px", alignItems: "center" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: user?.sync_status === "syncing" ? "var(--color-ochre)" : "var(--color-sage)" }} />
+              <span style={{ fontSize: "13px", color: "var(--color-text-secondary)" }}>
+                {user?.sync_status === "syncing" ? "Syncing in progress..." : `${user?.total_emails_synced.toLocaleString()} indexed records`}
+              </span>
             </div>
-            <div style={{ fontSize: "13px", color: "var(--color-text-secondary)", fontWeight: 500 }}>
-              {user?.total_emails_synced.toLocaleString()} Emails Indexed
-            </div>
+            <button className="editorial-btn" onClick={handleSync} disabled={syncing} style={{ padding: "6px 16px" }}>
+              <RefreshCw size={14} className={syncing ? "animate-spin" : ""} /> 
+              {syncing ? "Syncing" : "Sync"}
+            </button>
           </div>
-          <button className="glass-btn" onClick={handleSync} disabled={syncing}>
-            <RefreshCw size={14} className={syncing ? "animate-spin" : ""} /> 
-            {syncing ? "Syncing" : "Sync Now"}
-          </button>
         </header>
 
         {/* Page Content */}
-        <main style={{ flex: 1, padding: "0 40px 40px", overflowY: "auto" }}>
-          {children}
+        <main style={{ flex: 1, padding: "48px", overflowY: "auto" }}>
+          <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+            {children}
+          </div>
         </main>
       </div>
     </div>

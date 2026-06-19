@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Sparkles, User } from "lucide-react";
 import { chat } from "@/lib/api";
 
 export default function ChatPage() {
@@ -34,49 +33,46 @@ export default function ChatPage() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 120px)" }}>
-      <h1 className="glass-heading" style={{ fontSize: "32px", marginBottom: "24px" }}>AI Assistant</h1>
+      <h1 className="editorial-heading" style={{ fontSize: "36px", marginBottom: "24px" }}>Assistant</h1>
       
-      <div className="glass-card" style={{ flex: 1, display: "flex", flexDirection: "column", padding: 0, overflow: "hidden" }}>
+      <div className="editorial-card" style={{ flex: 1, display: "flex", flexDirection: "column", padding: 0, overflow: "hidden" }}>
         
         {/* Messages Area */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "32px", display: "flex", flexDirection: "column", gap: "24px" }}>
+        <div style={{ flex: 1, overflowY: "auto", padding: "40px", display: "flex", flexDirection: "column", gap: "32px", background: "var(--color-bg-primary)" }}>
           {messages.length === 0 ? (
-            <div style={{ margin: "auto", textAlign: "center", maxWidth: "500px" }}>
-              <div style={{ width: "64px", height: "64px", borderRadius: "20px", background: "linear-gradient(135deg, var(--color-accent), #a855f7)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px", boxShadow: "0 8px 24px rgba(79, 70, 229, 0.2)" }}>
-                <Sparkles size={32} />
-              </div>
-              <h2 className="glass-heading" style={{ fontSize: "24px", marginBottom: "16px" }}>How can I help you today?</h2>
-              <p style={{ color: "var(--color-text-secondary)", marginBottom: "32px", lineHeight: 1.6 }}>
-                I have full access to your indexed emails. You can ask me to summarize threads, find specific documents, or analyze your communication patterns.
+            <div style={{ margin: "auto", textAlign: "center", maxWidth: "600px" }}>
+              <div className="editorial-heading" style={{ fontSize: "28px", marginBottom: "16px" }}>How can I assist you?</div>
+              <p style={{ color: "var(--color-text-secondary)", marginBottom: "40px", lineHeight: 1.7, fontSize: "16px" }}>
+                I can process complex natural language queries against your complete email history. Ask for summaries, specific documents, or broad insights.
               </p>
-              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                {["What bills are due this week?", "Summarize my recent Amazon orders", "Who do I email the most?"].map(s => (
-                  <button key={s} onClick={() => handleSend(s)} className="glass-btn" style={{ justifyContent: "flex-start", padding: "16px 24px", fontWeight: 500 }}>
-                    <Sparkles size={16} color="var(--color-accent)" /> {s}
+              <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                {["Summarize the latest communications from my bank.", "What is the status of my recent job applications?", "List the total amount spent on Amazon this month."].map(s => (
+                  <button key={s} onClick={() => handleSend(s)} className="editorial-btn" style={{ justifyContent: "center", padding: "16px", color: "var(--color-text-secondary)", fontStyle: "italic" }}>
+                    "{s}"
                   </button>
                 ))}
               </div>
             </div>
           ) : (
             messages.map((m, i) => (
-              <div key={i} style={{ display: "flex", gap: "16px", flexDirection: m.role === "user" ? "row-reverse" : "row" }}>
-                <div style={{ width: "36px", height: "36px", borderRadius: "12px", background: m.role === "user" ? "#1e293b" : "linear-gradient(135deg, var(--color-accent), #a855f7)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
-                  {m.role === "user" ? <User size={18} /> : <Sparkles size={18} />}
+              <div key={i} style={{ display: "flex", gap: "24px", flexDirection: m.role === "user" ? "row-reverse" : "row" }}>
+                <div className="editorial-subheading" style={{ width: "60px", textAlign: m.role === "user" ? "right" : "left", color: m.role === "user" ? "var(--color-text-tertiary)" : "var(--color-text-primary)" }}>
+                  {m.role === "user" ? "You" : "InboxIQ"}
                 </div>
                 <div style={{ flex: 1, maxWidth: "80%", display: "flex", flexDirection: "column", alignItems: m.role === "user" ? "flex-end" : "flex-start" }}>
-                  <div style={{ padding: "16px 24px", borderRadius: "20px", background: m.role === "user" ? "#1e293b" : "rgba(255,255,255,0.7)", color: m.role === "user" ? "#fff" : "var(--color-text-primary)", border: m.role === "user" ? "none" : "1px solid rgba(255,255,255,0.8)", boxShadow: "0 4px 12px rgba(0,0,0,0.03)", whiteSpace: "pre-wrap", lineHeight: 1.6 }}>
+                  <div style={{ fontSize: "16px", color: "var(--color-text-primary)", whiteSpace: "pre-wrap", lineHeight: 1.8 }}>
                     {m.content}
                   </div>
                   {m.sources && m.sources.length > 0 && (
-                    <div style={{ marginTop: "12px", width: "100%", padding: "16px", borderRadius: "16px", background: "rgba(255,255,255,0.4)", border: "1px solid rgba(255,255,255,0.5)" }}>
-                      <div style={{ fontSize: "12px", fontWeight: 600, color: "var(--color-text-secondary)", marginBottom: "12px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Sources Retrieved</div>
-                      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                    <div style={{ marginTop: "24px", width: "100%", padding: "24px", borderTop: "1px solid var(--color-border-default)", background: "#ffffff" }}>
+                      <div className="editorial-subheading" style={{ marginBottom: "16px" }}>Sources Referenced</div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                         {m.sources.slice(0, 3).map((s: any, j: number) => (
-                          <div key={j} style={{ padding: "12px", background: "rgba(255,255,255,0.6)", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.8)" }}>
-                            <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--color-text-primary)", marginBottom: "4px" }}>{s.subject}</div>
-                            <div style={{ fontSize: "12px", color: "var(--color-text-tertiary)", display: "flex", justifyContent: "space-between" }}>
+                          <div key={j} style={{ padding: "16px", border: "1px solid var(--color-border-subtle)", borderRadius: "4px" }}>
+                            <div style={{ fontSize: "14px", fontWeight: 500, color: "var(--color-text-primary)", marginBottom: "4px" }}>{s.subject}</div>
+                            <div style={{ fontSize: "13px", color: "var(--color-text-secondary)", display: "flex", justifyContent: "space-between" }}>
                               <span>{s.sender_email}</span>
-                              <span style={{ color: "var(--color-accent)" }}>{(s.similarity_score * 100).toFixed(1)}% Match</span>
+                              <span>{(s.similarity_score * 100).toFixed(1)}%</span>
                             </div>
                           </div>
                         ))}
@@ -88,14 +84,12 @@ export default function ChatPage() {
             ))
           )}
           {loading && (
-            <div style={{ display: "flex", gap: "16px" }}>
-              <div style={{ width: "36px", height: "36px", borderRadius: "12px", background: "linear-gradient(135deg, var(--color-accent), #a855f7)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 4px 12px rgba(79, 70, 229, 0.2)" }}>
-                <Sparkles size={18} className="animate-pulse" />
-              </div>
-              <div style={{ padding: "16px 24px", borderRadius: "20px", background: "rgba(255,255,255,0.7)", border: "1px solid rgba(255,255,255,0.8)", display: "flex", alignItems: "center", gap: "8px" }}>
-                <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "var(--color-accent)", animation: "pulse 1s infinite" }} />
-                <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "var(--color-accent)", animation: "pulse 1s infinite 0.2s" }} />
-                <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "var(--color-accent)", animation: "pulse 1s infinite 0.4s" }} />
+            <div style={{ display: "flex", gap: "24px" }}>
+              <div className="editorial-subheading" style={{ width: "60px" }}>InboxIQ</div>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", height: "24px" }}>
+                <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--color-text-tertiary)", animation: "pulse 1s infinite" }} />
+                <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--color-text-tertiary)", animation: "pulse 1s infinite 0.2s" }} />
+                <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--color-text-tertiary)", animation: "pulse 1s infinite 0.4s" }} />
               </div>
             </div>
           )}
@@ -103,24 +97,24 @@ export default function ChatPage() {
         </div>
 
         {/* Input Area */}
-        <div style={{ padding: "24px", borderTop: "1px solid rgba(255,255,255,0.4)", background: "rgba(255,255,255,0.2)" }}>
-          <div style={{ display: "flex", gap: "12px", position: "relative" }}>
+        <div style={{ padding: "24px", borderTop: "1px solid var(--color-border-default)", background: "#ffffff" }}>
+          <div style={{ display: "flex", gap: "16px" }}>
             <input 
               type="text" 
               value={input} 
               onChange={e => setInput(e.target.value)} 
               onKeyDown={e => e.key === "Enter" && handleSend()} 
-              placeholder="Ask anything about your inbox..." 
-              className="glass-input" 
-              style={{ flex: 1, padding: "16px 20px", fontSize: "15px", borderRadius: "100px", paddingRight: "60px" }} 
+              placeholder="Type your query..." 
+              className="editorial-input" 
+              style={{ flex: 1, padding: "16px 20px", fontSize: "16px" }} 
             />
             <button 
               onClick={() => handleSend()} 
               disabled={loading || !input.trim()} 
-              className="glass-btn-primary" 
-              style={{ position: "absolute", right: "6px", top: "6px", bottom: "6px", padding: "0 16px", borderRadius: "100px" }}
+              className="editorial-btn-primary" 
+              style={{ padding: "0 32px" }}
             >
-              <Send size={18} />
+              Submit
             </button>
           </div>
         </div>
