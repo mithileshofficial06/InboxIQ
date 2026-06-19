@@ -130,7 +130,336 @@ function Typewriter({ queries }: { queries: string[] }) {
   );
 }
 
-/* HeroCanvas removed — replaced by InboxChaosAnimation component */
+/* ─── Concept 2: Neural Vector Search Grid (Semantic Mapper) ─── */
+function HeroCanvas() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let animationId: number;
+    const dpr = window.devicePixelRatio || 1;
+
+    // Grid configuration
+    const spacing = 55; // Space between grid nodes
+    let points: {
+      baseX: number;
+      baseY: number;
+      x: number;
+      y: number;
+      color: string;
+      pulse: number;
+      pulseSpeed: number;
+    }[] = [];
+
+    let mouse = { x: -1000, y: -1000, radius: 140 };
+
+    const resize = () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      canvas.style.width = w + "px";
+      canvas.style.height = h + "px";
+      ctx.scale(dpr, dpr);
+
+      // Populate grid coordinates based on screen bounds
+      points = [];
+      const cols = Math.ceil(w / spacing) + 1;
+      const rows = Math.ceil(h / spacing) + 1;
+
+      // Soft pastel category colors matching the InboxIQ theme
+      const categoryColors = [
+        "rgba(107, 122, 143, 0.35)", // Jobs (slate)
+        "rgba(132, 155, 135, 0.35)", // Academic (sage)
+        "rgba(196, 107, 90, 0.35)",  // Bills (terracotta)
+        "rgba(201, 154, 92, 0.35)",  // Orders (ochre)
+      ];
+
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const x = c * spacing;
+          const y = r * spacing;
+
+          // Sparse distribution of category coordinate anchors
+          let color = "rgba(28, 25, 23, 0.05)";
+          if (Math.random() < 0.06) {
+            color = categoryColors[Math.floor(Math.random() * categoryColors.length)];
+          }
+
+          points.push({
+            baseX: x,
+            baseY: y,
+            x: x,
+            y: y,
+            color,
+            pulse: Math.random() * Math.PI * 2,
+            pulseSpeed: 0.015 + Math.random() * 0.02,
+          });
+        }
+      }
+    };
+
+    resize();
+    window.addEventListener("resize", resize);
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      mouse.x = e.clientX - rect.left;
+      mouse.y = e.clientY - rect.top;
+    };
+
+    const handleMouseLeave = () => {
+      mouse.x = -1000;
+      mouse.y = -1000;
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseleave", handleMouseLeave);
+
+    // Active path signal lines representing semantic search queries
+    interface ActivePulse {
+      x: number;
+      y: number;
+      targetX: number;
+      targetY: number;
+      progress: number;
+      speed: number;
+      color: string;
+      path: { x: number; y: number }[];
+      currentStep: number;
+    }
+
+    let activePulses: ActivePulse[] = [];
+
+    const triggerPulse = () => {
+      if (points.length === 0) return;
+
+      const startPt = points[Math.floor(Math.random() * points.length)];
+      const path: { x: number; y: number }[] = [{ x: startPt.baseX, y: startPt.baseY }];
+      let currentX = startPt.baseX;
+      let currentY = startPt.baseY;
+
+      // Select matching color theme for trail
+      const trailColors = [
+        "rgba(107, 122, 143, 0.75)", // Jobs
+        "rgba(132, 155, 135, 0.75)", // Academic
+        "rgba(196, 107, 90, 0.75)",  // Bills
+        "rgba(201, 154, 92, 0.75)",  // Orders
+      ];
+      const selectedColor = trailColors[Math.floor(Math.random() * trailColors.length)];
+
+      // Generate a path traversing along grid intersections
+      for (let steps = 0; steps < 4; steps++) {
+        const goHorizontal = Math.random() > 0.5;
+        const dir = Math.random() > 0.5 ? 1 : -1;
+        if (goHorizontal) {
+          currentX += spacing * dir * Math.floor(1 + Math.random() * 2);
+        } else {
+          currentY += spacing * dir * Math.floor(1 + Math.random() * 2);
+        }
+        path.push({ x: currentX, y: currentY });
+      }
+
+      activePulses.push({
+        x: startPt.baseX,
+        y: startPt.baseY,
+        targetX: path[1].x,
+        targetY: path[1].y,
+        progress: 0,
+        speed: 0.04 + Math.random() * 0.03,
+        color: selectedColor,
+        path,
+        currentStep: 0,
+      });
+    };
+
+    let pulseInterval = setInterval(triggerPulse, 2000);
+
+    interface Ripple {
+      x: number;
+      y: number;
+      r: number;
+      maxR: number;
+      opacity: number;
+      color: string;
+    }
+    let ripples: Ripple[] = [];
+
+    const draw = () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      ctx.clearRect(0, 0, w, h);
+
+      // Point warping calculation based on magnetic mouse pull
+      for (const pt of points) {
+        pt.pulse += pt.pulseSpeed;
+        const dx = mouse.x - pt.baseX;
+        const dy = mouse.y - pt.baseY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < mouse.radius) {
+          const force = (mouse.radius - dist) / mouse.radius;
+          const angle = Math.atan2(dy, dx);
+          const pull = force * 20; // grid warping pull weight
+          pt.x = pt.baseX + Math.cos(angle) * pull;
+          pt.y = pt.baseY + Math.sin(angle) * pull;
+        } else {
+          pt.x += (pt.baseX - pt.x) * 0.08;
+          pt.y += (pt.baseY - pt.y) * 0.08;
+        }
+      }
+
+      const cols = Math.ceil(w / spacing) + 1;
+      const rows = Math.ceil(h / spacing) + 1;
+
+      // Draw horizontal grids
+      for (let r = 0; r < rows; r++) {
+        ctx.beginPath();
+        for (let c = 0; c < cols; c++) {
+          const pt = points[r * cols + c];
+          if (!pt) continue;
+          if (c === 0) {
+            ctx.moveTo(pt.x, pt.y);
+          } else {
+            ctx.lineTo(pt.x, pt.y);
+          }
+        }
+        ctx.strokeStyle = "rgba(168, 162, 158, 0.08)";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      // Draw vertical grids
+      for (let c = 0; c < cols; c++) {
+        ctx.beginPath();
+        for (let r = 0; r < rows; r++) {
+          const pt = points[r * cols + c];
+          if (!pt) continue;
+          if (r === 0) {
+            ctx.moveTo(pt.x, pt.y);
+          } else {
+            ctx.lineTo(pt.x, pt.y);
+          }
+        }
+        ctx.strokeStyle = "rgba(168, 162, 158, 0.08)";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      // Draw intersection dots
+      for (const pt of points) {
+        const pulseVal = Math.sin(pt.pulse) * 0.25 + 0.75;
+        ctx.beginPath();
+        
+        if (pt.color.includes("28, 25, 23")) {
+          ctx.arc(pt.x, pt.y, 1.5, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(168, 162, 158, ${0.28 * pulseVal})`;
+        } else {
+          ctx.arc(pt.x, pt.y, 3, 0, Math.PI * 2);
+          ctx.fillStyle = pt.color.replace("0.35", (0.75 * pulseVal).toString());
+        }
+        ctx.fill();
+      }
+
+      // Update and draw active pulses
+      for (let i = activePulses.length - 1; i >= 0; i--) {
+        const p = activePulses[i];
+        p.progress += p.speed;
+
+        const currX = p.x + (p.targetX - p.x) * p.progress;
+        const currY = p.y + (p.targetY - p.y) * p.progress;
+
+        // Draw connecting trail lines
+        ctx.beginPath();
+        ctx.moveTo(p.path[0].x, p.path[0].y);
+        for (let s = 1; s <= p.currentStep; s++) {
+          ctx.lineTo(p.path[s].x, p.path[s].y);
+        }
+        ctx.lineTo(currX, currY);
+        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = p.color;
+        ctx.stroke();
+
+        // Draw light head
+        ctx.beginPath();
+        ctx.arc(currX, currY, 3, 0, Math.PI * 2);
+        ctx.fillStyle = "#ffffff";
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = 6;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        if (p.progress >= 1) {
+          p.currentStep++;
+          if (p.currentStep < p.path.length - 1) {
+            p.progress = 0;
+            p.x = p.targetX;
+            p.y = p.targetY;
+            p.targetX = p.path[p.currentStep + 1].x;
+            p.targetY = p.path[p.currentStep + 1].y;
+          } else {
+            // Ripple trigger
+            ripples.push({
+              x: p.targetX,
+              y: p.targetY,
+              r: 1,
+              maxR: 35,
+              opacity: 0.7,
+              color: p.color,
+            });
+            activePulses.splice(i, 1);
+          }
+        }
+      }
+
+      // Render expansion rings
+      for (let i = ripples.length - 1; i >= 0; i--) {
+        const r = ripples[i];
+        r.r += 0.8;
+        r.opacity -= 0.02;
+
+        ctx.beginPath();
+        ctx.arc(r.x, r.y, r.r, 0, Math.PI * 2);
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = r.color.replace("0.4", r.opacity.toString());
+        ctx.stroke();
+
+        if (r.opacity <= 0) {
+          ripples.splice(i, 1);
+        }
+      }
+
+      animationId = requestAnimationFrame(draw);
+    };
+
+    draw();
+
+    return () => {
+      cancelAnimationFrame(animationId);
+      clearInterval(pulseInterval);
+      window.removeEventListener("resize", resize);
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseleave", handleMouseLeave);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{
+        position: "absolute",
+        inset: 0,
+        zIndex: 0,
+        pointerEvents: "none",
+        opacity: 0.95,
+      }}
+    />
+  );
+}
 
 /* ═══════════════════════════════
    MAIN PAGE
@@ -236,6 +565,7 @@ export default function LandingPage() {
 
       {/* ═══════ HERO SECTION (with live canvas) ═══════ */}
       <motion.section style={{ y: heroY, opacity: heroOpacity, position: "relative", zIndex: 2, paddingTop: "140px", paddingBottom: "60px", textAlign: "center", overflow: "hidden" }}>
+        <HeroCanvas />
         <div style={{ maxWidth: "900px", margin: "0 auto", padding: "0 32px", position: "relative", zIndex: 1 }}>
 
           <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0}
