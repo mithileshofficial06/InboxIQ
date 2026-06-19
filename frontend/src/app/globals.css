@@ -1,61 +1,56 @@
 @import "tailwindcss";
 
 @theme {
-  /* Color System — Deep ocean blue with electric accents */
-  --color-bg-primary: hsl(222 28% 7%);
-  --color-bg-secondary: hsl(220 20% 11%);
-  --color-bg-tertiary: hsl(220 20% 14%);
-  --color-bg-card: hsl(220 18% 13%);
-  --color-bg-elevated: hsl(220 15% 17%);
-  --color-bg-hover: hsl(220 15% 20%);
+  /* Brutalist Dark Mode Colors */
+  --color-bg-primary: #0a0a0a;
+  --color-bg-secondary: #121212;
+  --color-bg-tertiary: #1a1a1a;
+  --color-bg-card: #000000;
+  
+  --color-border-default: #ffffff;
+  --color-border-subtle: #444444;
+  --color-border-accent: #00ff41;
 
-  --color-border-default: hsl(220 15% 22%);
-  --color-border-subtle: hsl(220 15% 18%);
-  --color-border-accent: hsl(217 91% 60%);
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #cccccc;
+  --color-text-tertiary: #888888;
+  --color-text-accent: #00ff41;
 
-  --color-text-primary: hsl(210 40% 96%);
-  --color-text-secondary: hsl(215 20% 65%);
-  --color-text-tertiary: hsl(215 15% 45%);
-  --color-text-accent: hsl(217 91% 70%);
+  /* Neon Brutalist Accents */
+  --color-accent: #00ff41; /* Hacker Green */
+  --color-accent-hover: #00cc33;
+  
+  --color-success: #00ff41;
+  --color-warning: #ffb800; /* Sharp Yellow */
+  --color-danger: #ff003c; /* Neon Red */
+  --color-info: #00e5ff; /* Cyan */
 
-  /* Brand / Accent colors */
-  --color-accent: hsl(217 91% 60%);
-  --color-accent-hover: hsl(217 91% 55%);
-  --color-accent-glow: hsl(217 91% 60% / 0.3);
-
-  --color-success: hsl(142 71% 45%);
-  --color-warning: hsl(38 92% 50%);
-  --color-danger: hsl(0 84% 60%);
-  --color-info: hsl(199 89% 48%);
-
-  /* Category colors */
-  --color-cat-bills: hsl(280 65% 60%);
-  --color-cat-jobs: hsl(217 91% 60%);
-  --color-cat-orders: hsl(25 95% 53%);
-  --color-cat-otps: hsl(340 75% 55%);
-  --color-cat-newsletters: hsl(160 60% 45%);
-  --color-cat-people: hsl(142 71% 45%);
-  --color-cat-academic: hsl(45 93% 47%);
-  --color-cat-promos: hsl(0 84% 60%);
-  --color-cat-travel: hsl(199 89% 48%);
+  /* Category Neon Colors */
+  --color-cat-bills: #bc13fe; /* Neon Purple */
+  --color-cat-jobs: #00ff41; /* Neon Green */
+  --color-cat-orders: #ffb800; /* Neon Yellow */
+  --color-cat-otps: #ff007f; /* Hot Pink */
+  --color-cat-newsletters: #00e5ff; /* Cyan */
+  --color-cat-people: #00ff41; 
+  --color-cat-academic: #ff5e00; /* Orange */
+  --color-cat-promos: #ff003c; /* Red */
+  --color-cat-travel: #0055ff; /* Blue */
 
   /* Fonts */
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
-  /* Radius */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  --radius-xl: 20px;
-  --radius-full: 9999px;
+  /* Zero Radius for Brutalism */
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-full: 0px;
 
-  /* Shadows */
-  --shadow-sm: 0 1px 2px hsl(0 0% 0% / 0.3);
-  --shadow-md: 0 4px 12px hsl(0 0% 0% / 0.3);
-  --shadow-lg: 0 8px 30px hsl(0 0% 0% / 0.4);
-  --shadow-glow: 0 0 20px hsl(217 91% 60% / 0.15);
-  --shadow-glow-lg: 0 0 40px hsl(217 91% 60% / 0.2);
+  /* Sharp Shadows */
+  --shadow-brutal: 6px 6px 0px 0px #ffffff;
+  --shadow-brutal-sm: 3px 3px 0px 0px #ffffff;
+  --shadow-brutal-accent: 6px 6px 0px 0px var(--color-accent);
 }
 
 /* ============ Base Styles ============ */
@@ -66,198 +61,126 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto; /* Removed smooth scroll for brutal feel */
 }
 
 body {
-  font-family: var(--font-sans);
+  font-family: var(--font-mono); /* Switched default to Mono */
   background: var(--color-bg-primary);
   color: var(--color-text-primary);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-image: radial-gradient(#333 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  font-weight: 900;
+  letter-spacing: -0.05em;
 }
 
 /* ============ Scrollbar ============ */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 12px;
+  height: 12px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: var(--color-bg-primary);
+  border-left: 2px solid var(--color-border-default);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(220 15% 25%);
-  border-radius: 3px;
+  background: var(--color-text-primary);
+  border: 2px solid var(--color-bg-primary);
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: hsl(220 15% 35%);
+/* ============ Brutal Components ============ */
+
+.brutal-card {
+  background: var(--color-bg-card);
+  border: 3px solid var(--color-border-default);
+  box-shadow: var(--shadow-brutal);
+  padding: 24px;
+  transition: transform 0.1s, box-shadow 0.1s;
 }
 
-/* ============ Glassmorphism ============ */
-.glass {
-  background: hsl(220 20% 11% / 0.7);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid hsl(220 15% 22% / 0.5);
+.brutal-card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0px 0px var(--color-accent);
 }
 
-.glass-card {
-  background: hsl(220 18% 13% / 0.8);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid hsl(220 15% 22% / 0.4);
-  border-radius: var(--radius-lg);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.glass-card:hover {
-  border-color: hsl(217 91% 60% / 0.3);
-  box-shadow: var(--shadow-glow);
-  transform: translateY(-1px);
-}
-
-/* ============ Gradient Text ============ */
-.gradient-text {
-  background: linear-gradient(135deg, hsl(217 91% 70%), hsl(199 89% 58%), hsl(280 65% 70%));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.gradient-text-accent {
-  background: linear-gradient(135deg, hsl(217 91% 60%), hsl(280 65% 65%));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* ============ Gradient Backgrounds ============ */
-.gradient-bg {
-  background: linear-gradient(135deg, hsl(217 91% 60%), hsl(280 65% 55%));
-}
-
-.gradient-bg-subtle {
-  background: linear-gradient(135deg, hsl(217 91% 60% / 0.1), hsl(280 65% 55% / 0.1));
-}
-
-/* ============ Animated Background Mesh ============ */
-.mesh-gradient {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
-  background:
-    radial-gradient(ellipse at 20% 50%, hsl(217 91% 60% / 0.08) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 20%, hsl(280 65% 55% / 0.06) 0%, transparent 50%),
-    radial-gradient(ellipse at 40% 80%, hsl(199 89% 48% / 0.05) 0%, transparent 50%),
-    var(--color-bg-primary);
-}
-
-/* ============ Animations ============ */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes slideInLeft {
-  from { opacity: 0; transform: translateX(-20px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-
-@keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 15px hsl(217 91% 60% / 0.2); }
-  50% { box-shadow: 0 0 30px hsl(217 91% 60% / 0.4); }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-8px); }
-}
-
-@keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.5s ease-out forwards;
-}
-
-.animate-slide-up {
-  animation: slideUp 0.6s ease-out forwards;
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 3s ease-in-out infinite;
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-/* Stagger delays */
-.delay-100 { animation-delay: 100ms; }
-.delay-200 { animation-delay: 200ms; }
-.delay-300 { animation-delay: 300ms; }
-.delay-400 { animation-delay: 400ms; }
-.delay-500 { animation-delay: 500ms; }
-
-/* ============ Button Styles ============ */
-.btn-primary {
+.brutal-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  padding: 12px 28px;
-  background: linear-gradient(135deg, hsl(217 91% 55%), hsl(217 91% 48%));
-  color: white;
-  font-weight: 600;
-  font-size: 15px;
-  border: none;
-  border-radius: var(--radius-lg);
+  padding: 12px 24px;
+  background: var(--color-accent);
+  color: #000;
+  font-family: var(--font-sans);
+  font-weight: 900;
+  font-size: 16px;
+  text-transform: uppercase;
+  border: 3px solid var(--color-border-default);
+  box-shadow: var(--shadow-brutal);
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 14px hsl(217 91% 60% / 0.3);
+  transition: all 0.1s;
 }
 
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px hsl(217 91% 60% / 0.4);
+.brutal-btn:hover {
+  background: var(--color-text-primary);
+  color: #000;
 }
 
-.btn-primary:active {
-  transform: translateY(0);
+.brutal-btn:active {
+  transform: translate(6px, 6px);
+  box-shadow: 0px 0px 0px 0px #ffffff;
 }
 
-.btn-ghost {
+.brutal-btn-ghost {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 20px;
+  padding: 12px 24px;
   background: transparent;
-  color: var(--color-text-secondary);
-  font-weight: 500;
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+  font-weight: 700;
   font-size: 14px;
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-md);
+  text-transform: uppercase;
+  border: 3px solid var(--color-border-default);
+  box-shadow: var(--shadow-brutal-sm);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.1s;
 }
 
-.btn-ghost:hover {
-  background: var(--color-bg-hover);
+.brutal-btn-ghost:hover {
+  background: var(--color-text-primary);
+  color: #000;
+}
+
+.brutal-btn-ghost:active {
+  transform: translate(3px, 3px);
+  box-shadow: 0px 0px 0px 0px var(--color-border-default);
+}
+
+/* ============ Typography ============ */
+.brutal-text {
+  font-family: var(--font-sans);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.05em;
   color: var(--color-text-primary);
-  border-color: var(--color-border-accent);
+  text-shadow: 3px 3px 0px var(--color-border-subtle);
+}
+
+.brutal-text-accent {
+  color: var(--color-accent);
+  text-shadow: 3px 3px 0px var(--color-border-default);
 }
 
 /* ============ Category Badges ============ */
@@ -266,112 +189,77 @@ body {
   align-items: center;
   padding: 4px 12px;
   font-size: 12px;
-  font-weight: 600;
-  border-radius: var(--radius-full);
-  letter-spacing: 0.02em;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  text-transform: uppercase;
+  border: 2px solid var(--color-text-primary);
+  background: #000;
+  box-shadow: 2px 2px 0px 0px var(--color-text-primary);
 }
 
-.badge-bills { background: hsl(280 65% 60% / 0.15); color: hsl(280 65% 75%); }
-.badge-jobs { background: hsl(217 91% 60% / 0.15); color: hsl(217 91% 75%); }
-.badge-orders { background: hsl(25 95% 53% / 0.15); color: hsl(25 95% 70%); }
-.badge-otps { background: hsl(340 75% 55% / 0.15); color: hsl(340 75% 75%); }
-.badge-newsletters { background: hsl(160 60% 45% / 0.15); color: hsl(160 60% 65%); }
-.badge-people { background: hsl(142 71% 45% / 0.15); color: hsl(142 71% 65%); }
-.badge-academic { background: hsl(45 93% 47% / 0.15); color: hsl(45 93% 65%); }
-.badge-promos { background: hsl(0 84% 60% / 0.15); color: hsl(0 84% 75%); }
-.badge-travel { background: hsl(199 89% 48% / 0.15); color: hsl(199 89% 68%); }
-
-/* ============ Stat Card ============ */
-.stat-card {
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-lg);
-  padding: 24px;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.stat-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, hsl(217 91% 60%), hsl(280 65% 60%));
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.stat-card:hover {
-  border-color: hsl(217 91% 60% / 0.3);
-  box-shadow: var(--shadow-glow);
-}
-
-.stat-card:hover::before {
-  opacity: 1;
-}
-
-/* ============ Skeleton Loader ============ */
-.skeleton {
-  background: linear-gradient(90deg, var(--color-bg-tertiary), var(--color-bg-elevated), var(--color-bg-tertiary));
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-  border-radius: var(--radius-md);
-}
+.badge-bills { border-color: var(--color-cat-bills); color: var(--color-cat-bills); box-shadow: 2px 2px 0px 0px var(--color-cat-bills); }
+.badge-jobs { border-color: var(--color-cat-jobs); color: var(--color-cat-jobs); box-shadow: 2px 2px 0px 0px var(--color-cat-jobs); }
+.badge-orders { border-color: var(--color-cat-orders); color: var(--color-cat-orders); box-shadow: 2px 2px 0px 0px var(--color-cat-orders); }
+.badge-otps { border-color: var(--color-cat-otps); color: var(--color-cat-otps); box-shadow: 2px 2px 0px 0px var(--color-cat-otps); }
+.badge-newsletters { border-color: var(--color-cat-newsletters); color: var(--color-cat-newsletters); box-shadow: 2px 2px 0px 0px var(--color-cat-newsletters); }
+.badge-people { border-color: var(--color-cat-people); color: var(--color-cat-people); box-shadow: 2px 2px 0px 0px var(--color-cat-people); }
+.badge-academic { border-color: var(--color-cat-academic); color: var(--color-cat-academic); box-shadow: 2px 2px 0px 0px var(--color-cat-academic); }
+.badge-promos { border-color: var(--color-cat-promos); color: var(--color-cat-promos); box-shadow: 2px 2px 0px 0px var(--color-cat-promos); }
+.badge-travel { border-color: var(--color-cat-travel); color: var(--color-cat-travel); box-shadow: 2px 2px 0px 0px var(--color-cat-travel); }
 
 /* ============ Sidebar ============ */
 .sidebar {
   background: var(--color-bg-secondary);
-  border-right: 1px solid var(--color-border-subtle);
+  border-right: 4px solid var(--color-border-default);
   width: 260px;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  transition: width 0.3s ease;
 }
 
 .sidebar-link {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 16px;
+  padding: 14px 16px;
   color: var(--color-text-secondary);
   text-decoration: none;
-  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
   font-size: 14px;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  margin: 2px 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  border-bottom: 2px solid var(--color-border-subtle);
 }
 
 .sidebar-link:hover {
-  background: var(--color-bg-hover);
-  color: var(--color-text-primary);
+  background: var(--color-text-primary);
+  color: #000;
+  border-color: var(--color-text-primary);
 }
 
 .sidebar-link.active {
-  background: hsl(217 91% 60% / 0.12);
-  color: hsl(217 91% 70%);
+  background: var(--color-accent);
+  color: #000;
+  border-color: var(--color-accent);
 }
 
-/* ============ Chart Container ============ */
-.chart-container {
+/* ============ Utilities ============ */
+.brutal-input {
   background: var(--color-bg-card);
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-lg);
-  padding: 24px;
-  transition: all 0.3s ease;
+  border: 3px solid var(--color-border-default);
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+  padding: 12px 16px;
+  box-shadow: var(--shadow-brutal-sm);
+  outline: none;
+}
+.brutal-input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 3px 3px 0px 0px var(--color-accent);
 }
 
-.chart-container:hover {
-  border-color: hsl(217 91% 60% / 0.2);
-}
-
-/* ============ Responsive ============ */
-@media (max-width: 768px) {
-  .sidebar {
-    width: 70px;
-  }
+/* Animations removed, hard states only */
+.skeleton {
+  background: #222;
+  border: 2px solid #555;
 }

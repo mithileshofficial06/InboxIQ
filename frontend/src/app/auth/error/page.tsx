@@ -1,77 +1,26 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { AlertTriangle, ArrowLeft } from "lucide-react";
 import { Suspense } from "react";
 
 function ErrorContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const message = searchParams.get("message") || "An unknown error occurred.";
+  const msg = searchParams.get("message") || "UNKNOWN_SYSTEM_ERROR";
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <div className="mesh-gradient" />
-      <div
-        className="glass-card"
-        style={{
-          padding: "48px",
-          textAlign: "center",
-          maxWidth: "420px",
-          width: "100%",
-        }}
-      >
-        <div
-          style={{
-            width: "64px",
-            height: "64px",
-            borderRadius: "16px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            background: "hsl(0 84% 60% / 0.15)",
-            margin: "0 auto 24px",
-          }}
-        >
-          <AlertTriangle size={28} style={{ color: "hsl(0 84% 60%)" }} />
-        </div>
-        <h1 style={{ fontSize: "22px", fontWeight: 800, marginBottom: "8px" }}>
-          Authentication Error
-        </h1>
-        <p
-          style={{
-            fontSize: "14px",
-            color: "var(--color-text-secondary)",
-            marginBottom: "28px",
-            lineHeight: 1.7,
-          }}
-        >
-          {message}
+    <div style={{ height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--color-bg-primary)" }}>
+      <div className="brutal-card" style={{ textAlign: "center", padding: "48px", maxWidth: "400px", width: "100%", borderColor: "var(--color-danger)", boxShadow: "8px 8px 0px 0px var(--color-danger)" }}>
+        <h1 className="brutal-text" style={{ fontSize: "24px", color: "var(--color-danger)", marginBottom: "16px" }}>CRITICAL_ERROR</h1>
+        <p style={{ fontFamily: "var(--font-mono)", fontSize: "14px", marginBottom: "32px", color: "#fff", background: "#222", padding: "16px", border: "2px solid #555" }}>
+          {msg}
         </p>
-        <button
-          className="btn-primary"
-          onClick={() => router.push("/")}
-          style={{ width: "100%" }}
-        >
-          <ArrowLeft size={16} />
-          Back to Home
-        </button>
+        <button className="brutal-btn" onClick={() => router.push("/")} style={{ width: "100%", background: "var(--color-danger)" }}>RETURN_TO_BASE</button>
       </div>
     </div>
   );
 }
 
 export default function AuthErrorPage() {
-  return (
-    <Suspense fallback={null}>
-      <ErrorContent />
-    </Suspense>
-  );
+  return <Suspense><ErrorContent /></Suspense>;
 }

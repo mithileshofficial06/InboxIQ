@@ -1,394 +1,111 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  Mail,
-  TrendingUp,
-  Calendar,
-  Eye,
-  BarChart3,
-  PieChart,
-  Activity,
-  Clock,
-  Users,
-  ArrowUpRight,
-  ArrowDownRight,
-} from "lucide-react";
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart as RechartsPie,
-  Pie,
-  Cell,
-  BarChart,
-  Bar,
-} from "recharts";
+import { Mail, TrendingUp, Calendar, Eye, BarChart3, PieChart, Activity, Clock, Users } from "lucide-react";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RechartsPie, Pie, Cell } from "recharts";
 import { analytics } from "@/lib/api";
 
 const CATEGORY_COLORS: Record<string, string> = {
-  "Bills & Invoices": "#9b59b6",
-  "Job Applications": "#3b82f6",
-  "Orders & Deliveries": "#f97316",
-  "OTPs & Notifications": "#ec4899",
-  "Newsletters": "#10b981",
-  "Real People": "#22c55e",
-  "Academic": "#eab308",
-  "Promotions": "#ef4444",
-  "Travel & Bookings": "#0ea5e9",
-  "Uncategorized": "#6b7280",
+  "Bills & Invoices": "#bc13fe",
+  "Job Applications": "#00ff41",
+  "Orders & Deliveries": "#ffb800",
+  "OTPs & Notifications": "#ff007f",
+  "Newsletters": "#00e5ff",
+  "Real People": "#00ff41",
+  "Academic": "#ff5e00",
+  "Promotions": "#ff003c",
+  "Travel & Bookings": "#0055ff",
+  "Uncategorized": "#ffffff",
 };
 
-interface OverviewData {
-  totalEmails: number;
-  todayEmails: number;
-  unreadCount: number;
-  avgPerDay: number;
-}
-
 export default function DashboardPage() {
-  const [overview, setOverview] = useState<OverviewData | null>(null);
-  const [categories, setCategories] = useState<{ name: string; count: number }[]>([]);
-  const [volume, setVolume] = useState<{ date: string; count: number }[]>([]);
-  const [topSenders, setTopSenders] = useState<{ email: string; name: string; count: number }[]>([]);
+  const [overview, setOverview] = useState<any>(null);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [volume, setVolume] = useState<any[]>([]);
+  const [topSenders, setTopSenders] = useState<any[]>([]);
   const [heatmapData, setHeatmapData] = useState<number[][]>([]);
-  const [sentiment, setSentiment] = useState<Record<string, number>>({});
+  const [sentiment, setSentiment] = useState<any>({});
   const [loading, setLoading] = useState(true);
   const [volumePeriod, setVolumePeriod] = useState<"daily" | "weekly" | "monthly">("weekly");
 
-  useEffect(() => {
-    loadDashboardData();
-  }, []);
-
-  useEffect(() => {
-    analytics.volume(volumePeriod).then((data) => setVolume(data.volume)).catch(console.error);
-  }, [volumePeriod]);
+  useEffect(() => { loadDashboardData(); }, []);
+  useEffect(() => { analytics.volume(volumePeriod).then(d => setVolume(d.volume)).catch(console.error); }, [volumePeriod]);
 
   async function loadDashboardData() {
     try {
-      const [overviewData, catData, volData, senderData, heatData, sentData] =
-        await Promise.all([
-          analytics.overview(),
-          analytics.categories(),
-          analytics.volume("weekly"),
-          analytics.topSenders(8),
-          analytics.heatmap(),
-          analytics.sentiment(),
-        ]);
-
-      setOverview(overviewData);
-      setCategories(catData.categories);
-      setVolume(volData.volume);
-      setTopSenders(senderData.topSenders);
-      setHeatmapData(heatData.heatmap);
-      setSentiment(sentData.distribution);
-    } catch (error) {
-      console.error("Failed to load dashboard data:", error);
-    } finally {
-      setLoading(false);
-    }
+      const [o, c, v, s, h, se] = await Promise.all([
+        analytics.overview(), analytics.categories(), analytics.volume("weekly"),
+        analytics.topSenders(8), analytics.heatmap(), analytics.sentiment()
+      ]);
+      setOverview(o); setCategories(c.categories); setVolume(v.volume);
+      setTopSenders(s.topSenders); setHeatmapData(h.heatmap); setSentiment(se.distribution);
+    } catch {} finally { setLoading(false); }
   }
 
-  if (loading) {
-    return (
-      <div>
-        <h1 style={{ fontSize: "28px", fontWeight: 800, marginBottom: "28px", letterSpacing: "-0.02em" }}>
-          Dashboard
-        </h1>
-        {/* Skeleton stat cards */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px", marginBottom: "28px" }}>
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="skeleton" style={{ height: "120px" }} />
-          ))}
-        </div>
-        {/* Skeleton charts */}
-        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "16px" }}>
-          <div className="skeleton" style={{ height: "340px" }} />
-          <div className="skeleton" style={{ height: "340px" }} />
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <div className="brutal-text" style={{ fontSize: "32px" }}>INITIALIZING_DASHBOARD...</div>;
 
-  const STAT_CARDS = [
-    {
-      label: "Total Emails",
-      value: overview?.totalEmails?.toLocaleString() || "0",
-      icon: Mail,
-      color: "hsl(217 91% 60%)",
-      change: null,
-    },
-    {
-      label: "Today",
-      value: overview?.todayEmails?.toLocaleString() || "0",
-      icon: Calendar,
-      color: "hsl(142 71% 45%)",
-      change: null,
-    },
-    {
-      label: "Avg / Day",
-      value: overview?.avgPerDay?.toString() || "0",
-      icon: TrendingUp,
-      color: "hsl(280 65% 60%)",
-      change: null,
-    },
-    {
-      label: "Unread",
-      value: overview?.unreadCount?.toLocaleString() || "0",
-      icon: Eye,
-      color: "hsl(38 92% 50%)",
-      change: null,
-    },
+  const STATS = [
+    { label: "TOTAL", value: overview?.totalEmails || 0, icon: Mail },
+    { label: "TODAY", value: overview?.todayEmails || 0, icon: Calendar },
+    { label: "AVG/DAY", value: overview?.avgPerDay || 0, icon: TrendingUp },
+    { label: "UNREAD", value: overview?.unreadCount || 0, icon: Eye },
   ];
 
-  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
   const maxHeat = Math.max(...(heatmapData.flat() || [1]));
 
   return (
     <div>
-      <h1
-        style={{
-          fontSize: "28px",
-          fontWeight: 800,
-          marginBottom: "28px",
-          letterSpacing: "-0.02em",
-        }}
-      >
-        Dashboard
-      </h1>
+      <h1 className="brutal-text" style={{ fontSize: "40px", marginBottom: "32px", borderBottom: "4px solid #fff", paddingBottom: "16px" }}>OVERVIEW</h1>
 
-      {/* ========== Stat Cards ========== */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-          gap: "16px",
-          marginBottom: "28px",
-        }}
-      >
-        {STAT_CARDS.map((stat, i) => (
-          <div
-            key={stat.label}
-            className="stat-card"
-            style={{
-              opacity: 0,
-              animation: `fadeIn 0.4s ease-out ${i * 80}ms forwards`,
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                marginBottom: "16px",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "13px",
-                  fontWeight: 600,
-                  color: "var(--color-text-secondary)",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.05em",
-                }}
-              >
-                {stat.label}
-              </span>
-              <div
-                style={{
-                  width: "36px",
-                  height: "36px",
-                  borderRadius: "10px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  background: `${stat.color}15`,
-                }}
-              >
-                <stat.icon size={18} style={{ color: stat.color }} />
-              </div>
+      {/* Stats */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "24px", marginBottom: "40px" }}>
+        {STATS.map(s => (
+          <div key={s.label} className="brutal-card" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontFamily: "var(--font-mono)", fontWeight: "bold", fontSize: "16px" }}>[{s.label}]</span>
+              <s.icon size={24} style={{ color: "var(--color-accent)" }} />
             </div>
-            <div
-              style={{
-                fontSize: "32px",
-                fontWeight: 800,
-                letterSpacing: "-0.02em",
-                lineHeight: 1,
-              }}
-            >
-              {stat.value}
-            </div>
+            <div className="brutal-text" style={{ fontSize: "48px" }}>{s.value}</div>
           </div>
         ))}
       </div>
 
-      {/* ========== Charts Row 1 ========== */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "2fr 1fr",
-          gap: "16px",
-          marginBottom: "16px",
-        }}
-      >
-        {/* Email Volume Chart */}
-        <div className="chart-container">
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: "20px",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <Activity size={18} style={{ color: "var(--color-accent)" }} />
-              <h3 style={{ fontSize: "16px", fontWeight: 700 }}>
-                Email Volume
-              </h3>
-            </div>
-            <div style={{ display: "flex", gap: "4px" }}>
-              {(["daily", "weekly", "monthly"] as const).map((p) => (
-                <button
-                  key={p}
-                  onClick={() => setVolumePeriod(p)}
-                  style={{
-                    padding: "4px 12px",
-                    fontSize: "12px",
-                    fontWeight: 600,
-                    borderRadius: "6px",
-                    border: "none",
-                    cursor: "pointer",
-                    background:
-                      volumePeriod === p
-                        ? "hsl(217 91% 60% / 0.15)"
-                        : "transparent",
-                    color:
-                      volumePeriod === p
-                        ? "hsl(217 91% 70%)"
-                        : "var(--color-text-tertiary)",
-                    transition: "all 0.2s ease",
-                  }}
-                >
-                  {p}
-                </button>
+      {/* Charts Row 1 */}
+      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "24px", marginBottom: "24px" }}>
+        <div className="brutal-card">
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "24px", alignItems: "center" }}>
+            <h3 className="brutal-text" style={{ fontSize: "20px" }}>VOLUME_HISTORY</h3>
+            <div style={{ display: "flex", gap: "8px" }}>
+              {(["daily", "weekly", "monthly"] as const).map(p => (
+                <button key={p} onClick={() => setVolumePeriod(p)} className={volumePeriod === p ? "brutal-btn" : "brutal-btn-ghost"} style={{ padding: "4px 8px", fontSize: "12px" }}>{p}</button>
               ))}
             </div>
           </div>
           <ResponsiveContainer width="100%" height={260}>
             <AreaChart data={volume}>
-              <defs>
-                <linearGradient id="volumeGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(217 91% 60%)" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="hsl(217 91% 60%)" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 15% 18%)" />
-              <XAxis
-                dataKey="date"
-                tick={{ fontSize: 11, fill: "hsl(215 20% 50%)" }}
-                tickLine={false}
-                axisLine={{ stroke: "hsl(220 15% 18%)" }}
-              />
-              <YAxis
-                tick={{ fontSize: 11, fill: "hsl(215 20% 50%)" }}
-                tickLine={false}
-                axisLine={false}
-              />
-              <Tooltip
-                contentStyle={{
-                  background: "hsl(220 20% 14%)",
-                  border: "1px solid hsl(220 15% 22%)",
-                  borderRadius: "10px",
-                  fontSize: "13px",
-                  color: "hsl(210 40% 96%)",
-                }}
-              />
-              <Area
-                type="monotone"
-                dataKey="count"
-                stroke="hsl(217 91% 60%)"
-                strokeWidth={2}
-                fill="url(#volumeGradient)"
-              />
+              <CartesianGrid strokeDasharray="3 3" stroke="#444" />
+              <XAxis dataKey="date" stroke="#fff" tick={{ fontFamily: "var(--font-mono)", fill: "#fff", fontSize: 12 }} />
+              <YAxis stroke="#fff" tick={{ fontFamily: "var(--font-mono)", fill: "#fff", fontSize: 12 }} />
+              <Tooltip contentStyle={{ background: "#000", border: "2px solid #fff", borderRadius: 0, fontFamily: "var(--font-mono)", fontWeight: "bold" }} />
+              <Area type="step" dataKey="count" stroke="var(--color-accent)" strokeWidth={4} fill="var(--color-accent)" fillOpacity={0.2} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Category Donut */}
-        <div className="chart-container">
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              marginBottom: "20px",
-            }}
-          >
-            <PieChart size={18} style={{ color: "hsl(280 65% 60%)" }} />
-            <h3 style={{ fontSize: "16px", fontWeight: 700 }}>Categories</h3>
-          </div>
+        <div className="brutal-card">
+          <h3 className="brutal-text" style={{ fontSize: "20px", marginBottom: "24px" }}>CATEGORIES</h3>
           <ResponsiveContainer width="100%" height={180}>
             <RechartsPie>
-              <Pie
-                data={categories}
-                cx="50%"
-                cy="50%"
-                innerRadius={50}
-                outerRadius={80}
-                paddingAngle={2}
-                dataKey="count"
-              >
-                {categories.map((entry) => (
-                  <Cell
-                    key={entry.name}
-                    fill={CATEGORY_COLORS[entry.name] || "#6b7280"}
-                  />
-                ))}
+              <Pie data={categories} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="count" stroke="#000" strokeWidth={2}>
+                {categories.map(e => <Cell key={e.name} fill={CATEGORY_COLORS[e.name] || "#fff"} />)}
               </Pie>
-              <Tooltip
-                contentStyle={{
-                  background: "hsl(220 20% 14%)",
-                  border: "1px solid hsl(220 15% 22%)",
-                  borderRadius: "10px",
-                  fontSize: "12px",
-                  color: "hsl(210 40% 96%)",
-                }}
-              />
+              <Tooltip contentStyle={{ background: "#000", border: "2px solid #fff", borderRadius: 0, fontFamily: "var(--font-mono)" }} />
             </RechartsPie>
           </ResponsiveContainer>
-          {/* Legend */}
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "6px",
-              marginTop: "8px",
-            }}
-          >
-            {categories.slice(0, 6).map((cat) => (
-              <span
-                key={cat.name}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "4px",
-                  fontSize: "11px",
-                  color: "var(--color-text-secondary)",
-                }}
-              >
-                <span
-                  style={{
-                    width: "8px",
-                    height: "8px",
-                    borderRadius: "50%",
-                    background: CATEGORY_COLORS[cat.name] || "#6b7280",
-                  }}
-                />
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "16px" }}>
+            {categories.slice(0, 6).map(cat => (
+              <span key={cat.name} style={{ fontFamily: "var(--font-mono)", fontSize: "11px", fontWeight: "bold", background: CATEGORY_COLORS[cat.name] || "#fff", color: "#000", padding: "2px 6px" }}>
                 {cat.name}
               </span>
             ))}
@@ -396,237 +113,59 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ========== Charts Row 2 ========== */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "16px",
-          marginBottom: "16px",
-        }}
-      >
-        {/* Top Senders */}
-        <div className="chart-container">
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              marginBottom: "20px",
-            }}
-          >
-            <Users size={18} style={{ color: "hsl(142 71% 45%)" }} />
-            <h3 style={{ fontSize: "16px", fontWeight: 700 }}>Top Senders</h3>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            {topSenders.map((sender, i) => {
-              const maxCount = topSenders[0]?.count || 1;
+      {/* Charts Row 2 */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px", marginBottom: "24px" }}>
+        <div className="brutal-card">
+          <h3 className="brutal-text" style={{ fontSize: "20px", marginBottom: "24px" }}>TOP_SENDERS</h3>
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            {topSenders.map((s, i) => {
+              const max = topSenders[0]?.count || 1;
               return (
-                <div key={sender.email} style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                  <span
-                    style={{
-                      width: "24px",
-                      height: "24px",
-                      borderRadius: "50%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "11px",
-                      fontWeight: 700,
-                      background: "hsl(217 91% 60% / 0.12)",
-                      color: "hsl(217 91% 70%)",
-                      flexShrink: 0,
-                    }}
-                  >
-                    {i + 1}
-                  </span>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div
-                      style={{
-                        fontSize: "13px",
-                        fontWeight: 600,
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      {sender.name || sender.email}
-                    </div>
-                    <div
-                      style={{
-                        height: "4px",
-                        borderRadius: "2px",
-                        background: "var(--color-bg-tertiary)",
-                        marginTop: "4px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          height: "100%",
-                          borderRadius: "2px",
-                          background: `hsl(${217 - i * 15} 91% 60%)`,
-                          width: `${(sender.count / maxCount) * 100}%`,
-                          transition: "width 0.5s ease",
-                        }}
-                      />
+                <div key={s.email} style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                  <span style={{ fontFamily: "var(--font-mono)", fontWeight: "bold", width: "24px" }}>{i+1}.</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontFamily: "var(--font-mono)", fontSize: "14px", fontWeight: "bold", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{s.name || s.email}</div>
+                    <div style={{ height: "8px", background: "#333", border: "1px solid #fff", marginTop: "4px" }}>
+                      <div style={{ height: "100%", width: `${(s.count / max) * 100}%`, background: "var(--color-accent)" }} />
                     </div>
                   </div>
-                  <span
-                    style={{
-                      fontSize: "12px",
-                      fontWeight: 700,
-                      color: "var(--color-text-secondary)",
-                      fontFamily: "var(--font-mono)",
-                    }}
-                  >
-                    {sender.count}
-                  </span>
+                  <span style={{ fontFamily: "var(--font-mono)", fontWeight: "bold" }}>[{s.count}]</span>
                 </div>
               );
             })}
-            {topSenders.length === 0 && (
-              <p style={{ fontSize: "13px", color: "var(--color-text-tertiary)", textAlign: "center", padding: "20px 0" }}>
-                No data yet. Sync your inbox to see top senders.
-              </p>
-            )}
           </div>
         </div>
 
-        {/* Activity Heatmap */}
-        <div className="chart-container">
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              marginBottom: "20px",
-            }}
-          >
-            <Clock size={18} style={{ color: "hsl(25 95% 55%)" }} />
-            <h3 style={{ fontSize: "16px", fontWeight: 700 }}>
-              Activity Heatmap
-            </h3>
-          </div>
-          <div style={{ overflowX: "auto" }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: "3px" }}>
-              {days.map((day, dayIdx) => (
-                <div key={day} style={{ display: "flex", alignItems: "center", gap: "3px" }}>
-                  <span
-                    style={{
-                      width: "32px",
-                      fontSize: "11px",
-                      color: "var(--color-text-tertiary)",
-                      fontWeight: 500,
-                      textAlign: "right",
-                      paddingRight: "4px",
-                    }}
-                  >
-                    {day}
-                  </span>
-                  {Array.from({ length: 24 }, (_, hour) => {
-                    const value = heatmapData[dayIdx]?.[hour] || 0;
-                    const intensity = maxHeat > 0 ? value / maxHeat : 0;
-                    return (
-                      <div
-                        key={hour}
-                        title={`${day} ${hour}:00 — ${value} emails`}
-                        style={{
-                          width: "16px",
-                          height: "16px",
-                          borderRadius: "3px",
-                          background:
-                            intensity === 0
-                              ? "var(--color-bg-tertiary)"
-                              : `hsl(217 91% 60% / ${0.1 + intensity * 0.8})`,
-                          transition: "all 0.2s ease",
-                          cursor: "pointer",
-                        }}
-                      />
-                    );
-                  })}
-                </div>
-              ))}
-              {/* Hour labels */}
-              <div style={{ display: "flex", alignItems: "center", gap: "3px" }}>
-                <span style={{ width: "32px" }} />
-                {Array.from({ length: 24 }, (_, hour) => (
-                  <span
-                    key={hour}
-                    style={{
-                      width: "16px",
-                      fontSize: "8px",
-                      textAlign: "center",
-                      color: "var(--color-text-tertiary)",
-                    }}
-                  >
-                    {hour % 6 === 0 ? hour : ""}
-                  </span>
-                ))}
+        <div className="brutal-card">
+          <h3 className="brutal-text" style={{ fontSize: "20px", marginBottom: "24px" }}>ACTIVITY_HEATMAP</h3>
+          <div style={{ display: "flex", flexDirection: "column", gap: "4px", fontFamily: "var(--font-mono)" }}>
+            {days.map((day, dIdx) => (
+              <div key={day} style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                <span style={{ width: "32px", fontSize: "12px", fontWeight: "bold" }}>{day}</span>
+                {Array.from({ length: 24 }, (_, h) => {
+                  const val = heatmapData[dIdx]?.[h] || 0;
+                  const int = maxHeat > 0 ? val / maxHeat : 0;
+                  return (
+                    <div key={h} title={`${day} ${h}:00 - ${val}`} style={{ width: "16px", height: "16px", border: "1px solid #333", background: int === 0 ? "transparent" : `rgba(0, 255, 65, ${0.2 + int * 0.8})` }} />
+                  );
+                })}
               </div>
-            </div>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* ========== Sentiment Row ========== */}
-      <div className="chart-container">
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            marginBottom: "20px",
-          }}
-        >
-          <BarChart3 size={18} style={{ color: "hsl(160 60% 50%)" }} />
-          <h3 style={{ fontSize: "16px", fontWeight: 700 }}>
-            Sentiment Overview
-          </h3>
-        </div>
-        <div
-          style={{
-            display: "flex",
-            gap: "24px",
-            justifyContent: "center",
-          }}
-        >
+      <div className="brutal-card">
+        <h3 className="brutal-text" style={{ fontSize: "20px", marginBottom: "24px" }}>SENTIMENT_ANALYSIS</h3>
+        <div style={{ display: "flex", gap: "24px", justifyContent: "center" }}>
           {[
-            { key: "positive", label: "Positive", color: "hsl(142 71% 45%)", icon: ArrowUpRight },
-            { key: "neutral", label: "Neutral", color: "hsl(215 20% 55%)", icon: Activity },
-            { key: "negative", label: "Negative", color: "hsl(0 84% 60%)", icon: ArrowDownRight },
-          ].map((s) => (
-            <div
-              key={s.key}
-              style={{
-                textAlign: "center",
-                padding: "20px 32px",
-                background: `${s.color}08`,
-                borderRadius: "var(--radius-lg)",
-                border: `1px solid ${s.color}20`,
-              }}
-            >
-              <s.icon size={20} style={{ color: s.color, marginBottom: "8px" }} />
-              <div
-                style={{
-                  fontSize: "28px",
-                  fontWeight: 800,
-                  color: s.color,
-                  marginBottom: "4px",
-                }}
-              >
-                {sentiment[s.key] || 0}
-              </div>
-              <div
-                style={{
-                  fontSize: "12px",
-                  color: "var(--color-text-tertiary)",
-                  fontWeight: 600,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.05em",
-                }}
-              >
-                {s.label}
-              </div>
+            { k: "positive", l: "POSITIVE", c: "var(--color-success)" },
+            { k: "neutral", l: "NEUTRAL", c: "#fff" },
+            { k: "negative", l: "NEGATIVE", c: "var(--color-danger)" }
+          ].map(s => (
+            <div key={s.k} style={{ padding: "24px 48px", border: `4px solid ${s.c}`, background: "#000", textAlign: "center", boxShadow: `4px 4px 0px 0px ${s.c}` }}>
+              <div className="brutal-text" style={{ fontSize: "40px", color: s.c }}>{sentiment[s.k] || 0}</div>
+              <div style={{ fontFamily: "var(--font-mono)", fontWeight: "bold", color: s.c }}>[{s.l}]</div>
             </div>
           ))}
         </div>
