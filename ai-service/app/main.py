@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.db.pgvector import close_vector_store
-from app.routes import classify, embed, rag, health, process
+from app.routes import classify, embed, rag, health, process, search
 
 
 @asynccontextmanager
@@ -36,6 +36,7 @@ app.include_router(classify.router)
 app.include_router(embed.router)
 app.include_router(rag.router)
 app.include_router(process.router)
+app.include_router(search.router)
 
 
 @app.get("/")

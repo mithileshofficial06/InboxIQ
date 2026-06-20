@@ -15,6 +15,7 @@ import analyticsRoutes from './routes/analytics.routes';
 import peopleRoutes from './routes/people.routes';
 import jobsRoutes from './routes/jobs.routes';
 import subsRoutes from './routes/subs.routes';
+import searchRoutes from './routes/search.routes';
 
 // Validate environment variables at startup
 validateEnvironment();
@@ -63,6 +64,7 @@ app.use('/analytics', analyticsRoutes);
 app.use('/people', peopleRoutes);
 app.use('/jobs', jobsRoutes);
 app.use('/subs', subsRoutes);
+app.use('/search', searchRoutes);
 
 // ====================
 // 404 Handler

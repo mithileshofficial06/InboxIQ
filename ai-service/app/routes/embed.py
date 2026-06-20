@@ -1,10 +1,21 @@
 from fastapi import APIRouter
 from app.models.schemas import EmbedRequest, BatchEmbedRequest
 from app.services.chunker import chunk_email
-from app.services.embeddings import generate_embedding
+from app.services.embeddings import generate_embedding, generate_query_embedding
 from app.db.pgvector import get_vector_store
+from pydantic import BaseModel
 
 router = APIRouter(prefix="/ai/embed", tags=["embeddings"])
+
+
+class QueryEmbedRequest(BaseModel):
+    query: str
+
+
+class QueryEmbedResponse(BaseModel):
+    query: str
+    embedding: list[float]
+    dimension: int
 
 
 @router.post("/")
@@ -76,3 +87,15 @@ async def embed_batch(request: BatchEmbedRequest):
             })
 
     return {"results": results}
+
+
+@router.post("/query", response_model=QueryEmbedResponse)
+async def embed_query(request: QueryEmbedRequest):
+    """Generate embedding for a search query."""
+    embedding = await generate_query_embedding(request.query)
+    
+    return {
+        "query": request.query,
+        "embedding": embedding,
+        "dimension": len(embedding),
+    }

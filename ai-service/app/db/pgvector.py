@@ -52,32 +52,59 @@ class PgVectorStore:
         query_embedding: List[float],
         user_id: str,
         top_k: int = 20,
+        category: Optional[str] = None,
+        date_from: Optional[str] = None,
+        date_to: Optional[str] = None,
     ) -> List[Dict]:
         """
         Find the top-k most similar email chunks using pgvector HNSW index.
         Returns chunks with similarity scores and email metadata.
+        Supports filtering by category and date range.
         """
+        # Build dynamic WHERE clause
+        where_conditions = ["emb.user_id = %s"]
+        params = [user_id]
+        
+        if category:
+            where_conditions.append("e.category = %s")
+            params.append(category)
+        
+        if date_from:
+            where_conditions.append("e.received_at >= %s")
+            params.append(date_from)
+        
+        if date_to:
+            where_conditions.append("e.received_at <= %s")
+            params.append(date_to)
+        
+        where_clause = " AND ".join(where_conditions)
+        
         async with self.conn.cursor() as cur:
-            await cur.execute(
-                """
+            query = f"""
                 SELECT 
                     ec.id as chunk_id,
                     ec.email_id,
                     ec.chunk_text,
                     ec.chunk_index,
                     e.subject,
+                    e.sender_name,
                     e.sender_email,
-                    e.date,
-                    1 - (emb.embedding <=> %s::vector) as similarity_score
+                    e.received_at,
+                    e.category,
+                    e.sentiment,
+                    1 - (emb.embedding <=> %s::vector) as similarity
                 FROM embeddings emb
                 JOIN email_chunks ec ON emb.chunk_id = ec.id
                 JOIN emails e ON ec.email_id = e.id
-                WHERE emb.user_id = %s
+                WHERE {where_clause}
                 ORDER BY emb.embedding <=> %s::vector
                 LIMIT %s
-                """,
-                (str(query_embedding), user_id, str(query_embedding), top_k),
-            )
+            """
+            
+            # Parameters: [user_id, ...filters, query_embedding, query_embedding, top_k]
+            all_params = params + [str(query_embedding), str(query_embedding), top_k]
+            
+            await cur.execute(query, all_params)
             rows = await cur.fetchall()
 
             results = []
@@ -88,9 +115,12 @@ class PgVectorStore:
                     "chunk_text": row[2],
                     "chunk_index": row[3],
                     "subject": row[4],
-                    "sender_email": row[5],
-                    "date": str(row[6]) if row[6] else None,
-                    "similarity_score": float(row[7]),
+                    "sender_name": row[5],
+                    "sender_email": row[6],
+                    "received_at": str(row[7]) if row[7] else None,
+                    "category": row[8],
+                    "sentiment": row[9],
+                    "similarity": float(row[10]),
                 })
 
             return results
