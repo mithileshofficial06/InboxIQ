@@ -132,24 +132,24 @@ export default function DashboardPage() {
     <div style={{ paddingBottom: 48 }}>
 
       {/* ── Page Header ── */}
-      <div className="animate-fade-in" style={{ marginBottom: 32 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 700, color: "#1c1917", marginBottom: 4 }}>
+      <div className="reveal-up stagger-1" style={{ marginBottom: 32 }}>
+        <h1 style={{ fontSize: 28, fontWeight: 700, color: "#1c1917", marginBottom: 6, letterSpacing: "-0.02em" }}>
           Dashboard Overview
         </h1>
-        <p style={{ fontSize: 13, color: "#a8a29e", display: "flex", alignItems: "center", gap: 6, margin: 0 }}>
-          <Clock size={13} />
+        <p style={{ fontSize: 14, color: "#a8a29e", display: "flex", alignItems: "center", gap: 6, margin: 0 }}>
+          <Clock size={14} />
           Last synced: {lastSyncedText}
           {syncing && (
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 4, color: "#c99a5c" }}>
-              <RefreshCcw size={12} className="animate-spin" /> Syncing…
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 4, color: "#c99a5c", fontWeight: 500 }}>
+              <RefreshCcw size={13} className="spin-slow" /> Syncing…
             </span>
           )}
         </p>
       </div>
 
       {/* ── Stat Cards ── */}
-      <div className="animate-fade-in-up delay-100" style={{
-        display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 24, marginBottom: 24,
+      <div className="reveal-up stagger-2" style={{
+        display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 24, marginBottom: 32,
       }}>
 
         {/* Total Emails */}

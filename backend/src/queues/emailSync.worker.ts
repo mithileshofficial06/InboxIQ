@@ -16,6 +16,14 @@ async function processSync(job: Job<SyncJobData>): Promise<void> {
 
   console.log(`[Sync Worker] Starting ${type} for user ${userId}`);
 
+  // Get current last_sync_at before updating
+  const { data: currentUser } = await supabase
+    .from('users')
+    .select('last_sync_at')
+    .eq('id', userId)
+    .single();
+  const previousSyncAt = currentUser?.last_sync_at;
+
   // Update user sync status
   await supabase
     .from('users')
@@ -33,19 +41,11 @@ async function processSync(job: Job<SyncJobData>): Promise<void> {
     const startTime = Date.now();
 
     // For incremental sync, only fetch emails after last sync
-    if (type === 'incremental-sync') {
-      const { data: user } = await supabase
-        .from('users')
-        .select('last_sync_at')
-        .eq('id', userId)
-        .single();
-
-      if (user?.last_sync_at) {
-        const afterDate = new Date(user.last_sync_at);
-        // Gmail API expects Unix timestamp in seconds
-        query = `after:${Math.floor(afterDate.getTime() / 1000)}`;
-        console.log(`[Sync Worker] Incremental sync query: ${query}`);
-      }
+    if (type === 'incremental-sync' && previousSyncAt) {
+      const afterDate = new Date(previousSyncAt);
+      // Gmail API expects Unix timestamp in seconds
+      query = `after:${Math.floor(afterDate.getTime() / 1000)}`;
+      console.log(`[Sync Worker] Incremental sync query: ${query}`);
     }
 
     // Paginate through all emails in batches of 100
