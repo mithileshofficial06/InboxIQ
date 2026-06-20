@@ -26,10 +26,39 @@ const app = express();
 // Middleware
 // ====================
 app.use(helmet());
-app.use(cors({
-  origin: config.frontendUrl,
+
+// CORS configuration - allow multiple origins in development
+const corsOptions = {
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    // Allow requests with no origin (like mobile apps, Postman, curl)
+    if (!origin) return callback(null, true);
+    
+    // In development, allow localhost and local network IPs
+    if (config.nodeEnv === 'development') {
+      const allowedOrigins = [
+        'http://localhost:3000',
+        'http://127.0.0.1:3000',
+        /^http:\/\/192\.168\.\d{1,3}\.\d{1,3}:3000$/, // Local network
+        /^http:\/\/10\.\d{1,3}\.\d{1,3}\.\d{1,3}:3000$/, // Local network
+      ];
+      
+      const isAllowed = allowedOrigins.some(allowed => {
+        if (typeof allowed === 'string') return origin === allowed;
+        return allowed.test(origin);
+      });
+      
+      if (isAllowed) return callback(null, true);
+    } else {
+      // In production, only allow configured frontend URL
+      if (origin === config.frontendUrl) return callback(null, true);
+    }
+    
+    callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
-}));
+};
+
+app.use(cors(corsOptions));
 app.use(morgan('dev'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));

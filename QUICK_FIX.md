@@ -1,161 +1,82 @@
-# 🚨 Quick Fix Guide
+# QUICK FIX - "Failed to Fetch" Error
 
-## Error: "Cannot find module 'axios'" and "EADDRINUSE port 3001"
+## The Problem
+Frontend shows: `TypeError: Failed to fetch`
 
-### Solution (Choose One):
+## The Solution (90% of cases)
 
----
+### Option 1: Hard Refresh Browser ⚡
+1. Press **Ctrl + Shift + R**
+2. Wait 5 seconds
+3. Try again
 
-## ✅ Option 1: Use the Fix Script (Recommended)
+### Option 2: Clear Cache & Restart 🔄
+1. Press **Ctrl + Shift + Delete**
+2. Select "All time" 
+3. Clear all data
+4. Close browser completely
+5. Reopen and go to http://localhost:3000
 
-**Just run this in your backend folder**:
+### Option 3: Verify Backend is Running ✅
+```bash
+curl -UseBasicParsing http://localhost:3001/health
+```
+
+If this fails, backend is not running:
 ```bash
 cd backend
-fix-and-start.bat
-```
-
-This will:
-1. Kill any process using port 3001
-2. Install all dependencies (including axios)
-3. Start the backend server
-
----
-
-## ✅ Option 2: Manual Steps
-
-### Step 1: Kill process on port 3001
-```bash
-# Find the process
-netstat -ano | findstr :3001
-
-# Kill it (replace PID with the number you see)
-taskkill /F /PID <PID>
-```
-
-### Step 2: Reinstall dependencies
-```bash
-cd backend
-npm install
-```
-
-### Step 3: Start backend
-```bash
 npm run dev
 ```
 
 ---
 
-## ✅ Option 3: Complete Fresh Install
+## Root Causes Fixed
 
-If still having issues:
+✅ **CORS Updated**: Backend now accepts requests from:
+- http://localhost:3000
+- http://127.0.0.1:3000
+- http://192.168.x.x:3000 (local network)
 
-```bash
-cd backend
+✅ **Session Persistence**: Token no longer cleared on network errors
 
-# Delete node_modules and package-lock
-rmdir /s /q node_modules
-del package-lock.json
+✅ **Rate Limiting**: Increased to 1000 requests/minute
 
-# Reinstall everything
-npm install
-
-# Start backend
-npm run dev
-```
+✅ **Email Sync Limit**: Set to 200 emails for testing
 
 ---
 
-## Expected Output
+## If Still Not Working
 
-When backend starts successfully, you should see:
-
-```
-╔══════════════════════════════════════════╗
-║        InboxIQ Backend API               ║
-║        Port: 3001                        ║
-║        Env: development                  ║
-╚══════════════════════════════════════════╝
-
-[Sync Worker] Worker started - Concurrency: 2
-```
+1. **Test API Connection**: http://localhost:3000/api-test
+2. **Read Full Guide**: `TROUBLESHOOTING.md`
+3. **Restart All Services**: Follow `START_ALL.md`
 
 ---
 
-## Test Backend is Running
+## Services Required
 
-Open in browser or run:
-```bash
-curl http://localhost:3001/health
-```
+| Service | Status | Command |
+|---------|--------|---------|
+| Backend | ✅ RUNNING | `cd backend && npm run dev` |
+| AI Service | ❌ NEEDS START | `cd ai-service && uvicorn app.main:app --reload` |
+| Frontend | ✅ RUNNING | Already running |
 
-Expected response:
-```json
-{"status":"ok","service":"inboxiq-backend","timestamp":"..."}
-```
+**YOU NEED TO START AI SERVICE** for email sync to work!
 
 ---
 
-## Still Having Issues?
+## Expected Behavior After Fix
 
-### 1. Check Node.js version
-```bash
-node --version
-# Should be v18+ or v20+
-```
-
-### 2. Check if port is really free
-```bash
-netstat -ano | findstr :3001
-# Should return nothing
-```
-
-### 3. Try a different port temporarily
-```bash
-# Edit backend/.env
-PORT=3002
-
-# Edit frontend/.env.local
-NEXT_PUBLIC_API_URL=http://localhost:3002
-
-# Restart both services
-```
+1. Login works ✅
+2. Dashboard loads ✅
+3. Session persists on refresh ✅
+4. Can click "Sync Emails" (starts 200 email sync)
+5. Sync completes in 5-10 minutes
 
 ---
 
-## What Causes These Errors?
+## Next Steps
 
-### "Cannot find module 'axios'"
-- **Cause**: node_modules not synced with package.json
-- **Fix**: `npm install`
-
-### "EADDRINUSE port 3001"
-- **Cause**: Another process is using port 3001 (usually a previous instance that didn't close)
-- **Fix**: Kill the process or use different port
-
----
-
-## Quick Commands Cheat Sheet
-
-```bash
-# Install dependencies
-npm install
-
-# Start backend (development)
-npm run dev
-
-# Build for production
-npm run build
-
-# Start production server
-npm start
-
-# Check what's using port 3001
-netstat -ano | findstr :3001
-
-# Kill process by PID
-taskkill /F /PID <PID>
-```
-
----
-
-**After fixing, proceed to login at http://localhost:3000** 🚀
+1. Hard refresh browser (**Ctrl + Shift + R**)
+2. If works → Start AI service → Click "Sync Emails"
+3. If not → Read `TROUBLESHOOTING.md`

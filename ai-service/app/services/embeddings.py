@@ -3,7 +3,7 @@ from typing import List
 from app.config import get_settings
 
 
-async def generate_embedding(text: str) -> List[float]:
+async def generate_embedding(text: str, input_type: str = "passage") -> List[float]:
     """
     Generate a vector embedding for a single text using NVIDIA NIM Embeddings API.
     Returns a list of floats (1024 dimensions for nv-embedqa-e5-v5).
@@ -19,7 +19,8 @@ async def generate_embedding(text: str) -> List[float]:
     response = client.embeddings.create(
         model=settings.embedding_model,
         input=text,
-        encoding_format="float"
+        encoding_format="float",
+        extra_body={"input_type": input_type}
     )
 
     return response.data[0].embedding
@@ -30,7 +31,7 @@ async def generate_query_embedding(text: str) -> List[float]:
     Generate embedding for a search query.
     Uses the same model as document embeddings.
     """
-    return await generate_embedding(text)
+    return await generate_embedding(text, input_type="query")
 
 
 async def batch_embed(texts: List[str]) -> List[List[float]]:
