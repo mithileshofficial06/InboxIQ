@@ -49,7 +49,16 @@ async function processSync(job: Job<SyncJobData>): Promise<void> {
     }
 
     // Paginate through all emails in batches of 100
+    // LIMIT: Only sync first 200 emails for testing
+    const MAX_EMAILS_TO_SYNC = 200;
+    
     do {
+      // Stop if we've reached the limit
+      if (totalFetched >= MAX_EMAILS_TO_SYNC) {
+        console.log(`[Sync Worker] Reached limit of ${MAX_EMAILS_TO_SYNC} emails, stopping sync`);
+        break;
+      }
+      
       // Fetch batch of message IDs
       const { messageIds, nextPageToken } = await fetchEmailIds(
         userId,
