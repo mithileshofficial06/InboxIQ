@@ -217,8 +217,8 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Charts Row ── */}
-      <div className="animate-fade-in-up delay-200" style={{
-        display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 24,
+      <div className="reveal-up stagger-3" style={{
+        display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 32,
       }}>
 
         {/* Category Breakdown */}
@@ -366,9 +366,9 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Most Active Senders ── */}
-      <div className="dash-section-card animate-fade-in-up delay-300">
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-          <h3 style={{ fontSize: 15, fontWeight: 600, color: "#1c1917" }}>
+      <div className="dash-section-card reveal-up stagger-4">
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+          <h3 style={{ fontSize: 16, fontWeight: 600, color: "#1c1917", letterSpacing: "-0.01em" }}>
             Most Active Senders
           </h3>
           <Link href="/dashboard/people" className="dash-view-all-link">

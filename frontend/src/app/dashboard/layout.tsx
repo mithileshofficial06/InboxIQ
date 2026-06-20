@@ -192,10 +192,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </aside>
 
       {/* ── Main Content Area ── */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", height: "100vh", overflow: "hidden" }}>
+      <div className="topo-background" style={{ flex: 1, display: "flex", flexDirection: "column", height: "100vh", overflow: "hidden" }}>
 
         {/* Topbar */}
         <header className="animate-fade-in" style={{
+          position: "relative", zIndex: 10,
           padding: "14px 32px", display: "flex", alignItems: "center",
           justifyContent: "flex-end", gap: 16,
           background: "#ffffff", borderBottom: "1px solid #e5e2db",
@@ -221,7 +222,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </header>
 
         {/* Page Content */}
-        <main style={{ flex: 1, padding: 32, overflowY: "auto" }}>
+        <main style={{ flex: 1, padding: 32, overflowY: "auto", position: "relative", zIndex: 1 }}>
           <div style={{ maxWidth: 1200, margin: "0 auto" }}>
             {children}
           </div>

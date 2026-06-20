@@ -138,27 +138,29 @@ export default function SearchPage() {
   };
 
   return (
-    <div className="min-h-screen bg-stone-50 p-6 sm:p-8">
+    <div className="min-h-screen bg-stone-50 p-6 sm:p-8 smooth-scroll">
       {/* Header */}
-      <div className="max-w-5xl mx-auto mb-8">
-        <div className="flex items-center gap-3 mb-2">
-          <Sparkles className="w-8 h-8 text-stone-900" />
-          <h1 className="text-3xl font-bold text-stone-900 tracking-tight">Semantic Search</h1>
+      <div className="max-w-5xl mx-auto mb-10 reveal-up">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-stone-900 to-stone-700 flex items-center justify-center float-gentle">
+            <Sparkles className="w-6 h-6 text-white" />
+          </div>
+          <h1 className="text-4xl font-bold text-stone-900 tracking-tight">Semantic Search</h1>
         </div>
-        <p className="text-stone-600">Search your emails using natural language</p>
+        <p className="text-stone-600 text-lg">Ask questions using natural language and find relevant emails instantly</p>
       </div>
 
       {/* Search Bar */}
-      <div className="max-w-5xl mx-auto mb-6">
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400" />
+      <div className="max-w-5xl mx-auto mb-8 reveal-up stagger-1">
+        <div className="relative hover-glow">
+          <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400" />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Ask anything about your emails..."
-            className="w-full pl-12 pr-32 py-4 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-stone-900 focus:border-transparent text-lg"
+            className="w-full pl-14 pr-36 py-5 rounded-2xl border-2 border-stone-300 focus:outline-none focus:ring-2 focus:ring-stone-900 focus:border-transparent text-lg bg-white shadow-sm transition-all"
           />
           <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
             <button
@@ -175,7 +177,7 @@ export default function SearchPage() {
             <button
               onClick={performSearch}
               disabled={loading || !query.trim()}
-              className="px-5 py-2 bg-stone-900 text-white rounded-lg hover:bg-stone-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+              className="px-6 py-2.5 bg-stone-900 text-white rounded-xl hover:bg-stone-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 font-medium btn-shine"
             >
               {loading ? (
                 <>
@@ -262,7 +264,7 @@ export default function SearchPage() {
               <button
                 key={idx}
                 onClick={() => handleSuggestionClick(suggestion)}
-                className="px-4 py-2 bg-white text-stone-700 rounded-lg border border-stone-200 hover:border-stone-900 hover:bg-stone-50 transition-colors text-sm"
+                className="px-5 py-3 bg-white text-stone-700 rounded-xl border-2 border-stone-200 hover:border-stone-900 hover:bg-stone-50 transition-all text-sm font-medium hover-lift"
               >
                 {suggestion}
               </button>
@@ -298,7 +300,7 @@ export default function SearchPage() {
             {results.map((result, idx) => (
               <div
                 key={idx}
-                className="bg-white rounded-lg p-6 border border-stone-200 hover:border-stone-900 hover:shadow-md transition-all cursor-pointer"
+                className="bg-white rounded-2xl p-6 border-2 border-stone-200 card-interactive"
                 onClick={() => setSelectedEmail(result.emailId)}
               >
                 {/* Header */}

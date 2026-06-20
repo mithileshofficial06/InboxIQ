@@ -60,6 +60,35 @@ body::before {
   background-size: 200px 200px;
 }
 
+/* Topographic Animated Background */
+.topo-background {
+  position: relative;
+  overflow: hidden;
+}
+
+.topo-background::before {
+  content: '';
+  position: absolute;
+  top: -100px;
+  left: -100px;
+  right: -100px;
+  bottom: -100px;
+  width: calc(100% + 200px);
+  height: calc(100% + 200px);
+  background-image: url('/topo.svg');
+  background-repeat: repeat;
+  background-size: 800px 800px;
+  opacity: 0.8;
+  z-index: 0;
+  pointer-events: none;
+  animation: topo-pan 90s linear infinite;
+}
+
+@keyframes topo-pan {
+  0% { background-position: 0px 0px; }
+  100% { background-position: -800px -800px; }
+}
+
 .mesh-gradient { display: none; }
 
 /* ============ Scrollbar ============ */

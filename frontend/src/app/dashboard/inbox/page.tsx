@@ -339,7 +339,7 @@ export default function InboxExplorerPage() {
                 <div
                   key={email.id}
                   onClick={() => openEmailDetail(email)}
-                  className="bg-white border border-stone-200 rounded-xl p-5 hover:shadow-lg transition-all cursor-pointer group"
+                  className="bg-white border border-stone-200 rounded-xl p-6 card-interactive"
                 >
                   {/* Header */}
                   <div className="flex items-start justify-between mb-4">
