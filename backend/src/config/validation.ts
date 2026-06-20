@@ -1,29 +1,57 @@
+import { config } from './index';
+
 /**
- * Environment Variable Validation
- * Ensures all required credentials are present at startup
+ * Validates that all required environment variables are set
  */
-
 export function validateEnvironment(): void {
-  const required = [
-    'GOOGLE_CLIENT_ID',
-    'GOOGLE_CLIENT_SECRET',
-    'SUPABASE_URL',
-    'SUPABASE_ANON_KEY',
-    'SUPABASE_SERVICE_ROLE_KEY',
-    'REDIS_HOST',
-    'REDIS_PASSWORD',
-    'JWT_SECRET',
-    'GEMINI_API_KEY',
-  ];
+  const errors: string[] = [];
 
-  const missing = required.filter(key => !process.env[key]);
-
-  if (missing.length > 0) {
-    console.error('❌ Missing required environment variables:');
-    missing.forEach(key => console.error(`   - ${key}`));
-    console.error('\n📝 Copy .env.example to .env and fill in your credentials');
-    process.exit(1);
+  // Google OAuth
+  if (!config.google.clientId) {
+    errors.push('GOOGLE_CLIENT_ID is required');
+  }
+  if (!config.google.clientSecret) {
+    errors.push('GOOGLE_CLIENT_SECRET is required');
   }
 
-  console.log('✅ All required environment variables are set');
+  // Supabase
+  if (!config.supabase.url) {
+    errors.push('SUPABASE_URL is required');
+  }
+  if (!config.supabase.anonKey) {
+    errors.push('SUPABASE_ANON_KEY is required');
+  }
+
+  // Redis
+  if (!config.redis.host) {
+    errors.push('REDIS_HOST is required');
+  }
+
+  // JWT
+  if (config.jwt.secret === 'dev-secret-change-this' && config.nodeEnv === 'production') {
+    errors.push('JWT_SECRET must be set in production');
+  }
+
+  // AI Service
+  if (!config.aiServiceUrl) {
+    errors.push('AI_SERVICE_URL is required');
+  }
+
+  // Gemini
+  if (!config.geminiApiKey) {
+    errors.push('GEMINI_API_KEY is required');
+  }
+
+  if (errors.length > 0) {
+    console.error('[Config] Environment validation failed:');
+    errors.forEach((err) => console.error(`  ❌ ${err}`));
+    
+    if (config.nodeEnv === 'production') {
+      throw new Error('Environment validation failed');
+    } else {
+      console.warn('[Config] Running in development mode with missing variables');
+    }
+  } else {
+    console.log('[Config] ✅ All required environment variables are set');
+  }
 }

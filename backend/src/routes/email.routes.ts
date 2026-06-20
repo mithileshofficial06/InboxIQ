@@ -155,7 +155,7 @@ router.post('/sync', async (req: AuthRequest, res: Response) => {
 
 /**
  * GET /emails/sync/status
- * Get current sync status
+ * Get current sync status with detailed progress
  */
 router.get('/sync/status', async (req: AuthRequest, res: Response) => {
   try {
@@ -171,10 +171,46 @@ router.get('/sync/status', async (req: AuthRequest, res: Response) => {
       return;
     }
 
+    // Get total emails count
+    const { count: totalEmails } = await supabase
+      .from('emails')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', req.userId!);
+
+    // Get unprocessed (not yet classified/embedded) emails
+    const { count: unprocessedCount } = await supabase
+      .from('emails')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', req.userId!)
+      .eq('is_processed', false);
+
+    // Get categorized emails for breakdown
+    const { data: categoryBreakdown } = await supabase
+      .from('emails')
+      .select('category')
+      .eq('user_id', req.userId!)
+      .is('category', 'NOT NULL');
+
+    const categories: Record<string, number> = {};
+    categoryBreakdown?.forEach((email) => {
+      categories[email.category] = (categories[email.category] || 0) + 1;
+    });
+
+    const processingPercentage = totalEmails && totalEmails > 0
+      ? Math.round(((totalEmails - (unprocessedCount || 0)) / totalEmails) * 100)
+      : 0;
+
     res.json({
       status: user.sync_status,
       lastSyncAt: user.last_sync_at,
       totalEmailsSynced: user.total_emails_synced,
+      stats: {
+        totalEmails: totalEmails || 0,
+        processedEmails: (totalEmails || 0) - (unprocessedCount || 0),
+        unprocessedEmails: unprocessedCount || 0,
+        processingPercentage,
+      },
+      categories,
     });
   } catch (error) {
     console.error('[Emails] Sync status error:', error);

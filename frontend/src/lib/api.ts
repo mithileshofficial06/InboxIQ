@@ -75,6 +75,7 @@ export const analytics = {
   sentiment: () => fetchAPI('/analytics/sentiment'),
   topSenders: (limit: number = 10) => fetchAPI(`/analytics/top-senders?limit=${limit}`),
   heatmap: () => fetchAPI('/analytics/heatmap'),
+  syncStatus: () => fetchAPI('/emails/sync/status'),
 };
 
 // ============ People ============

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { LayoutDashboard, Inbox, MessageSquare, Users, Briefcase, Bell, Sparkles, Mail, LogOut, RefreshCw } from "lucide-react";
 import { auth, emails } from "@/lib/api";
 import toast from "react-hot-toast";
+import { SyncIndicator } from "@/components/SyncIndicator";
 
 const NAV_ITEMS = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Overview" },
@@ -110,6 +111,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </main>
       </div>
+      <SyncIndicator />
     </div>
   );
 }
