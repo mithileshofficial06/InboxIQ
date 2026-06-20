@@ -102,7 +102,7 @@ export function SyncIndicator() {
               .slice(0, 4)
               .map(([category, count]) => (
                 <div key={category}>
-                  {category}: <span className="font-medium">{count}</span>
+                  {category}: <span className="font-medium">{String(count)}</span>
                 </div>
               ))}
           </div>
