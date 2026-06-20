@@ -5,7 +5,7 @@ import { emails as emailsApi } from "@/lib/api";
 import {
   Mail,
   Search,
-  Filter,
+  SlidersHorizontal,
   Grid,
   List,
   Calendar,
@@ -19,6 +19,8 @@ import {
   User,
   Tag,
   Paperclip,
+  TrendingUp,
+  TrendingDown,
 } from "lucide-react";
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -202,23 +204,26 @@ export default function InboxExplorerPage() {
   return (
     <div className="pb-10">
       {/* Header */}
-      <div className="flex items-center justify-between pb-5 mb-8 border-b border-[#e5e2db]">
-        <div>
+      <div 
+        style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.5rem", paddingBottom: "0.5rem", marginBottom: "0.75rem" }}
+        className="flex items-center justify-between bg-white/50 backdrop-blur-md border border-[#e5e2db] rounded-none shadow-[0_2px_12px_rgba(28,25,23,0.02)]"
+      >
+        <div style={{ paddingLeft: "0.25rem" }}>
           <h1 className="text-[28px] font-bold text-[#1c1917] tracking-[-0.02em] leading-tight">Inbox Explorer</h1>
-          <p className="text-[13px] text-[#a8a29e] mt-1">
+          <p className="text-[13px] text-[#78716c] font-medium mt-1">
             {total.toLocaleString()} emails • {activeFiltersCount} filter{activeFiltersCount !== 1 ? 's' : ''} active
           </p>
         </div>
 
         {/* View Mode Toggle */}
-        <div className="flex items-center gap-1 bg-white border border-[#e5e2db] rounded-lg p-1">
+        <div className="flex items-center gap-1 bg-white border border-[#e5e2db] rounded-none p-1">
           <button
             onClick={() => setView("grid")}
             className={`transition-colors ${
               view === "grid"
                 ? "bg-[#1c1917] text-white"
                 : "text-[#a8a29e] bg-transparent hover:bg-[#ede9e3]"
-            } rounded-[6px] w-[28px] h-[28px] flex items-center justify-center`}
+            } rounded-none w-[28px] h-[28px] flex items-center justify-center cursor-pointer`}
             title="Grid View"
           >
             <Grid className="w-4 h-4" />
@@ -229,7 +234,7 @@ export default function InboxExplorerPage() {
               view === "list"
                 ? "bg-[#1c1917] text-white"
                 : "text-[#a8a29e] bg-transparent hover:bg-[#ede9e3]"
-            } rounded-[6px] w-[28px] h-[28px] flex items-center justify-center`}
+            } rounded-none w-[28px] h-[28px] flex items-center justify-center cursor-pointer`}
             title="List View"
           >
             <List className="w-4 h-4" />
@@ -240,7 +245,7 @@ export default function InboxExplorerPage() {
               view === "timeline"
                 ? "bg-[#1c1917] text-white"
                 : "text-[#a8a29e] bg-transparent hover:bg-[#ede9e3]"
-            } rounded-[6px] w-[28px] h-[28px] flex items-center justify-center`}
+            } rounded-none w-[28px] h-[28px] flex items-center justify-center cursor-pointer`}
             title="Timeline View"
           >
             <Calendar className="w-4 h-4" />
@@ -249,23 +254,27 @@ export default function InboxExplorerPage() {
       </div>
 
       {/* Search & Filter Bar */}
-      <div className="bg-white border border-[#e5e2db] rounded-xl p-4 mb-6 shadow-sm">
+      <div 
+        style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.5rem", paddingBottom: "0.5rem", marginBottom: "1rem" }}
+        className="bg-white/80 backdrop-blur-md border border-[#e5e2db] rounded-none shadow-[0_2px_12px_rgba(28,25,23,0.03)]"
+      >
         <div className="flex items-center gap-3 flex-wrap">
           {/* Search Input */}
-          <div className="flex-1 min-w-[250px] relative h-10">
-            <Search className="w-4 h-4 text-[#a8a29e] absolute left-3 top-1/2 -translate-y-1/2" />
+          <div className="flex-1 min-w-[280px] relative h-10">
+            <Search className="w-4 h-4 text-[#a8a29e] absolute left-4 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && applyFilters()}
               placeholder="Search subjects, senders, content..."
-              className="w-full h-full pl-10 pr-4 border border-[#e5e2db] rounded-lg text-[14px] text-[#1c1917] bg-white placeholder-[#a8a29e] focus:border-[#1c1917] focus:shadow-[0_0_0_2px_rgba(28,25,23,0.06)] focus:outline-none transition-all"
+              style={{ paddingLeft: "2.75rem" }}
+              className="w-full h-full pr-4 border border-[#e5e2db] rounded-xl text-[14px] text-[#1c1917] bg-white placeholder-[#a8a29e] hover:border-[#d6d3d1] focus:border-[#1c1917] focus:ring-2 focus:ring-[#1c1917]/10 focus:outline-none transition-all duration-200"
             />
           </div>
 
           {/* Quick Category Filter */}
-          <div className="relative h-10 min-w-[160px]">
+          <div className="relative h-10 min-w-[170px]">
             <select
               value={category}
               onChange={(e) => {
@@ -273,7 +282,8 @@ export default function InboxExplorerPage() {
                 setPage(1);
                 loadEmails();
               }}
-              className="appearance-none w-full h-full pl-4 pr-10 border border-[#e5e2db] rounded-lg text-[14px] text-[#1c1917] bg-white cursor-pointer focus:border-[#1c1917] focus:shadow-[0_0_0_2px_rgba(28,25,23,0.06)] focus:outline-none transition-all"
+              style={{ paddingLeft: "1.25rem", paddingRight: "2.5rem" }}
+              className="appearance-none w-full h-full border border-[#e5e2db] rounded-none text-[14px] text-[#1c1917] bg-white cursor-pointer hover:border-[#d6d3d1] focus:border-[#1c1917] focus:ring-2 focus:ring-[#1c1917]/10 focus:outline-none transition-all duration-200"
             >
               <option value="">All Categories</option>
               {Object.keys(CATEGORY_COLORS).map((cat) => (
@@ -282,18 +292,19 @@ export default function InboxExplorerPage() {
                 </option>
               ))}
             </select>
-            <ChevronDown className="w-4 h-4 text-[#a8a29e] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <ChevronDown className="w-4 h-4 text-[#a8a29e] absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
 
           {/* Advanced Filters Toggle */}
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center gap-2 h-10 px-4 border border-[#e5e2db] rounded-lg text-[14px] font-medium text-[#57534e] bg-white hover:bg-[#f5f2ed] transition-colors relative"
+            style={{ paddingLeft: "1.5rem", paddingRight: "1.5rem" }}
+            className="flex items-center gap-2.5 h-10 border border-[#e5e2db] rounded-none text-[14px] font-semibold text-[#1c1917] bg-white hover:bg-[#f5f2ed] hover:border-[#d6d3d1] transition-all relative shrink-0 cursor-pointer"
           >
-            <Filter className="w-4 h-4 text-[#57534e]" />
-            Filters
+            <SlidersHorizontal className="w-4 h-4 text-[#78716c]" />
+            <span>Filters</span>
             {activeFiltersCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#1c1917] text-white text-xs rounded-full flex items-center justify-center font-bold">
+              <span className="ml-1.5 px-1.5 py-0.5 text-[10px] leading-none bg-[#1c1917] text-white rounded-full font-bold">
                 {activeFiltersCount}
               </span>
             )}
@@ -302,9 +313,9 @@ export default function InboxExplorerPage() {
           {/* Search Button */}
           <button
             onClick={applyFilters}
-            className="h-10 px-5 bg-[#1c1917] text-white rounded-lg text-[14px] font-medium hover:bg-[#292524] transition-colors"
+            className="w-10 h-10 flex items-center justify-center bg-[#1c1917] text-white rounded-none hover:bg-[#292524] active:scale-[0.98] transition-all shrink-0 cursor-pointer"
           >
-            Search
+            <Search className="w-5 h-5 text-white" />
           </button>
         </div>
 
@@ -375,43 +386,50 @@ export default function InboxExplorerPage() {
       {view === "grid" && (
         <>
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 items-stretch">
               {Array.from({ length: 9 }).map((_, i) => (
                 <div
                   key={i}
-                  className="bg-white border border-[#e5e2db] rounded-[12px] p-5 animate-pulse flex flex-col justify-between"
+                  className="bg-white border border-[#e5e2db] rounded-[20px] overflow-hidden flex flex-col justify-between animate-pulse"
                 >
-                  <div>
-                    {/* Row 1: Avatar + two lines */}
-                    <div className="flex items-center gap-3 w-full mb-3">
-                      <div className="w-9 h-9 rounded-full bg-[#ede9e3] shrink-0" />
+                  {/* Dark Header Strip Skeleton */}
+                  <div className="bg-[#1c1917]/95 px-6 py-5 flex items-center justify-between rounded-t-[19px]">
+                    <div className="flex items-center gap-3.5 w-full">
+                      <div className="w-12 h-12 rounded-full bg-white/10 shrink-0" />
                       <div className="flex flex-col gap-1.5 flex-1">
-                        <div className="w-[60px] h-3 bg-[#ede9e3] rounded" />
-                        <div className="w-[120px] h-2.5 bg-[#ede9e3] rounded" />
+                        <div className="w-[70px] h-3.5 bg-white/15 rounded" />
+                        <div className="w-[130px] h-2.5 bg-white/10 rounded" />
+                      </div>
+                    </div>
+                    <div className="w-20 h-2.5 bg-white/10 rounded shrink-0 self-start pt-1" />
+                  </div>
+
+                  {/* Body Skeleton */}
+                  <div className="bg-white px-6 pt-5 pb-6 flex-1 flex flex-col justify-between rounded-b-[19px]">
+                    <div>
+                      {/* Category Badge Pill Skeleton */}
+                      <div className="w-24 h-6 bg-[#ede9e3] rounded-full" />
+
+                      {/* Subject Lines Skeleton */}
+                      <div className="space-y-2 mt-4">
+                        <div className="w-full h-5 bg-[#ede9e3] rounded" />
+                        <div className="w-5/6 h-5 bg-[#ede9e3] rounded" />
+                      </div>
+
+                      {/* Preview Lines Skeleton */}
+                      <div className="space-y-1.5 mt-3">
+                        <div className="w-full h-3 bg-[#ede9e3] rounded" />
+                        <div className="w-full h-3 bg-[#ede9e3] rounded" />
+                        <div className="w-2/3 h-3 bg-[#ede9e3] rounded" />
                       </div>
                     </div>
 
-                    {/* Row 2: Category Badge Pill */}
-                    <div className="flex mt-1 mb-2.5">
-                      <div className="w-[60px] h-4 bg-[#ede9e3] rounded-full" />
-                    </div>
-
-                    {/* Row 3: Subject Lines */}
-                    <div className="space-y-1.5 mt-2.5">
-                      <div className="w-full h-3.5 bg-[#ede9e3] rounded" />
-                      <div className="w-5/6 h-3.5 bg-[#ede9e3] rounded" />
-                    </div>
-
-                    {/* Row 4: Preview Lines */}
-                    <div className="space-y-1.5 mt-2">
-                      <div className="w-full h-3 bg-[#ede9e3] rounded" />
-                      <div className="w-full h-3 bg-[#ede9e3] rounded" />
-                      <div className="w-2/3 h-3 bg-[#ede9e3] rounded" />
+                    {/* Footer Skeleton */}
+                    <div className="mt-6 flex items-center justify-between">
+                      <div className="w-32 h-5 bg-[#ede9e3] rounded" />
+                      <div className="w-6 h-6 bg-[#ede9e3] rounded" />
                     </div>
                   </div>
-
-                  {/* Empty Footer just to maintain heights */}
-                  <div className="border-t border-[#f5f2ed] mt-3 pt-2.5 h-5 shrink-0" />
                 </div>
               ))}
             </div>
@@ -421,107 +439,137 @@ export default function InboxExplorerPage() {
               <p className="text-lg font-medium">No emails found</p>
               <p className="text-sm">Try adjusting your filters</p>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch">
+          ) : (            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
               {emails.map((email) => {
                 const isUnread = !email.is_read;
+                const categoryStyle = getCategoryStyle(email.category);
+                
                 return (
                   <div
                     key={email.id}
                     onClick={() => openEmailDetail(email)}
-                    className={`bg-white border border-[#e5e2db] rounded-[12px] p-5 cursor-pointer flex flex-col justify-between transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:border-[#d6d3d1] group relative ${
-                      isUnread ? "border-l-[3px] border-l-[#6b7a8f]" : ""
-                    }`}
+                    className="group cursor-pointer bg-white rounded-[20px] border border-[#e5e2db] flex flex-col justify-between overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:-translate-y-1.5 hover:shadow-[0_16px_40px_rgba(28,25,23,0.08)] hover:border-[#d6d3d1] transition-all duration-300 ease-out"
                   >
-                    <div>
-                      {/* Card Header */}
-                      <div className="flex items-start justify-between w-full mb-3">
-                        <div className="flex items-center gap-3 min-w-0 flex-1">
-                          {/* Sender Avatar */}
-                          <div 
-                            className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0"
-                            style={{ backgroundColor: getAvatarColor(email.sender_name || email.sender_email) }}
-                          >
-                            {getInitials(email.sender_name || email.sender_email)}
+                    {/* Header Strip */}
+                    <div className="bg-[#1c1917] px-6 py-5 flex items-center justify-between rounded-t-[19px] select-none">
+                      <div className="flex items-center gap-3.5 min-w-0">
+                        {/* Avatar */}
+                        <div className="w-12 h-12 rounded-full bg-white/10 border border-white/5 flex items-center justify-center text-white font-bold text-base select-none shrink-0">
+                          {getInitials(email.sender_name || email.sender_email)}
+                        </div>
+                        {/* Sender Info */}
+                        <div className="min-w-0 flex flex-col gap-0.5">
+                          <div className="font-bold text-white text-[16px] leading-tight truncate">
+                            {email.sender_name || email.sender_email.split("@")[0]}
                           </div>
-                          
-                          {/* Sender Details */}
-                          <div className="flex flex-col min-w-0 flex-1">
-                            <span className="text-[13px] font-semibold text-[#1c1917] truncate leading-tight">
-                              {email.sender_name || email.sender_email.split("@")[0]}
-                            </span>
-                            <span className="text-[11px] text-[#a8a29e] truncate max-w-[160px] leading-tight mt-0.5">
-                              {email.sender_email}
-                            </span>
+                          <div className="text-[13px] text-[#a8a29e] leading-tight truncate">
+                            {email.sender_email}
                           </div>
                         </div>
-
-                        {/* Date */}
-                        <span className="text-[11px] text-[#a8a29e] shrink-0 ml-2 whitespace-nowrap">
+                      </div>
+                      
+                      {/* Date & Unread Indicator */}
+                      <div className="flex items-center gap-2 shrink-0 self-start pt-1">
+                        <span className="text-[13px] text-[#a8a29e] font-medium whitespace-nowrap">
                           {new Date(email.date).toLocaleDateString("en-US", {
                             month: "short",
                             day: "numeric",
+                          }) + ", " + new Date(email.date).toLocaleTimeString("en-US", {
+                            hour: "numeric",
+                            minute: "2-digit",
                           })}
                         </span>
+                        {isUnread && (
+                          <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse shrink-0" title="Unread" />
+                        )}
                       </div>
-
-                      {/* Category Badge */}
-                      {(() => {
-                        const style = getCategoryStyle(email.category);
-                        return (
-                          <div className="flex mt-1">
-                            <span
-                              className="inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-full border"
-                              style={{
-                                backgroundColor: style.bg,
-                                color: style.text,
-                                borderColor: style.border,
-                              }}
-                            >
-                              {email.category || "Uncategorized"}
-                            </span>
-                          </div>
-                        );
-                      })()}
-
-                      {/* Subject Line */}
-                      <h3
-                        className="text-[14px] text-[#1c1917] tracking-[-0.01em] line-clamp-2 mt-2.5 overflow-hidden"
-                        style={{
-                          display: "-webkit-box",
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: "vertical",
-                          fontWeight: isUnread ? 700 : 600,
-                        }}
-                      >
-                        {email.subject || "No Subject"}
-                      </h3>
-
-                      {/* Preview Text */}
-                      <p
-                        className="text-[13px] text-[#78716c] font-normal leading-[1.5] mt-1 line-clamp-2 overflow-hidden"
-                        style={{
-                          display: "-webkit-box",
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: "vertical",
-                        }}
-                      >
-                        {email.snippet}
-                      </p>
                     </div>
 
-                    {/* Card Footer */}
-                    <div className="border-t border-[#f5f2ed] mt-3 pt-2.5 flex items-center justify-between w-full h-5 shrink-0">
-                      <div className="flex items-center gap-2">
-                        {isUnread && (
-                          <span className="w-1 h-1 rounded-full bg-[#6b7a8f]" title="Unread" />
-                        )}
-                        {email.has_attachments && <Paperclip className="w-3.5 h-3.5 text-[#a8a29e]" />}
+                    {/* Body */}
+                    <div className="bg-white px-6 pt-5 pb-6 flex-1 flex flex-col justify-between rounded-b-[19px]">
+                      <div>
+                        {/* Category Badge */}
+                        <div>
+                          <span
+                            className="inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-semibold select-none"
+                            style={{
+                              backgroundColor: categoryStyle.bg,
+                              color: categoryStyle.text,
+                            }}
+                          >
+                            {email.category || "Uncategorized"}
+                          </span>
+                        </div>
+
+                        {/* Subject */}
+                        <h3 
+                          className="text-[#1c1917] text-[20px] font-bold leading-tight mt-4 select-text"
+                          style={{
+                            display: "-webkit-box",
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden",
+                          }}
+                        >
+                          {email.subject || "No Subject"}
+                        </h3>
+
+                        {/* Preview Text */}
+                        <p 
+                          className="text-[#57534e] text-[14px] leading-relaxed mt-3 select-text"
+                          style={{
+                            display: "-webkit-box",
+                            WebkitLineClamp: 3,
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden",
+                          }}
+                        >
+                          {email.snippet || "No preview available"}
+                        </p>
                       </div>
-                      
-                      <span className="text-[14px] text-[#1c1917] font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200 select-none">
-                        →
-                      </span>
+
+                      {/* Footer */}
+                      <div className="mt-6 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          {email.sentiment && (
+                            <div className="flex items-center gap-2">
+                              {email.sentiment === "positive" && (
+                                <div className="flex items-center gap-1.5 text-[#166534]">
+                                  <Smile className="w-[22px] h-[22px] text-[#166534]" />
+                                  <TrendingUp className="w-4 h-4 text-emerald-600" />
+                                  <span className="text-sm font-semibold tracking-tight">Positive Feedback</span>
+                                </div>
+                              )}
+                              {email.sentiment === "neutral" && (
+                                <div className="flex items-center gap-1.5 text-[#78716c]">
+                                  <Meh className="w-[22px] h-[22px] text-[#78716c]" />
+                                  <span className="text-sm font-semibold tracking-tight">Neutral Feedback</span>
+                                </div>
+                              )}
+                              {email.sentiment === "negative" && (
+                                <div className="flex items-center gap-1.5 text-[#9f1239]">
+                                  <Frown className="w-[22px] h-[22px] text-[#9f1239]" />
+                                  <TrendingDown className="w-4 h-4 text-rose-600" />
+                                  <span className="text-sm font-semibold tracking-tight">Negative Feedback</span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                          {email.has_attachments && (
+                            <div className="flex items-center gap-1.5 text-stone-400">
+                              <Paperclip className="w-4 h-4" />
+                              <span className="text-xs font-medium">Attachment</span>
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* Hover Arrow */}
+                        <div className="text-gray-400 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-x-1 shrink-0">
+                          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5-5 5M6 12h12" />
+                          </svg>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 );

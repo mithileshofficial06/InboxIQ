@@ -103,7 +103,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       }}>
 
         {/* Logo */}
-        <div style={{ padding: "0 20px 32px", display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{ padding: "0 14px 32px", display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{
             width: 28, height: 28, background: "#1c1917", borderRadius: 6,
             display: "flex", alignItems: "center", justifyContent: "center",
@@ -117,7 +117,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         {/* Section Label */}
         <div style={{
-          padding: "0 20px 8px", fontSize: 10, fontWeight: 600,
+          padding: "0 14px 8px", fontSize: 10, fontWeight: 600,
           textTransform: "uppercase", letterSpacing: "0.12em", color: "#a8a29e",
         }}>
           Modules
@@ -141,7 +141,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </nav>
 
         {/* Account Section */}
-        <div style={{ padding: "16px 20px 0", borderTop: "1px solid #e5e2db" }}>
+        <div style={{ padding: "16px 14px 0", borderTop: "1px solid #e5e2db" }}>
           <div style={{
             fontSize: 10, fontWeight: 600, textTransform: "uppercase",
             letterSpacing: "0.08em", color: "#a8a29e", marginBottom: 10,

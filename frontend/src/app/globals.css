@@ -451,7 +451,7 @@ body::before {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 16px;
+  padding: 10px 16px 10px 10px;
   border-radius: 6px;
   color: #78716c;
   text-decoration: none;
@@ -474,7 +474,7 @@ body::before {
   border-radius: 0 6px 6px 0;
   box-shadow: 0 1px 4px rgba(0,0,0,0.06);
   font-weight: 600;
-  padding-left: 13px;
+  padding-left: 8px;
 }
 
 .dash-sender-row {
@@ -948,7 +948,7 @@ textarea:focus-visible {
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  justify-center;
+  justify-content: center;
   color: white;
   font-weight: 700;
   font-size: 15px;
@@ -1114,3 +1114,28 @@ textarea:focus-visible {
   }
 }
 
+/* ============ Line Clamp Utilities ============ */
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+/* ============ Premium Email Cards Enhancement ============ */
+
+.email-card-hover-arrow {
+  transition: opacity 200ms ease;
+}
+
+.group:hover .email-card-hover-arrow {
+  opacity: 1;
+}
