@@ -370,3 +370,147 @@ body::before {
 .delay-300 { animation-delay: 300ms; }
 .delay-400 { animation-delay: 400ms; }
 .delay-500 { animation-delay: 500ms; }
+
+/* ============ Dashboard Redesign — Scoped Styles ============ */
+
+.dash-stat-card {
+  background: #ffffff;
+  border: 1px solid #e5e2db;
+  border-radius: 8px;
+  padding: 20px 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  transition: all 0.2s ease;
+  cursor: default;
+}
+.dash-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+
+.dash-section-card {
+  background: #ffffff;
+  border: 1px solid #e5e2db;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  transition: box-shadow 0.2s ease;
+}
+.dash-section-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+}
+
+.dash-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-radius: 6px;
+  color: #57534e;
+  text-decoration: none;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+  margin-bottom: 2px;
+}
+.dash-nav-link:hover {
+  background: #ede9e3;
+  color: #1c1917;
+}
+.dash-nav-link.active {
+  background: #ffffff;
+  color: #1c1917;
+  border-color: #e5e2db;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  font-weight: 600;
+}
+
+.dash-sender-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 8px;
+  transition: background 0.15s ease;
+  border-radius: 8px;
+  margin: 0 -8px;
+}
+.dash-sender-row:hover {
+  background: #faf9f7;
+}
+
+@keyframes dashBarFill {
+  from { width: 0%; }
+}
+.dash-bar-fill {
+  animation: dashBarFill 0.8s ease-out forwards;
+}
+
+@keyframes dashPulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(132, 155, 135, 0.4); }
+  50% { opacity: 0.8; box-shadow: 0 0 0 4px rgba(132, 155, 135, 0); }
+}
+.dash-pulse-dot {
+  animation: dashPulse 2s ease-in-out infinite;
+}
+
+.dash-sync-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: #ffffff;
+  border: 1px solid #e5e2db;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #57534e;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+.dash-sync-btn:hover {
+  background: #f5f2ed;
+  border-color: #d6d3d1;
+  color: #1c1917;
+}
+.dash-sync-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.dash-logout-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: transparent;
+  border: 1px solid #e5e2db;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #57534e;
+  cursor: pointer;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  transition: all 0.15s ease;
+}
+.dash-logout-btn:hover {
+  background: #ede9e3;
+  color: #1c1917;
+}
+
+.dash-view-all-link {
+  font-size: 13px;
+  color: #a8a29e;
+  text-decoration: none;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  transition: color 0.15s ease;
+}
+.dash-view-all-link:hover {
+  color: #57534e;
+}
