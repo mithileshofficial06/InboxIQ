@@ -10,7 +10,7 @@ router.use(authMiddleware);
 
 /**
  * GET /emails
- * Paginated email list with filtering
+ * Paginated email list with advanced filtering
  */
 router.get('/', async (req: AuthRequest, res: Response) => {
   try {
@@ -20,6 +20,9 @@ router.get('/', async (req: AuthRequest, res: Response) => {
       category,
       sender,
       search,
+      sentiment,
+      dateFrom,
+      dateTo,
       sort = 'date',
       order = 'desc',
     } = req.query;
@@ -31,7 +34,7 @@ router.get('/', async (req: AuthRequest, res: Response) => {
     const supabase = getSupabase();
     let query = supabase
       .from('emails')
-      .select('id, gmail_id, thread_id, sender_email, sender_name, subject, snippet, date, category, sentiment, is_read, has_attachments, label_ids', { count: 'exact' })
+      .select('id, gmail_id, thread_id, sender_email, sender_name, subject, snippet, date, category, sentiment, sentiment_score, is_read, has_attachments, label_ids', { count: 'exact' })
       .eq('user_id', req.userId!);
 
     // Filters
@@ -41,8 +44,17 @@ router.get('/', async (req: AuthRequest, res: Response) => {
     if (sender && typeof sender === 'string') {
       query = query.ilike('sender_email', `%${sender}%`);
     }
+    if (sentiment && typeof sentiment === 'string') {
+      query = query.eq('sentiment', sentiment);
+    }
+    if (dateFrom && typeof dateFrom === 'string') {
+      query = query.gte('date', dateFrom);
+    }
+    if (dateTo && typeof dateTo === 'string') {
+      query = query.lte('date', dateTo);
+    }
     if (search && typeof search === 'string') {
-      query = query.or(`subject.ilike.%${search}%,snippet.ilike.%${search}%`);
+      query = query.or(`subject.ilike.%${search}%,snippet.ilike.%${search}%,sender_name.ilike.%${search}%`);
     }
 
     // Sorting
@@ -72,6 +84,66 @@ router.get('/', async (req: AuthRequest, res: Response) => {
     });
   } catch (error) {
     console.error('[Emails] Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * GET /emails/timeline
+ * Email timeline grouped by month/year
+ */
+router.get('/timeline', async (req: AuthRequest, res: Response) => {
+  try {
+    const supabase = getSupabase();
+    const { data: emails, error } = await supabase
+      .from('emails')
+      .select('date, category, sentiment')
+      .eq('user_id', req.userId!)
+      .order('date', { ascending: false });
+
+    if (error) {
+      console.error('[Emails] Timeline error:', error);
+      res.status(500).json({ error: 'Failed to fetch timeline' });
+      return;
+    }
+
+    // Group by month
+    const timeline: Record<string, { count: number; categories: Record<string, number>; sentiments: Record<string, number> }> = {};
+
+    (emails || []).forEach((email) => {
+      const date = new Date(email.date);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+
+      if (!timeline[monthKey]) {
+        timeline[monthKey] = {
+          count: 0,
+          categories: {},
+          sentiments: {},
+        };
+      }
+
+      timeline[monthKey].count++;
+
+      if (email.category) {
+        timeline[monthKey].categories[email.category] = (timeline[monthKey].categories[email.category] || 0) + 1;
+      }
+
+      if (email.sentiment) {
+        timeline[monthKey].sentiments[email.sentiment] = (timeline[monthKey].sentiments[email.sentiment] || 0) + 1;
+      }
+    });
+
+    // Convert to array format
+    const timelineArray = Object.entries(timeline)
+      .map(([month, data]) => ({
+        month,
+        ...data,
+      }))
+      .sort((a, b) => b.month.localeCompare(a.month));
+
+    res.json({ timeline: timelineArray });
+  } catch (error) {
+    console.error('[Emails] Timeline error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

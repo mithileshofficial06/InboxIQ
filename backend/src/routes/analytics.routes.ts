@@ -7,12 +7,19 @@ router.use(authMiddleware);
 
 /**
  * GET /analytics/overview
- * High-level email stats
+ * High-level email stats with week-over-week comparison
  */
 router.get('/overview', async (req: AuthRequest, res: Response) => {
   try {
     const supabase = getSupabase();
     const userId = req.userId!;
+
+    // Get last sync timestamp
+    const { data: userData } = await supabase
+      .from('users')
+      .select('last_sync_at, sync_status')
+      .eq('id', userId)
+      .single();
 
     // Total emails
     const { count: totalEmails } = await supabase
@@ -20,14 +27,34 @@ router.get('/overview', async (req: AuthRequest, res: Response) => {
       .select('*', { count: 'exact', head: true })
       .eq('user_id', userId);
 
-    // Emails today
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const { count: todayEmails } = await supabase
+    // This week's date range
+    const now = new Date();
+    const thisWeekStart = new Date(now);
+    thisWeekStart.setDate(now.getDate() - now.getDay()); // Start of this week (Sunday)
+    thisWeekStart.setHours(0, 0, 0, 0);
+
+    const lastWeekStart = new Date(thisWeekStart);
+    lastWeekStart.setDate(thisWeekStart.getDate() - 7);
+
+    // Emails this week
+    const { count: thisWeekCount } = await supabase
       .from('emails')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', userId)
-      .gte('date', today.toISOString());
+      .gte('date', thisWeekStart.toISOString());
+
+    // Emails last week
+    const { count: lastWeekCount } = await supabase
+      .from('emails')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .gte('date', lastWeekStart.toISOString())
+      .lt('date', thisWeekStart.toISOString());
+
+    // Calculate percentage change
+    const weekOverWeekChange = lastWeekCount && lastWeekCount > 0
+      ? Math.round(((thisWeekCount! - lastWeekCount) / lastWeekCount) * 100)
+      : 0;
 
     // Unread count
     const { count: unreadCount } = await supabase
@@ -36,26 +63,14 @@ router.get('/overview', async (req: AuthRequest, res: Response) => {
       .eq('user_id', userId)
       .eq('is_read', false);
 
-    // Date range for average calculation
-    const { data: dateRange } = await supabase
-      .from('emails')
-      .select('date')
-      .eq('user_id', userId)
-      .order('date', { ascending: true })
-      .limit(1);
-
-    let avgPerDay = 0;
-    if (dateRange && dateRange.length > 0 && totalEmails) {
-      const firstDate = new Date(dateRange[0].date);
-      const days = Math.max(1, Math.ceil((Date.now() - firstDate.getTime()) / (1000 * 60 * 60 * 24)));
-      avgPerDay = Math.round((totalEmails / days) * 10) / 10;
-    }
-
     res.json({
       totalEmails: totalEmails || 0,
-      todayEmails: todayEmails || 0,
+      thisWeekEmails: thisWeekCount || 0,
+      lastWeekEmails: lastWeekCount || 0,
+      weekOverWeekChange,
       unreadCount: unreadCount || 0,
-      avgPerDay,
+      lastSyncedAt: userData?.last_sync_at || null,
+      syncStatus: userData?.sync_status || 'idle',
     });
   } catch (error) {
     console.error('[Analytics] Overview error:', error);
