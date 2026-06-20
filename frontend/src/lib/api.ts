@@ -40,6 +40,18 @@ async function fetchAPI(endpoint: string, options: RequestInit = {}) {
   return response.json();
 }
 
+// ============ Health Check ============
+export const health = {
+  checkBackend: async (): Promise<boolean> => {
+    try {
+      const response = await fetch(`${API_BASE}/health`, { method: 'GET' });
+      return response.ok;
+    } catch {
+      return false;
+    }
+  },
+};
+
 // ============ Auth ============
 export const auth = {
   getLoginUrl: () => `${API_BASE}/auth/google`,

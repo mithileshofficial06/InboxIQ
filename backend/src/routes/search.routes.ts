@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { authenticateToken } from '../middleware/auth.middleware';
+import { authMiddleware } from '../middleware/auth.middleware';
 import axios from 'axios';
 
 const router = Router();
@@ -9,7 +9,7 @@ const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://localhost:8000';
  * POST /search/semantic
  * Perform semantic search across user's emails
  */
-router.post('/semantic', authenticateToken, async (req: Request, res: Response) => {
+router.post('/semantic', authMiddleware, async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user.id;
     const { query, category, dateFrom, dateTo, limit = 20 } = req.body;
@@ -64,7 +64,7 @@ router.post('/semantic', authenticateToken, async (req: Request, res: Response) 
  * GET /search/suggestions
  * Get suggested search queries based on user's email patterns
  */
-router.get('/suggestions', authenticateToken, async (req: Request, res: Response) => {
+router.get('/suggestions', authMiddleware, async (req: Request, res: Response) => {
   try {
     // Static suggestions for now - can be made dynamic later
     const suggestions = [

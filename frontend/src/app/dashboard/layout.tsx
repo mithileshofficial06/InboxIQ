@@ -27,8 +27,29 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   useEffect(() => {
     const token = localStorage.getItem("inboxiq_token");
-    if (!token) { router.push("/"); return; }
-    auth.getMe().then(d => { setUser(d.user); setLoading(false); }).catch(() => { localStorage.removeItem("inboxiq_token"); router.push("/"); });
+    if (!token) { 
+      router.push("/"); 
+      return; 
+    }
+    
+    // Verify token with backend
+    auth.getMe()
+      .then(d => { 
+        setUser(d.user); 
+        setLoading(false); 
+      })
+      .catch((error) => { 
+        console.error("Auth verification failed:", error);
+        // Only clear token if it's a 401 (unauthorized), not network errors
+        if (error.response?.status === 401) {
+          localStorage.removeItem("inboxiq_token");
+          router.push("/");
+        } else {
+          // Keep token but show error - might be temporary backend issue
+          setLoading(false);
+          toast.error("Could not connect to server. Some features may be unavailable.");
+        }
+      });
   }, [router]);
 
   const handleSync = async () => {

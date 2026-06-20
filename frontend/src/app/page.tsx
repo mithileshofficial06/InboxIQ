@@ -10,7 +10,7 @@ import {
   Mail, TrendingUp, Zap, ExternalLink, ChevronRight, MessagesSquare,
   BarChart3, Globe, FileText, Layers, Clock
 } from "lucide-react";
-import { auth } from "@/lib/api";
+import { auth, health } from "@/lib/api";
 import InboxChaosAnimation from "@/components/InboxChaosAnimation";
 
 /* ─── Animation Variants ─── */
@@ -615,7 +615,17 @@ export default function LandingPage() {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, [handleMouseMove]);
 
-  const handleLogin = () => { window.location.href = auth.getLoginUrl(); };
+  const handleLogin = async () => { 
+    // Check if backend is running
+    const backendRunning = await health.checkBackend();
+    
+    if (!backendRunning) {
+      alert("⚠️ Backend server is not running!\n\nPlease start the backend server:\n\ncd backend\nnpm run dev\n\nThen try logging in again.");
+      return;
+    }
+    
+    window.location.href = auth.getLoginUrl(); 
+  };
   const handleCTA = isLoggedIn ? () => router.push("/dashboard") : handleLogin;
 
   /* ─── Section style helpers ─── */

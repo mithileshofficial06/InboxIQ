@@ -8,16 +8,25 @@ function CallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     const token = searchParams.get("token");
-    if (searchParams.get("message")) { setStatus("error"); return; }
+    const message = searchParams.get("message");
+    
+    if (message) { 
+      setStatus("error");
+      setErrorMessage(decodeURIComponent(message));
+      return; 
+    }
+    
     if (token) {
       localStorage.setItem("inboxiq_token", token);
       setStatus("success");
       setTimeout(() => router.push("/dashboard"), 1500);
     } else {
       setStatus("error");
+      setErrorMessage("No authentication token received. Please try again.");
     }
   }, [searchParams, router]);
 
@@ -36,15 +45,17 @@ function CallbackContent() {
         {status === "success" && (
           <div>
             <h1 className="editorial-heading" style={{ fontSize: "24px", marginBottom: "12px", color: "var(--color-sage)" }}>Access Granted</h1>
-            <p style={{ color: "var(--color-text-secondary)", fontSize: "15px" }}>Redirecting...</p>
+            <p style={{ color: "var(--color-text-secondary)", fontSize: "15px" }}>Redirecting to dashboard...</p>
           </div>
         )}
 
         {status === "error" && (
           <div>
             <h1 className="editorial-heading" style={{ fontSize: "24px", marginBottom: "12px", color: "var(--color-terracotta)" }}>Authentication Failed</h1>
-            <p style={{ color: "var(--color-text-secondary)", fontSize: "15px", marginBottom: "32px" }}>We couldn't verify your credentials.</p>
-            <button className="editorial-btn" onClick={() => router.push("/")} style={{ width: "100%" }}>Return</button>
+            <p style={{ color: "var(--color-text-secondary)", fontSize: "15px", marginBottom: "32px" }}>
+              {errorMessage || "We couldn't verify your credentials."}
+            </p>
+            <button className="editorial-btn" onClick={() => router.push("/")} style={{ width: "100%" }}>Return to Home</button>
           </div>
         )}
 
