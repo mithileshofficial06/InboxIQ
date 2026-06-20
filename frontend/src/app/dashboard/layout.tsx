@@ -7,6 +7,7 @@ import { LayoutDashboard, Inbox, MessageSquare, Users, Briefcase, Bell, Sparkles
 import { auth, emails } from "@/lib/api";
 import toast from "react-hot-toast";
 import { SyncIndicator } from "@/components/SyncIndicator";
+import { ContourField } from "@/components/ContourField";
 
 const NAV_ITEMS = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Overview" },
@@ -192,7 +193,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </aside>
 
       {/* ── Main Content Area ── */}
-      <div className="topo-background" style={{ flex: 1, display: "flex", flexDirection: "column", height: "100vh", overflow: "hidden" }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", height: "100vh", overflow: "hidden", position: "relative", background: "#f0ede8" }}>
+        <ContourField lineCount={42} color="#b8b2ab" />
 
         {/* Topbar */}
         <header className="animate-fade-in" style={{
