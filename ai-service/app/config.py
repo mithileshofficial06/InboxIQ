@@ -14,18 +14,20 @@ class Settings(BaseSettings):
         "postgresql://postgres:password@localhost:5432/postgres"
     )
 
-    # Gemini API
-    gemini_api_key: str = os.getenv("GEMINI_API_KEY", "")
-
-    # Embedding config
-    embedding_model: str = "models/text-embedding-004"
-    embedding_dimension: int = 768
+    # NVIDIA NIM API (Meta Llama 3.3 70B)
+    nvidia_api_key: str = os.getenv("NVIDIA_API_KEY", os.getenv("GEMINI_API_KEY", ""))
+    nvidia_base_url: str = "https://integrate.api.nvidia.com/v1"
+    
+    # Model config
+    llm_model: str = "meta/llama-3.3-70b-instruct"  # NVIDIA NIM model
+    embedding_model: str = "nvidia/nv-embedqa-e5-v5"  # NVIDIA embedding model
+    embedding_dimension: int = 1024  # NV-Embed-v2 dimension
 
     # Classification config
-    classification_model: str = "models/gemini-2.0-flash"
+    classification_model: str = "meta/llama-3.3-70b-instruct"
 
     # RAG config
-    rag_model: str = "models/gemini-2.0-flash"
+    rag_model: str = "meta/llama-3.3-70b-instruct"
     rag_top_k: int = 20
     rag_max_context_tokens: int = 8000
 

@@ -267,12 +267,34 @@ export default function DashboardPage() {
               </div>
             </>
           ) : (
-            <div style={{
-              display: "flex", flexDirection: "column", alignItems: "center",
-              justifyContent: "center", height: 260, gap: 10,
-            }}>
-              <BarChart2 size={28} color="#d6d3d1" />
-              <span style={{ fontSize: 13, color: "#a8a29e" }}>Sync your inbox to see breakdown</span>
+            <div style={{ padding: "8px 0" }}>
+              <div className="dash-pill-pulse" style={{
+                display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8,
+              }}>
+                {[
+                  { name: "Bills & Invoices", dot: "#c46b5a" },
+                  { name: "Job Applications", dot: "#6b7a8f" },
+                  { name: "Orders & Deliveries", dot: "#c99a5c" },
+                  { name: "OTPs & Notifications", dot: "#849b87" },
+                  { name: "Newsletters", dot: "#b5838d" },
+                  { name: "Real People", dot: "#6b7a8f" },
+                  { name: "Academic", dot: "#849b87" },
+                  { name: "Promotions", dot: "#c99a5c" },
+                  { name: "Travel & Bookings", dot: "#c46b5a" },
+                ].map((cat) => (
+                  <div key={cat.name} style={{
+                    display: "flex", alignItems: "center", gap: 6,
+                    padding: "6px 10px", borderRadius: 9999,
+                    background: "#ede9e3", border: "1px solid #e5e2db",
+                  }}>
+                    <div style={{ width: 6, height: 6, borderRadius: "50%", background: cat.dot, flexShrink: 0 }} />
+                    <span style={{ fontSize: 11, color: "#a8a29e", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{cat.name}</span>
+                  </div>
+                ))}
+              </div>
+              <p style={{ fontSize: 12, color: "#a8a29e", textAlign: "center", marginTop: 16 }}>
+                Sync your inbox to see counts
+              </p>
             </div>
           )}
         </div>
@@ -318,12 +340,26 @@ export default function DashboardPage() {
               })}
             </div>
           ) : (
-            <div style={{
-              display: "flex", flexDirection: "column", alignItems: "center",
-              justifyContent: "center", height: 260, gap: 10,
-            }}>
-              <Mail size={28} color="#d6d3d1" />
-              <span style={{ fontSize: 13, color: "#a8a29e" }}>Sync your inbox to see sentiment data</span>
+            <div style={{ display: "flex", flexDirection: "column", gap: 20, paddingTop: 8 }}>
+              {[
+                { label: "Positive", dot: "#849b87" },
+                { label: "Neutral",  dot: "#c99a5c" },
+                { label: "Negative", dot: "#c46b5a" },
+              ].map((row) => (
+                <div key={row.label}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                    <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#a8a29e" }}>
+                      <span style={{ width: 7, height: 7, borderRadius: "50%", background: row.dot, display: "inline-block" }} />
+                      {row.label}
+                    </span>
+                    <span style={{ fontSize: 12, color: "#a8a29e" }}>—</span>
+                  </div>
+                  <div className="dash-shimmer-bar" style={{ height: 8, borderRadius: 9999 }} />
+                </div>
+              ))}
+              <p style={{ fontSize: 12, color: "#a8a29e", textAlign: "center", marginTop: 4 }}>
+                Sync your inbox to see sentiment data
+              </p>
             </div>
           )}
         </div>

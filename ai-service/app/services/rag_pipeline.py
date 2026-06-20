@@ -1,4 +1,4 @@
-import google.generativeai as genai
+from openai import OpenAI
 from typing import List, Dict
 from app.config import get_settings
 from app.services.embeddings import generate_query_embedding
@@ -11,11 +11,16 @@ async def rag_query(query: str, user_id: str, top_k: int = 20) -> Dict:
     1. Embed the user query
     2. Similarity search in pgvector
     3. Build augmented prompt with retrieved context
-    4. Generate answer with Gemini LLM
+    4. Generate answer with NVIDIA NIM (Llama 3.3 70B)
     5. Return answer + source references
     """
     settings = get_settings()
-    genai.configure(api_key=settings.gemini_api_key)
+    
+    # Initialize OpenAI client with NVIDIA NIM endpoint
+    client = OpenAI(
+        base_url=settings.nvidia_base_url,
+        api_key=settings.nvidia_api_key
+    )
 
     # Step 1: Embed the query
     query_embedding = await generate_query_embedding(query)
@@ -60,13 +65,14 @@ User Question: {query}
 
 Answer:"""
 
-    model = genai.GenerativeModel(settings.rag_model)
-    response = model.generate_content(
-        prompt,
-        generation_config=genai.GenerationConfig(
-            temperature=0.3,
-            max_output_tokens=2048,
-        ),
+    response = client.chat.completions.create(
+        model=settings.rag_model,
+        messages=[
+            {"role": "system", "content": "You are InboxIQ, an AI assistant that helps users understand their email inbox. Be helpful, accurate, and concise."},
+            {"role": "user", "content": prompt}
+        ],
+        temperature=0.3,
+        max_tokens=2048,
     )
 
     # Step 5: Format sources
@@ -85,7 +91,7 @@ Answer:"""
             seen_emails.add(chunk["email_id"])
 
     return {
-        "answer": response.text,
+        "answer": response.choices[0].message.content,
         "sources": sources,
         "query": query,
     }

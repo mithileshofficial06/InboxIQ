@@ -18,6 +18,15 @@ const NAV_ITEMS = [
   { href: "/dashboard/memories", icon: Sparkles, label: "Archives" },
 ];
 
+const getAvatarColor = (name: string) => {
+  const colors = ['#6b7a8f', '#849b87', '#c46b5a', '#c99a5c', '#b5838d'];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return colors[Math.abs(hash) % colors.length];
+};
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -71,8 +80,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     </div>
   );
 
-  const userInitial = (user?.email || "U").charAt(0).toUpperCase();
-  const userName = user?.email?.split("@")[0] || "User";
+  const displayName = user?.name || user?.email?.split("@")[0] || "User";
+  const profilePicture = user?.picture_url || null;
+  const initials = displayName
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w: string) => w.charAt(0).toUpperCase())
+    .join("");
+  const avatarBg = getAvatarColor(displayName);
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", background: "#f0ede8" }}>
@@ -134,22 +150,33 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
             {/* Avatar */}
-            <div style={{
-              width: 32, height: 32, borderRadius: "50%", background: "#1c1917",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 13, fontWeight: 600, color: "#fff", flexShrink: 0,
-            }}>
-              {userInitial}
-            </div>
+            {profilePicture ? (
+              <img
+                src={profilePicture}
+                alt={displayName}
+                referrerPolicy="no-referrer"
+                style={{
+                  width: 32, height: 32, borderRadius: "50%", objectFit: "cover", flexShrink: 0,
+                }}
+              />
+            ) : (
+              <div style={{
+                width: 32, height: 32, borderRadius: "50%", background: avatarBg,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 12, fontWeight: 600, color: "#fff", flexShrink: 0,
+              }}>
+                {initials}
+              </div>
+            )}
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{
                 fontSize: 13, fontWeight: 600, color: "#1c1917",
                 overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
               }}>
-                {userName}
+                {displayName}
               </div>
               <div style={{
-                fontSize: 11, color: "#a8a29e",
+                fontSize: 11, color: "#a8a29e", maxWidth: 160,
                 overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
               }}>
                 {user?.email}

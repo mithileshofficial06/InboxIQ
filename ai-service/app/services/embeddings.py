@@ -1,45 +1,36 @@
-import google.generativeai as genai
+from openai import OpenAI
 from typing import List
 from app.config import get_settings
 
 
-def _configure():
-    """Configure the Gemini API."""
-    settings = get_settings()
-    genai.configure(api_key=settings.gemini_api_key)
-
-
 async def generate_embedding(text: str) -> List[float]:
     """
-    Generate a vector embedding for a single text using Gemini Embeddings API.
-    Returns a list of floats (768 dimensions).
+    Generate a vector embedding for a single text using NVIDIA NIM Embeddings API.
+    Returns a list of floats (1024 dimensions for nv-embedqa-e5-v5).
     """
-    _configure()
     settings = get_settings()
-
-    result = genai.embed_content(
-        model=settings.embedding_model,
-        content=text,
-        task_type="retrieval_document",
+    
+    # Initialize OpenAI client with NVIDIA NIM endpoint
+    client = OpenAI(
+        base_url=settings.nvidia_base_url,
+        api_key=settings.nvidia_api_key
     )
 
-    return result["embedding"]
+    response = client.embeddings.create(
+        model=settings.embedding_model,
+        input=text,
+        encoding_format="float"
+    )
+
+    return response.data[0].embedding
 
 
 async def generate_query_embedding(text: str) -> List[float]:
     """
-    Generate embedding for a search query (uses retrieval_query task type).
+    Generate embedding for a search query.
+    Uses the same model as document embeddings.
     """
-    _configure()
-    settings = get_settings()
-
-    result = genai.embed_content(
-        model=settings.embedding_model,
-        content=text,
-        task_type="retrieval_query",
-    )
-
-    return result["embedding"]
+    return await generate_embedding(text)
 
 
 async def batch_embed(texts: List[str]) -> List[List[float]]:

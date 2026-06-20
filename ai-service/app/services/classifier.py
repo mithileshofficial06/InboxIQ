@@ -1,4 +1,4 @@
-import google.generativeai as genai
+from openai import OpenAI
 import json
 import re
 from app.config import get_settings
@@ -44,11 +44,14 @@ async def classify_email(subject: str, snippet: str, sender_email: str) -> dict:
 
 
 async def _llm_classify(subject: str, snippet: str, sender_email: str) -> dict:
-    """Use Gemini LLM for classification + sentiment."""
+    """Use NVIDIA NIM (Llama 3.3 70B) for classification + sentiment."""
     settings = get_settings()
-    genai.configure(api_key=settings.gemini_api_key)
-
-    model = genai.GenerativeModel(settings.classification_model)
+    
+    # Initialize OpenAI client with NVIDIA NIM endpoint
+    client = OpenAI(
+        base_url=settings.nvidia_base_url,
+        api_key=settings.nvidia_api_key
+    )
 
     prompt = f"""Analyze this email and provide classification and sentiment analysis.
 
@@ -66,16 +69,19 @@ Give a sentiment score from -1.0 (very negative) to 1.0 (very positive).
 Respond in valid JSON format ONLY, no other text:
 {{"category": "category name", "sentiment": "positive|negative|neutral", "sentiment_score": 0.0}}"""
 
-    response = model.generate_content(
-        prompt,
-        generation_config=genai.GenerationConfig(
-            response_mime_type="application/json",
-            temperature=0.1,
-        ),
+    response = client.chat.completions.create(
+        model=settings.classification_model,
+        messages=[
+            {"role": "system", "content": "You are an email classification assistant. Always respond with valid JSON only."},
+            {"role": "user", "content": prompt}
+        ],
+        temperature=0.1,
+        max_tokens=150,
     )
 
     # Parse JSON response
-    text = response.text.strip()
+    text = response.choices[0].message.content.strip()
+    
     # Handle potential markdown code blocks
     if text.startswith("```"):
         text = re.sub(r'^```(?:json)?\s*', '', text)
