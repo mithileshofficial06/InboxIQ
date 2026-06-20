@@ -7,7 +7,7 @@ import { LayoutDashboard, Inbox, MessageSquare, Users, Briefcase, Bell, Sparkles
 import { auth, emails } from "@/lib/api";
 import toast from "react-hot-toast";
 import { SyncIndicator } from "@/components/SyncIndicator";
-import { ContourField } from "@/components/ContourField";
+import { VideoBackground } from "@/components/VideoBackground";
 
 const NAV_ITEMS = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Overview" },
@@ -194,7 +194,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* ── Main Content Area ── */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", height: "100vh", overflow: "hidden", position: "relative", background: "#f0ede8" }}>
-        <ContourField lineCount={42} color="#b8b2ab" />
+        {/* ── Video Background (double-buffered, gap-free loop) ── */}
+        <VideoBackground src="/bg-loop.mp4" />
 
         {/* Topbar */}
         <header className="animate-fade-in" style={{
