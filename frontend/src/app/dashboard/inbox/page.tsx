@@ -15,12 +15,7 @@ import {
   Meh,
   Frown,
   ExternalLink,
-  Clock,
-  User,
-  Tag,
   Paperclip,
-  TrendingUp,
-  TrendingDown,
 } from "lucide-react";
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -202,15 +197,12 @@ export default function InboxExplorerPage() {
   const activeFiltersCount = [category, sentiment, search, sender, dateFrom, dateTo].filter(Boolean).length;
 
   return (
-    <div className="pb-10">
+    <div className="inbox-explorer">
       {/* Header */}
-      <div 
-        style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.5rem", paddingBottom: "0.5rem", marginBottom: "0.75rem" }}
-        className="flex items-center justify-between bg-white/50 backdrop-blur-md border border-[#e5e2db] rounded-none shadow-[0_2px_12px_rgba(28,25,23,0.02)]"
-      >
-        <div style={{ paddingLeft: "0.25rem" }}>
-          <h1 className="text-[28px] font-bold text-[#1c1917] tracking-[-0.02em] leading-tight">Inbox Explorer</h1>
-          <p className="text-[13px] text-[#78716c] font-medium mt-1">
+      <div className="inbox-explorer-bar inbox-explorer-header">
+        <div>
+          <h1 className="text-[22px] font-bold text-[#1c1917] tracking-[-0.02em] leading-tight">Inbox Explorer</h1>
+          <p className="text-[12px] text-[#78716c] font-medium mt-0.5">
             {total.toLocaleString()} emails • {activeFiltersCount} filter{activeFiltersCount !== 1 ? 's' : ''} active
           </p>
         </div>
@@ -254,10 +246,7 @@ export default function InboxExplorerPage() {
       </div>
 
       {/* Search & Filter Bar */}
-      <div 
-        style={{ paddingLeft: "1.25rem", paddingRight: "1.25rem", paddingTop: "0.5rem", paddingBottom: "0.5rem", marginBottom: "1rem" }}
-        className="bg-white/80 backdrop-blur-md border border-[#e5e2db] rounded-none shadow-[0_2px_12px_rgba(28,25,23,0.03)]"
-      >
+      <div className="inbox-explorer-bar inbox-explorer-toolbar">
         <div className="flex items-center gap-3 flex-wrap">
           {/* Search Input */}
           <div className="flex-1 min-w-[280px] relative h-10">
@@ -386,49 +375,29 @@ export default function InboxExplorerPage() {
       {view === "grid" && (
         <>
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 items-stretch">
+            <div className="inbox-grid">
               {Array.from({ length: 9 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="bg-white border border-[#e5e2db] rounded-[20px] overflow-hidden flex flex-col justify-between animate-pulse"
-                >
-                  {/* Dark Header Strip Skeleton */}
-                  <div className="bg-[#1c1917]/95 px-6 py-5 flex items-center justify-between rounded-t-[19px]">
-                    <div className="flex items-center gap-3.5 w-full">
-                      <div className="w-12 h-12 rounded-full bg-white/10 shrink-0" />
-                      <div className="flex flex-col gap-1.5 flex-1">
-                        <div className="w-[70px] h-3.5 bg-white/15 rounded" />
-                        <div className="w-[130px] h-2.5 bg-white/10 rounded" />
-                      </div>
+                <div key={i} className="inbox-card-skeleton animate-pulse">
+                  <div className="flex items-start gap-2.5">
+                    <div className="w-[30px] h-[30px] rounded-full skeleton shrink-0" />
+                    <div className="flex-1 space-y-1.5 min-w-0">
+                      <div className="w-24 h-3 skeleton" />
+                      <div className="w-32 h-2.5 skeleton" />
                     </div>
-                    <div className="w-20 h-2.5 bg-white/10 rounded shrink-0 self-start pt-1" />
+                    <div className="w-14 h-2.5 skeleton shrink-0" />
                   </div>
-
-                  {/* Body Skeleton */}
-                  <div className="bg-white px-6 pt-5 pb-6 flex-1 flex flex-col justify-between rounded-b-[19px]">
-                    <div>
-                      {/* Category Badge Pill Skeleton */}
-                      <div className="w-24 h-6 bg-[#ede9e3] rounded-full" />
-
-                      {/* Subject Lines Skeleton */}
-                      <div className="space-y-2 mt-4">
-                        <div className="w-full h-5 bg-[#ede9e3] rounded" />
-                        <div className="w-5/6 h-5 bg-[#ede9e3] rounded" />
-                      </div>
-
-                      {/* Preview Lines Skeleton */}
-                      <div className="space-y-1.5 mt-3">
-                        <div className="w-full h-3 bg-[#ede9e3] rounded" />
-                        <div className="w-full h-3 bg-[#ede9e3] rounded" />
-                        <div className="w-2/3 h-3 bg-[#ede9e3] rounded" />
-                      </div>
-                    </div>
-
-                    {/* Footer Skeleton */}
-                    <div className="mt-6 flex items-center justify-between">
-                      <div className="w-32 h-5 bg-[#ede9e3] rounded" />
-                      <div className="w-6 h-6 bg-[#ede9e3] rounded" />
-                    </div>
+                  <div className="w-20 h-4 skeleton rounded" />
+                  <div className="space-y-1.5">
+                    <div className="w-full h-3 skeleton" />
+                    <div className="w-4/5 h-3 skeleton" />
+                  </div>
+                  <div className="space-y-1">
+                    <div className="w-full h-2.5 skeleton" />
+                    <div className="w-2/3 h-2.5 skeleton" />
+                  </div>
+                  <div className="pt-2 border-t border-[#f0ede8] flex justify-between">
+                    <div className="w-12 h-3 skeleton" />
+                    <div className="w-4 h-4 skeleton" />
                   </div>
                 </div>
               ))}
@@ -439,136 +408,82 @@ export default function InboxExplorerPage() {
               <p className="text-lg font-medium">No emails found</p>
               <p className="text-sm">Try adjusting your filters</p>
             </div>
-          ) : (            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-              {emails.map((email) => {
+          ) : (
+            <div className="inbox-grid">
+              {emails.map((email, index) => {
                 const isUnread = !email.is_read;
                 const categoryStyle = getCategoryStyle(email.category);
-                
+                const senderName = email.sender_name || email.sender_email.split("@")[0];
+                const formattedDate =
+                  new Date(email.date).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  }) +
+                  " · " +
+                  new Date(email.date).toLocaleTimeString("en-US", {
+                    hour: "numeric",
+                    minute: "2-digit",
+                  });
+
                 return (
                   <div
                     key={email.id}
                     onClick={() => openEmailDetail(email)}
-                    className="group cursor-pointer bg-white rounded-[20px] border border-[#e5e2db] flex flex-col justify-between overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:-translate-y-1.5 hover:shadow-[0_16px_40px_rgba(28,25,23,0.08)] hover:border-[#d6d3d1] transition-all duration-300 ease-out"
+                    className={`inbox-card group reveal-up ${isUnread ? "inbox-card-unread" : ""}`}
+                    style={{ animationDelay: `${(index % 12) * 0.04}s` }}
                   >
-                    {/* Header Strip */}
-                    <div className="bg-[#1c1917] px-6 py-5 flex items-center justify-between rounded-t-[19px] select-none">
-                      <div className="flex items-center gap-3.5 min-w-0">
-                        {/* Avatar */}
-                        <div className="w-12 h-12 rounded-full bg-white/10 border border-white/5 flex items-center justify-center text-white font-bold text-base select-none shrink-0">
-                          {getInitials(email.sender_name || email.sender_email)}
-                        </div>
-                        {/* Sender Info */}
-                        <div className="min-w-0 flex flex-col gap-0.5">
-                          <div className="font-bold text-white text-[16px] leading-tight truncate">
-                            {email.sender_name || email.sender_email.split("@")[0]}
-                          </div>
-                          <div className="text-[13px] text-[#a8a29e] leading-tight truncate">
-                            {email.sender_email}
-                          </div>
-                        </div>
+                    <div className="inbox-card-header">
+                      <div
+                        className="inbox-card-avatar"
+                        style={{ backgroundColor: getAvatarColor(email.sender_name || email.sender_email) }}
+                      >
+                        {getInitials(email.sender_name || email.sender_email)}
                       </div>
-                      
-                      {/* Date & Unread Indicator */}
-                      <div className="flex items-center gap-2 shrink-0 self-start pt-1">
-                        <span className="text-[13px] text-[#a8a29e] font-medium whitespace-nowrap">
-                          {new Date(email.date).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                          }) + ", " + new Date(email.date).toLocaleTimeString("en-US", {
-                            hour: "numeric",
-                            minute: "2-digit",
-                          })}
-                        </span>
-                        {isUnread && (
-                          <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse shrink-0" title="Unread" />
-                        )}
+                      <div className="inbox-card-sender">
+                        <div className="inbox-card-sender-name">{senderName}</div>
+                        <div className="inbox-card-sender-email">{email.sender_email}</div>
                       </div>
+                      <div className="inbox-card-date">{formattedDate}</div>
                     </div>
 
-                    {/* Body */}
-                    <div className="bg-white px-6 pt-5 pb-6 flex-1 flex flex-col justify-between rounded-b-[19px]">
-                      <div>
-                        {/* Category Badge */}
-                        <div>
-                          <span
-                            className="inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-semibold select-none"
-                            style={{
-                              backgroundColor: categoryStyle.bg,
-                              color: categoryStyle.text,
-                            }}
-                          >
-                            {email.category || "Uncategorized"}
+                    <span
+                      className="inbox-card-badge"
+                      style={{
+                        backgroundColor: categoryStyle.bg,
+                        color: categoryStyle.text,
+                        borderColor: categoryStyle.border,
+                      }}
+                    >
+                      {email.category || "Uncategorized"}
+                    </span>
+
+                    <h3 className={`inbox-card-subject ${isUnread ? "unread" : ""}`}>
+                      {email.subject || "No Subject"}
+                    </h3>
+
+                    <p className="inbox-card-snippet">
+                      {email.snippet || "No preview available"}
+                    </p>
+
+                    <div className="inbox-card-footer">
+                      <div className="inbox-card-footer-icons">
+                        {email.sentiment && SENTIMENT_ICONS[email.sentiment as keyof typeof SENTIMENT_ICONS]}
+                        {email.has_attachments && (
+                          <span className="inbox-card-footer-icon" title="Has attachments">
+                            <Paperclip className="w-3.5 h-3.5" />
                           </span>
-                        </div>
-
-                        {/* Subject */}
-                        <h3 
-                          className="text-[#1c1917] text-[20px] font-bold leading-tight mt-4 select-text"
-                          style={{
-                            display: "-webkit-box",
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: "vertical",
-                            overflow: "hidden",
-                          }}
-                        >
-                          {email.subject || "No Subject"}
-                        </h3>
-
-                        {/* Preview Text */}
-                        <p 
-                          className="text-[#57534e] text-[14px] leading-relaxed mt-3 select-text"
-                          style={{
-                            display: "-webkit-box",
-                            WebkitLineClamp: 3,
-                            WebkitBoxOrient: "vertical",
-                            overflow: "hidden",
-                          }}
-                        >
-                          {email.snippet || "No preview available"}
-                        </p>
+                        )}
+                        {isUnread && (
+                          <span
+                            className="w-1.5 h-1.5 rounded-full bg-[#6b7a8f] dash-pulse-dot shrink-0"
+                            title="Unread"
+                          />
+                        )}
                       </div>
-
-                      {/* Footer */}
-                      <div className="mt-6 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          {email.sentiment && (
-                            <div className="flex items-center gap-2">
-                              {email.sentiment === "positive" && (
-                                <div className="flex items-center gap-1.5 text-[#166534]">
-                                  <Smile className="w-[22px] h-[22px] text-[#166534]" />
-                                  <TrendingUp className="w-4 h-4 text-emerald-600" />
-                                  <span className="text-sm font-semibold tracking-tight">Positive Feedback</span>
-                                </div>
-                              )}
-                              {email.sentiment === "neutral" && (
-                                <div className="flex items-center gap-1.5 text-[#78716c]">
-                                  <Meh className="w-[22px] h-[22px] text-[#78716c]" />
-                                  <span className="text-sm font-semibold tracking-tight">Neutral Feedback</span>
-                                </div>
-                              )}
-                              {email.sentiment === "negative" && (
-                                <div className="flex items-center gap-1.5 text-[#9f1239]">
-                                  <Frown className="w-[22px] h-[22px] text-[#9f1239]" />
-                                  <TrendingDown className="w-4 h-4 text-rose-600" />
-                                  <span className="text-sm font-semibold tracking-tight">Negative Feedback</span>
-                                </div>
-                              )}
-                            </div>
-                          )}
-                          {email.has_attachments && (
-                            <div className="flex items-center gap-1.5 text-stone-400">
-                              <Paperclip className="w-4 h-4" />
-                              <span className="text-xs font-medium">Attachment</span>
-                            </div>
-                          )}
-                        </div>
-                        
-                        {/* Hover Arrow */}
-                        <div className="text-gray-400 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-x-1 shrink-0">
-                          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5-5 5M6 12h12" />
-                          </svg>
-                        </div>
+                      <div className="inbox-card-arrow">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5-5 5M6 12h12" />
+                        </svg>
                       </div>
                     </div>
                   </div>
