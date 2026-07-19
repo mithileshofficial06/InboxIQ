@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
 import { config } from './config';
 import { validateEnvironment } from './config/validation';
+import { getRedis } from './config/redis';
 import { startSyncWorker, stopSyncWorker } from './queues/emailSync.worker';
 
 // Route imports
@@ -19,6 +20,9 @@ import searchRoutes from './routes/search.routes';
 
 // Validate environment variables at startup
 validateEnvironment();
+
+// Initialize Redis connection early
+getRedis();
 
 const app = express();
 
@@ -113,7 +117,7 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
 // ====================
 // Start Server
 // ====================
-const server = app.listen(config.port, () => {
+const server = app.listen(config.port, async () => {
   console.log(`
 ╔══════════════════════════════════════════╗
 ║        InboxIQ Backend API               ║
@@ -122,8 +126,10 @@ const server = app.listen(config.port, () => {
 ╚══════════════════════════════════════════╝
   `);
 
-  // Start BullMQ sync worker
+  // Start BullMQ sync worker (wait for Redis connection)
   try {
+    // Give Redis 2 seconds to connect, then start worker
+    await new Promise(resolve => setTimeout(resolve, 2000));
     startSyncWorker();
   } catch (err) {
     console.warn('[Server] Failed to start sync worker (Redis may not be available):', (err as Error).message);
