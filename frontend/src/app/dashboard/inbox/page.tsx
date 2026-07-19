@@ -723,7 +723,6 @@ export default function InboxExplorerPage() {
         </div>
       )}
       </div>
-    </div>
 
       {/* Email Detail Modal */}
       {selectedEmail && (
