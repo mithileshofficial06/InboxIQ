@@ -1,0 +1,226 @@
+# InboxIQ — AI-Powered Gmail Analytics Dashboard
+### Project Report
+
+---
+
+## 1. Abstract
+
+InboxIQ is a personal Gmail analytics dashboard that transforms a user's inbox into an interactive, insight-rich experience — similar to how Google Photos organizes media. It uses OAuth 2.0 for secure read-only Gmail access, processes emails through an AI pipeline for classification and semantic embedding, and exposes insights through a modern web dashboard with natural language querying capabilities powered by Retrieval Augmented Generation (RAG).
+
+---
+
+## 2. Introduction
+
+The average professional receives 120+ emails per day. Despite this volume, Gmail's native interface offers zero analytics, no categorization intelligence, and no way to query your inbox conversationally. Tools that do exist are built for enterprise teams — not individual users or students.
+
+InboxIQ fills this gap by treating a personal inbox as a structured data source and building a full analytics + AI layer on top of it — entirely read-only, entirely private.
+
+---
+
+## 3. Problem Statement
+
+- Users have no visibility into their own email behaviour and patterns
+- Finding specific emails requires exact keyword recall
+- Job applications, subscriptions, and bills are scattered with no tracking
+- No tool exists that gives personal inbox analytics the way Spotify Wrapped gives music analytics
+- Existing solutions (Email Meter, Superhuman) target businesses, not individuals
+
+---
+
+## 4. Objectives
+
+- Build a secure, read-only Gmail integration using OAuth 2.0
+- Design a fault-tolerant email sync pipeline handling rate limits and pagination
+- Implement AI-powered email classification across 9 categories
+- Build a semantic search and RAG pipeline for natural language inbox querying
+- Visualize inbox data through an interactive dashboard with charts, timelines, and heatmaps
+- Auto-track job applications, subscriptions, and people intelligence
+- Surface meaningful email memories and highlights
+
+---
+
+## 5. System Architecture
+
+The system is composed of four independently deployable layers:
+
+**Frontend** — Next.js + Tailwind CSS hosted on Vercel. Handles all user interaction, dashboard rendering, and AI chat interface.
+
+**Backend API** — Node.js + Express hosted on Railway. Manages OAuth flow, Gmail API communication, rate limit queuing via Bull + Redis, and acts as the orchestrator between frontend and AI microservice.
+
+**AI Microservice** — Python + FastAPI hosted on Railway. Handles email chunking, vector embedding generation, pgvector storage, RAG pipeline execution, email classification, and sentiment analysis.
+
+**Database** — PostgreSQL with pgvector extension on Supabase. Stores user data, email metadata, vector embeddings, classified categories, job application states, and subscription records.
+
+---
+
+## 6. Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | Next.js, Tailwind CSS |
+| Backend | Node.js, Express.js |
+| AI Microservice | Python, FastAPI |
+| Database | PostgreSQL, pgvector (Supabase) |
+| Queue | Bull, Redis (Upstash) |
+| Embeddings | Gemini Embeddings API |
+| LLM | Gemini / Claude API |
+| Auth | Google OAuth 2.0 |
+| Hosting | Vercel, Railway, Supabase, Upstash |
+
+---
+
+## 7. Key Modules
+
+### 7.1 Gmail Sync Engine
+Fetches the user's entire inbox history using Gmail API with batch pagination (100 emails per request). A Bull queue manages API calls with exponential backoff to handle rate limits gracefully. The sync runs incrementally in the background every 30 minutes to capture new emails without re-processing existing ones.
+
+### 7.2 Email Chunking Pipeline
+Email threads can span dozens of replies. Raw threads are split into semantically meaningful chunks before embedding — preserving conversation context while staying within embedding model token limits. This chunking strategy directly impacts RAG retrieval quality.
+
+### 7.3 Vector Embedding + pgvector Storage
+Each email chunk is converted to a high-dimensional vector using Gemini Embeddings API and stored in PostgreSQL via the pgvector extension. An HNSW index is applied to pgvector columns, reducing similarity search latency significantly compared to brute-force search.
+
+### 7.4 AI Classification Engine
+Each email is classified into one of nine categories — Bills & Invoices, Job Applications, Orders & Deliveries, OTPs & Notifications, Newsletters, Real People, Academic, Promotions, Travel & Bookings — using prompt-engineered LLM classification with fallback heuristics for speed.
+
+### 7.5 RAG Pipeline
+User natural language queries are embedded and used to retrieve the top-k most relevant email chunks from pgvector. These chunks are passed as context to the LLM along with the user's query. The LLM generates a grounded answer with source email references streamed back to the frontend.
+
+### 7.6 People Intelligence Engine
+Analyzes sender/recipient metadata to compute relationship strength scores, reply rates, response times, and conversation frequency per contact. Surfaces contacts the user frequently interacts with vs those they ignore.
+
+### 7.7 Job Application Tracker
+Detects job-related emails using classification + keyword heuristics and maps them to a state machine — Applied → Replied → Interview → Offer → Rejected. Tracks timeline per company and computes aggregate stats like response rate and average company reply time.
+
+### 7.8 Subscription Tracker
+Auto-detects recurring sender patterns and marketing emails to identify active and dead subscriptions. Tags each by category — SaaS, Food, Finance, Shopping, Travel — and flags services from which the user signed up but never heard from again.
+
+### 7.9 Memories & Highlights
+Detects milestone emails — first message from a person, offer letters, admission confirmations, first internship application — and surfaces them as "on this day" style highlights on the dashboard.
+
+---
+
+## 8. Database Schema
+
+**users** — id, google_id, email, access_token, refresh_token, created_at
+
+**emails** — id, user_id, gmail_id, sender, subject, date, category, sentiment, is_thread, thread_id
+
+**email_chunks** — id, email_id, chunk_text, chunk_index
+
+**embeddings** — id, chunk_id, embedding (vector), created_at
+
+**subscriptions** — id, user_id, sender_domain, service_name, last_email_date, frequency, category, is_dead
+
+**job_applications** — id, user_id, company_name, role, status, applied_date, last_update_date, email_ids
+
+---
+
+## 9. Data Flow
+
+```
+User logs in via Google OAuth
+→ Access + refresh tokens stored securely
+→ Bull job triggered: full inbox sync
+→ Gmail API paginated in batches of 100 emails
+→ Metadata stored in PostgreSQL (emails table)
+→ Email body chunked by thread
+→ Each chunk embedded via Gemini Embeddings API
+→ Vectors stored in pgvector (embeddings table)
+→ FastAPI classifies category + sentiment per email
+→ Dashboard populated with analytics
+→ Background sync every 30 mins for new emails
+```
+
+---
+
+## 10. RAG Query Flow
+
+```
+User types natural language query
+→ Query embedded via Gemini Embeddings API
+→ pgvector similarity search retrieves top-20 relevant chunks
+→ Chunks + query passed to LLM as context
+→ LLM generates grounded answer
+→ Response streamed to frontend
+→ Source emails shown below answer
+```
+
+---
+
+## 11. Features Summary
+
+**Authentication & Privacy** — Google OAuth 2.0, read-only scope, full data deletion
+
+**Dashboard** — email volume stats, sentiment overview, category breakdown, top senders
+
+**Inbox Explorer** — card/grid view, timeline view, filters, full thread reader
+
+**Smart Categories** — 9 AI-classified categories across all emails
+
+**People Intelligence** — relationship scores, reply rates, contact timelines
+
+**Subscription Tracker** — auto-detected services, dead subscription flags
+
+**Job Application Tracker** — status pipeline, company timeline, response rate stats
+
+**AI Chat (RAG)** — natural language queries over entire inbox, streamed answers, source references
+
+**Insights & Analytics** — heatmap, sentiment trend, inbox growth chart, active hours
+
+**Memories** — milestone email detection, "on this day" highlights
+
+---
+
+## 12. Technical Challenges & Solutions
+
+| Challenge | Solution |
+|---|---|
+| Gmail API rate limits | Exponential backoff queue using Bull + Redis |
+| Large inbox processing (50k+ emails) | Incremental batch sync with resumable jobs |
+| Slow vector search at scale | HNSW index on pgvector columns |
+| Email thread context in RAG | Custom chunking strategy preserving thread context |
+| Private email data security | Read-only OAuth scope, no raw email body stored — only embeddings and metadata |
+| LLM hallucination in chat | RAG grounds all answers in actual retrieved email chunks |
+
+---
+
+## 13. Privacy & Security
+
+- OAuth 2.0 with minimal `gmail.readonly` scope — app cannot send, delete, or modify any email
+- Raw email body text is never persisted — only embeddings and metadata are stored
+- All tokens encrypted at rest in PostgreSQL
+- User can disconnect Google account and delete all data at any time
+- App runs in Google Cloud OAuth testing mode during development — no external user data collected
+
+---
+
+## 14. Deployment Architecture
+
+| Service | Platform | Cost |
+|---|---|---|
+| Next.js Frontend | Vercel | Free |
+| Node.js Backend | Railway | Free tier |
+| Python FastAPI | Railway | Free tier |
+| PostgreSQL + pgvector | Supabase | Free tier |
+| Redis + Bull | Upstash | Free tier |
+| Domain (optional) | Namecheap | ~₹800/year |
+
+**Total development cost — ₹0**
+
+---
+
+## 15. Future Scope
+
+- Chrome extension for inline email insights inside Gmail
+- Outlook / Yahoo Mail support
+- Fine-tuned local embedding model to eliminate API dependency
+- Mobile app (React Native)
+- Weekly email digest report auto-generated and mailed to user
+- Export insights as PDF report
+
+---
+
+## 16. Conclusion
+
+InboxIQ demonstrates end-to-end full stack engineering across OAuth integration, distributed job queuing, vector databases, RAG pipelines, microservice architecture, and modern frontend development — all solving a real, personal problem that every developer and student faces. The project is entirely self-funded at zero cost and deployable on free-tier infrastructure, making it accessible and reproducible.

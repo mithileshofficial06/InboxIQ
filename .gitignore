@@ -16,10 +16,7 @@ out/
 .env.local
 .env.production
 .env.*.local
-# But always commit .example files (templates)
-!.env.example
-!.env.local.example
-!ai-service/.env.example
+.env.example
 
 # IDE
 .vscode/

@@ -197,73 +197,76 @@ export default function InboxExplorerPage() {
   const activeFiltersCount = [category, sentiment, search, sender, dateFrom, dateTo].filter(Boolean).length;
 
   return (
-    <div className="inbox-explorer">
+    <div className="min-h-screen bg-[#f0ede8] p-12">
+      <div className="max-w-[1600px] mx-auto">
       {/* Header */}
-      <div className="inbox-explorer-bar inbox-explorer-header">
+      <div className="mb-10">
+        <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-[22px] font-bold text-[#1c1917] tracking-[-0.02em] leading-tight">Inbox Explorer</h1>
-          <p className="text-[12px] text-[#78716c] font-medium mt-0.5">
+          <h1 className="text-4xl font-bold text-[#1c1917] tracking-tight leading-tight mb-2">Inbox Explorer</h1>
+          <p className="text-base text-[#78716c] font-medium">
             {total.toLocaleString()} emails • {activeFiltersCount} filter{activeFiltersCount !== 1 ? 's' : ''} active
           </p>
         </div>
 
         {/* View Mode Toggle */}
-        <div className="flex items-center gap-1 bg-white border border-[#e5e2db] rounded-none p-1">
+        <div className="flex items-center gap-2 bg-white border-2 border-[#e5e2db] rounded-xl p-2 shadow-sm">
           <button
             onClick={() => setView("grid")}
-            className={`transition-colors ${
+            className={`transition-all duration-200 ${
               view === "grid"
-                ? "bg-[#1c1917] text-white"
+                ? "bg-[#1c1917] text-white shadow-md"
                 : "text-[#a8a29e] bg-transparent hover:bg-[#ede9e3]"
-            } rounded-none w-[28px] h-[28px] flex items-center justify-center cursor-pointer`}
+            } rounded-lg w-10 h-10 flex items-center justify-center cursor-pointer`}
             title="Grid View"
           >
-            <Grid className="w-4 h-4" />
+            <Grid className="w-5 h-5" />
           </button>
           <button
             onClick={() => setView("list")}
-            className={`transition-colors ${
+            className={`transition-all duration-200 ${
               view === "list"
-                ? "bg-[#1c1917] text-white"
+                ? "bg-[#1c1917] text-white shadow-md"
                 : "text-[#a8a29e] bg-transparent hover:bg-[#ede9e3]"
-            } rounded-none w-[28px] h-[28px] flex items-center justify-center cursor-pointer`}
+            } rounded-lg w-10 h-10 flex items-center justify-center cursor-pointer`}
             title="List View"
           >
-            <List className="w-4 h-4" />
+            <List className="w-5 h-5" />
           </button>
           <button
             onClick={() => setView("timeline")}
-            className={`transition-colors ${
+            className={`transition-all duration-200 ${
               view === "timeline"
-                ? "bg-[#1c1917] text-white"
+                ? "bg-[#1c1917] text-white shadow-md"
                 : "text-[#a8a29e] bg-transparent hover:bg-[#ede9e3]"
-            } rounded-none w-[28px] h-[28px] flex items-center justify-center cursor-pointer`}
+            } rounded-lg w-10 h-10 flex items-center justify-center cursor-pointer`}
             title="Timeline View"
           >
-            <Calendar className="w-4 h-4" />
+            <Calendar className="w-5 h-5" />
           </button>
+        </div>
         </div>
       </div>
 
       {/* Search & Filter Bar */}
-      <div className="inbox-explorer-bar inbox-explorer-toolbar">
-        <div className="flex items-center gap-3 flex-wrap">
+      <div className="bg-white border-2 border-[#e5e2db] rounded-2xl p-6 mb-10 shadow-sm">
+        <div className="flex items-center gap-4 flex-wrap">
           {/* Search Input */}
-          <div className="flex-1 min-w-[280px] relative h-10">
-            <Search className="w-4 h-4 text-[#a8a29e] absolute left-4 top-1/2 -translate-y-1/2" />
+          <div className="flex-1 min-w-[320px] relative h-14">
+            <Search className="w-5 h-5 text-[#a8a29e] absolute left-5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && applyFilters()}
               placeholder="Search subjects, senders, content..."
-              style={{ paddingLeft: "2.75rem" }}
-              className="w-full h-full pr-4 border border-[#e5e2db] rounded-xl text-[14px] text-[#1c1917] bg-white placeholder-[#a8a29e] hover:border-[#d6d3d1] focus:border-[#1c1917] focus:ring-2 focus:ring-[#1c1917]/10 focus:outline-none transition-all duration-200"
+              style={{ paddingLeft: "3.5rem" }}
+              className="w-full h-full pr-5 border-2 border-[#e5e2db] rounded-xl text-base text-[#1c1917] bg-white placeholder-[#a8a29e] hover:border-[#d6d3d1] focus:border-[#1c1917] focus:ring-4 focus:ring-[#1c1917]/10 focus:outline-none transition-all duration-200"
             />
           </div>
 
           {/* Quick Category Filter */}
-          <div className="relative h-10 min-w-[170px]">
+          <div className="relative h-14 min-w-[200px]">
             <select
               value={category}
               onChange={(e) => {
@@ -271,8 +274,8 @@ export default function InboxExplorerPage() {
                 setPage(1);
                 loadEmails();
               }}
-              style={{ paddingLeft: "1.25rem", paddingRight: "2.5rem" }}
-              className="appearance-none w-full h-full border border-[#e5e2db] rounded-none text-[14px] text-[#1c1917] bg-white cursor-pointer hover:border-[#d6d3d1] focus:border-[#1c1917] focus:ring-2 focus:ring-[#1c1917]/10 focus:outline-none transition-all duration-200"
+              style={{ paddingLeft: "1.5rem", paddingRight: "3rem" }}
+              className="appearance-none w-full h-full border-2 border-[#e5e2db] rounded-xl text-base text-[#1c1917] bg-white cursor-pointer hover:border-[#d6d3d1] focus:border-[#1c1917] focus:ring-4 focus:ring-[#1c1917]/10 focus:outline-none transition-all duration-200 font-medium"
             >
               <option value="">All Categories</option>
               {Object.keys(CATEGORY_COLORS).map((cat) => (
@@ -281,19 +284,19 @@ export default function InboxExplorerPage() {
                 </option>
               ))}
             </select>
-            <ChevronDown className="w-4 h-4 text-[#a8a29e] absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <ChevronDown className="w-5 h-5 text-[#a8a29e] absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
 
           {/* Advanced Filters Toggle */}
           <button
             onClick={() => setShowFilters(!showFilters)}
-            style={{ paddingLeft: "1.5rem", paddingRight: "1.5rem" }}
-            className="flex items-center gap-2.5 h-10 border border-[#e5e2db] rounded-none text-[14px] font-semibold text-[#1c1917] bg-white hover:bg-[#f5f2ed] hover:border-[#d6d3d1] transition-all relative shrink-0 cursor-pointer"
+            style={{ paddingLeft: "2rem", paddingRight: "2rem" }}
+            className="flex items-center gap-3 h-14 border-2 border-[#e5e2db] rounded-xl text-base font-bold text-[#1c1917] bg-white hover:bg-[#f5f2ed] hover:border-[#d6d3d1] transition-all relative shrink-0 cursor-pointer"
           >
-            <SlidersHorizontal className="w-4 h-4 text-[#78716c]" />
+            <SlidersHorizontal className="w-5 h-5 text-[#78716c]" />
             <span>Filters</span>
             {activeFiltersCount > 0 && (
-              <span className="ml-1.5 px-1.5 py-0.5 text-[10px] leading-none bg-[#1c1917] text-white rounded-full font-bold">
+              <span className="ml-2 px-2.5 py-1 text-xs leading-none bg-[#1c1917] text-white rounded-full font-bold">
                 {activeFiltersCount}
               </span>
             )}
@@ -302,67 +305,67 @@ export default function InboxExplorerPage() {
           {/* Search Button */}
           <button
             onClick={applyFilters}
-            className="w-10 h-10 flex items-center justify-center bg-[#1c1917] text-white rounded-none hover:bg-[#292524] active:scale-[0.98] transition-all shrink-0 cursor-pointer"
+            className="w-14 h-14 flex items-center justify-center bg-[#1c1917] text-white rounded-xl hover:bg-[#292524] active:scale-95 transition-all shrink-0 cursor-pointer shadow-md hover:shadow-lg"
           >
-            <Search className="w-5 h-5 text-white" />
+            <Search className="w-6 h-6 text-white" />
           </button>
         </div>
 
         {/* Advanced Filters Panel */}
         {showFilters && (
-          <div className="mt-4 pt-4 border-t border-[#e5e2db] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="mt-6 pt-6 border-t-2 border-[#e5e2db] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             <div>
-              <label className="block text-xs font-semibold text-[#57534e] mb-2">Sentiment</label>
-              <div className="relative h-10">
+              <label className="block text-sm font-bold text-[#57534e] mb-3">Sentiment</label>
+              <div className="relative h-12">
                 <select
                   value={sentiment}
                   onChange={(e) => setSentiment(e.target.value)}
-                  className="appearance-none w-full h-full pl-4 pr-10 border border-[#e5e2db] rounded-lg text-[14px] text-[#1c1917] bg-white focus:border-[#1c1917] focus:shadow-[0_0_0_2px_rgba(28,25,23,0.06)] focus:outline-none transition-all cursor-pointer"
+                  className="appearance-none w-full h-full pl-5 pr-12 border-2 border-[#e5e2db] rounded-xl text-base text-[#1c1917] bg-white focus:border-[#1c1917] focus:ring-4 focus:ring-[#1c1917]/10 focus:outline-none transition-all cursor-pointer"
                 >
                   <option value="">All Sentiments</option>
                   <option value="positive">Positive</option>
                   <option value="neutral">Neutral</option>
                   <option value="negative">Negative</option>
                 </select>
-                <ChevronDown className="w-4 h-4 text-[#a8a29e] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <ChevronDown className="w-5 h-5 text-[#a8a29e] absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#57534e] mb-2">Sender</label>
+              <label className="block text-sm font-bold text-[#57534e] mb-3">Sender</label>
               <input
                 type="text"
                 value={sender}
                 onChange={(e) => setSender(e.target.value)}
                 placeholder="sender@example.com"
-                className="w-full h-10 px-4 border border-[#e5e2db] rounded-lg text-[14px] text-[#1c1917] bg-white focus:border-[#1c1917] focus:shadow-[0_0_0_2px_rgba(28,25,23,0.06)] focus:outline-none transition-all"
+                className="w-full h-12 px-5 border-2 border-[#e5e2db] rounded-xl text-base text-[#1c1917] bg-white focus:border-[#1c1917] focus:ring-4 focus:ring-[#1c1917]/10 focus:outline-none transition-all"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#57534e] mb-2">From Date</label>
+              <label className="block text-sm font-bold text-[#57534e] mb-3">From Date</label>
               <input
                 type="date"
                 value={dateFrom}
                 onChange={(e) => setDateFrom(e.target.value)}
-                className="w-full h-10 px-4 border border-[#e5e2db] rounded-lg text-[14px] text-[#1c1917] bg-white focus:border-[#1c1917] focus:shadow-[0_0_0_2px_rgba(28,25,23,0.06)] focus:outline-none transition-all"
+                className="w-full h-12 px-5 border-2 border-[#e5e2db] rounded-xl text-base text-[#1c1917] bg-white focus:border-[#1c1917] focus:ring-4 focus:ring-[#1c1917]/10 focus:outline-none transition-all"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#57534e] mb-2">To Date</label>
+              <label className="block text-sm font-bold text-[#57534e] mb-3">To Date</label>
               <input
                 type="date"
                 value={dateTo}
                 onChange={(e) => setDateTo(e.target.value)}
-                className="w-full h-10 px-4 border border-[#e5e2db] rounded-lg text-[14px] text-[#1c1917] bg-white focus:border-[#1c1917] focus:shadow-[0_0_0_2px_rgba(28,25,23,0.06)] focus:outline-none transition-all"
+                className="w-full h-12 px-5 border-2 border-[#e5e2db] rounded-xl text-base text-[#1c1917] bg-white focus:border-[#1c1917] focus:ring-4 focus:ring-[#1c1917]/10 focus:outline-none transition-all"
               />
             </div>
 
-            <div className="sm:col-span-2 lg:col-span-4 flex justify-end gap-2">
+            <div className="sm:col-span-2 lg:col-span-4 flex justify-end gap-3 mt-2">
               <button
                 onClick={clearFilters}
-                className="px-4 py-2 text-sm text-[#57534e] hover:text-[#1c1917] transition-colors"
+                className="px-6 py-3 text-base font-semibold text-[#57534e] hover:text-[#1c1917] transition-colors"
               >
                 Clear All
               </button>
@@ -375,41 +378,42 @@ export default function InboxExplorerPage() {
       {view === "grid" && (
         <>
           {loading ? (
-            <div className="inbox-grid">
-              {Array.from({ length: 9 }).map((_, i) => (
-                <div key={i} className="inbox-card-skeleton animate-pulse">
-                  <div className="flex items-start gap-2.5">
-                    <div className="w-[30px] h-[30px] rounded-full skeleton shrink-0" />
-                    <div className="flex-1 space-y-1.5 min-w-0">
-                      <div className="w-24 h-3 skeleton" />
-                      <div className="w-32 h-2.5 skeleton" />
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-10">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="bg-white rounded-3xl border-2 border-gray-200 p-8 animate-pulse">
+                  <div className="flex items-start gap-5 mb-6">
+                    <div className="w-16 h-16 rounded-full bg-gray-200 shrink-0" />
+                    <div className="flex-1 space-y-3 min-w-0">
+                      <div className="w-32 h-4 bg-gray-200 rounded" />
+                      <div className="w-48 h-3 bg-gray-200 rounded" />
                     </div>
-                    <div className="w-14 h-2.5 skeleton shrink-0" />
+                    <div className="w-20 h-3 bg-gray-200 rounded shrink-0" />
                   </div>
-                  <div className="w-20 h-4 skeleton rounded" />
-                  <div className="space-y-1.5">
-                    <div className="w-full h-3 skeleton" />
-                    <div className="w-4/5 h-3 skeleton" />
+                  <div className="w-32 h-7 bg-gray-200 rounded-full mb-5" />
+                  <div className="space-y-3 mb-4">
+                    <div className="w-full h-5 bg-gray-200 rounded" />
+                    <div className="w-4/5 h-5 bg-gray-200 rounded" />
                   </div>
-                  <div className="space-y-1">
-                    <div className="w-full h-2.5 skeleton" />
-                    <div className="w-2/3 h-2.5 skeleton" />
+                  <div className="space-y-2 mb-6">
+                    <div className="w-full h-4 bg-gray-200 rounded" />
+                    <div className="w-full h-4 bg-gray-200 rounded" />
+                    <div className="w-2/3 h-4 bg-gray-200 rounded" />
                   </div>
-                  <div className="pt-2 border-t border-[#f0ede8] flex justify-between">
-                    <div className="w-12 h-3 skeleton" />
-                    <div className="w-4 h-4 skeleton" />
+                  <div className="pt-6 border-t-2 border-gray-100 flex justify-between">
+                    <div className="w-16 h-5 bg-gray-200 rounded" />
+                    <div className="w-6 h-6 bg-gray-200 rounded" />
                   </div>
                 </div>
               ))}
             </div>
           ) : emails.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-[#a8a29e]">
-              <Mail className="w-16 h-16 mb-4" />
-              <p className="text-lg font-medium">No emails found</p>
-              <p className="text-sm">Try adjusting your filters</p>
+            <div className="flex flex-col items-center justify-center py-32 text-gray-400">
+              <Mail className="w-20 h-20 mb-6" />
+              <p className="text-xl font-semibold mb-2">No emails found</p>
+              <p className="text-base">Try adjusting your filters</p>
             </div>
           ) : (
-            <div className="inbox-grid">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-10">
               {emails.map((email, index) => {
                 const isUnread = !email.is_read;
                 const categoryStyle = getCategoryStyle(email.category);
@@ -429,60 +433,95 @@ export default function InboxExplorerPage() {
                   <div
                     key={email.id}
                     onClick={() => openEmailDetail(email)}
-                    className={`inbox-card group reveal-up ${isUnread ? "inbox-card-unread" : ""}`}
+                    className={`group cursor-pointer bg-white rounded-3xl border-2 transition-all duration-300 ease-out shadow-sm hover:shadow-2xl hover:-translate-y-2 hover:border-gray-400 p-8 reveal-up ${
+                      isUnread
+                        ? "border-l-[6px] border-l-blue-600 border-t-gray-200 border-r-gray-200 border-b-gray-200"
+                        : "border-gray-200"
+                    }`}
                     style={{ animationDelay: `${(index % 12) * 0.04}s` }}
                   >
-                    <div className="inbox-card-header">
+                    {/* Header: Avatar + Sender Info + Date */}
+                    <div className="flex items-start gap-5 mb-6">
                       <div
-                        className="inbox-card-avatar"
+                        className="w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-xl shrink-0 shadow-md"
                         style={{ backgroundColor: getAvatarColor(email.sender_name || email.sender_email) }}
                       >
                         {getInitials(email.sender_name || email.sender_email)}
                       </div>
-                      <div className="inbox-card-sender">
-                        <div className="inbox-card-sender-name">{senderName}</div>
-                        <div className="inbox-card-sender-email">{email.sender_email}</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-base font-bold text-gray-900 truncate mb-1">{senderName}</div>
+                        <div className="text-sm text-gray-500 truncate">{email.sender_email}</div>
                       </div>
-                      <div className="inbox-card-date">{formattedDate}</div>
+                      <div className="text-xs font-medium text-gray-500 text-right flex-shrink-0 whitespace-nowrap ml-2">
+                        {formattedDate}
+                      </div>
                     </div>
 
-                    <span
-                      className="inbox-card-badge"
+                    {/* Category Badge */}
+                    <div className="mb-5">
+                      <span
+                        className="inline-flex items-center px-4 py-2 rounded-full text-xs font-semibold border-2"
+                        style={{
+                          backgroundColor: categoryStyle.bg,
+                          color: categoryStyle.text,
+                          borderColor: categoryStyle.border,
+                        }}
+                      >
+                        {email.category || "Uncategorized"}
+                      </span>
+                    </div>
+
+                    {/* Subject */}
+                    <h3
+                      className={`text-xl mb-4 leading-snug ${
+                        isUnread ? "font-extrabold" : "font-bold"
+                      } text-gray-900`}
                       style={{
-                        backgroundColor: categoryStyle.bg,
-                        color: categoryStyle.text,
-                        borderColor: categoryStyle.border,
+                        display: "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
                       }}
                     >
-                      {email.category || "Uncategorized"}
-                    </span>
-
-                    <h3 className={`inbox-card-subject ${isUnread ? "unread" : ""}`}>
                       {email.subject || "No Subject"}
                     </h3>
 
-                    <p className="inbox-card-snippet">
+                    {/* Preview Text */}
+                    <p
+                      className="text-base text-gray-600 leading-relaxed mb-6"
+                      style={{
+                        display: "-webkit-box",
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                      }}
+                    >
                       {email.snippet || "No preview available"}
                     </p>
 
-                    <div className="inbox-card-footer">
-                      <div className="inbox-card-footer-icons">
-                        {email.sentiment && SENTIMENT_ICONS[email.sentiment as keyof typeof SENTIMENT_ICONS]}
+                    {/* Footer */}
+                    <div className="flex items-center justify-between pt-6 border-t-2 border-gray-100">
+                      <div className="flex items-center gap-4">
+                        {email.sentiment && (
+                          <div className="flex items-center">
+                            {SENTIMENT_ICONS[email.sentiment as keyof typeof SENTIMENT_ICONS]}
+                          </div>
+                        )}
                         {email.has_attachments && (
-                          <span className="inbox-card-footer-icon" title="Has attachments">
-                            <Paperclip className="w-3.5 h-3.5" />
-                          </span>
+                          <div className="flex items-center text-gray-400" title="Has attachments">
+                            <Paperclip className="w-5 h-5" />
+                          </div>
                         )}
                         {isUnread && (
                           <span
-                            className="w-1.5 h-1.5 rounded-full bg-[#6b7a8f] dash-pulse-dot shrink-0"
+                            className="w-3 h-3 rounded-full bg-blue-600 dash-pulse-dot shrink-0"
                             title="Unread"
                           />
                         )}
                       </div>
-                      <div className="inbox-card-arrow">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5-5 5M6 12h12" />
+                      <div className="text-gray-300 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5-5 5M6 12h12" />
                         </svg>
                       </div>
                     </div>
@@ -663,26 +702,28 @@ export default function InboxExplorerPage() {
 
       {/* Pagination */}
       {view !== "timeline" && totalPages > 1 && (
-        <div className="flex items-center justify-center gap-6 mt-8">
+        <div className="flex items-center justify-center gap-8 mt-12">
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page <= 1}
-            className="px-4 py-2 text-sm font-medium text-[#57534e] border border-[#e5e2db] rounded-lg hover:bg-[#f5f2ed] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-6 py-3 text-base font-semibold text-[#57534e] border-2 border-[#e5e2db] rounded-xl hover:bg-[#f5f2ed] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md"
           >
             Previous
           </button>
-          <span className="text-sm text-[#57534e]">
+          <span className="text-base font-medium text-[#57534e]">
             Page {page} of {totalPages}
           </span>
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages}
-            className="px-4 py-2 text-sm font-medium text-[#57534e] border border-[#e5e2db] rounded-lg hover:bg-[#f5f2ed] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-6 py-3 text-base font-semibold text-[#57534e] border-2 border-[#e5e2db] rounded-xl hover:bg-[#f5f2ed] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md"
           >
             Next
           </button>
         </div>
       )}
+      </div>
+    </div>
 
       {/* Email Detail Modal */}
       {selectedEmail && (

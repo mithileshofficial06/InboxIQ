@@ -1,0 +1,87 @@
+Here are the features, split by layer —
+
+---
+
+## 📬 Core Features
+
+### 1. Gmail OAuth Login
+- Sign in with Google, request Gmail read permissions
+- No password stored, fully secure
+
+### 2. Inbox Dashboard (The Google Photos moment)
+- Visual grid/card view of emails instead of boring list
+- Filter by — People, Date, Category, Sentiment
+- **Timeline view** — scroll through your email history like a photo timeline
+
+### 3. Smart Auto-Categories (AI powered)
+Automatically buckets every email into:
+- 🧾 Bills & Invoices
+- 💼 Job Applications & Responses
+- 📦 Orders & Deliveries
+- 🔔 OTPs & Notifications
+- 📰 Newsletters
+- 👤 Real people (actual human conversations)
+- 🎓 College / Academic
+
+### 4. People Intelligence
+- Who emails you most?
+- Who do you never reply to?
+- Relationship strength score per contact
+- Full conversation history per person in one clean view
+
+### 5. Subscription Tracker
+- Auto-detects every service you've signed up for
+- Shows last email date, frequency
+- Flags dead subscriptions (signed up, never heard from again)
+
+### 6. Job Application Tracker *(huge for you right now)*
+- Auto-detects application confirmation emails
+- Tracks status — Applied → Replied → Interview → Offer → Rejected
+- Timeline per company
+
+### 7. AI Chat over your Inbox (RAG)
+Natural language queries like:
+- *"Do I have any unpaid invoices?"*
+- *"When did I last hear from [person]?"*
+- *"Which companies rejected me in 2024?"*
+- *"Summarize everything from Swiggy this month"*
+
+This is the **technically heavy part** — every email gets embedded as vectors in pgvector, AI retrieves relevant ones and answers
+
+### 8. Insights & Stats
+- Most active email day/time
+- Average reply time
+- Sentiment trend over months (are people emailing you positively or negatively?)
+- Inbox growth over time
+
+### 9. Memory / Highlights *(the Google Photos "3 years ago" feature)*
+- *"1 year ago today you received your first internship offer"*
+- *"This week in 2023 you applied to 5 companies"*
+- Surfaces meaningful emails you forgot existed
+
+---
+
+## 🔒 Privacy First (important selling point)
+- Emails never stored as raw text — only embeddings + metadata
+- User can delete all their data anytime
+- No emails sent to third parties
+
+---
+
+## What makes this technically heavy for interviews
+
+| Concept | Where it appears |
+|---|---|
+| OAuth 2.0 flow | Gmail login |
+| REST API design | Backend endpoints |
+| Vector embeddings + RAG | AI chat feature |
+| NLP / classification | Auto-categories |
+| Data pipeline | Gmail sync engine |
+| Real-time updates | Inbox live sync |
+| Database design | pgvector + Postgres schema |
+
+---
+
+This is a **full semester project** worth of depth. Every single feature has something to talk about in an interview.
+
+Want me to now give you the **tech stack + system architecture** and then a **week by week build plan?**
