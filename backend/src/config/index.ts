@@ -37,6 +37,6 @@ export const config = {
   // AI Microservice
   aiServiceUrl: process.env.AI_SERVICE_URL || 'http://localhost:8000',
 
-  // Gemini
-  geminiApiKey: process.env.GEMINI_API_KEY || '',
+  // NVIDIA NIM
+  nvidiaApiKey: process.env.NVIDIA_API_KEY || '',
 };

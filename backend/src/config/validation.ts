@@ -37,9 +37,9 @@ export function validateEnvironment(): void {
     errors.push('AI_SERVICE_URL is required');
   }
 
-  // Gemini
-  if (!config.geminiApiKey) {
-    errors.push('GEMINI_API_KEY is required');
+  // NVIDIA NIM
+  if (!config.nvidiaApiKey) {
+    errors.push('NVIDIA_API_KEY is required');
   }
 
   if (errors.length > 0) {

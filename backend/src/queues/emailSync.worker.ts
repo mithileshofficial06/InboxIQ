@@ -1,5 +1,5 @@
 import { Worker, Job } from 'bullmq';
-import { getRedis } from '../config/redis';
+import { getRedis, isRedisAvailable } from '../config/redis';
 import { EMAIL_SYNC_QUEUE, SyncJobData } from './emailSync.queue';
 import { fetchEmailIds, batchFetchEmails } from '../services/gmail.service';
 import { getSupabase } from '../config/db';
@@ -272,32 +272,50 @@ async function triggerAIProcessing(userId: string, supabase: any): Promise<void>
 /**
  * Start the email sync worker
  */
-export function startSyncWorker(): Worker {
+export function startSyncWorker(): Worker | null {
   if (worker) return worker;
 
-  worker = new Worker(EMAIL_SYNC_QUEUE, processSync, {
-    connection: getRedis(),
-    concurrency: 2, // Process 2 sync jobs at a time
-    limiter: {
-      max: 5,
-      duration: 60000, // Max 5 jobs per minute
-    },
-  });
+  if (!isRedisAvailable()) {
+    console.warn('[Sync Worker] ⚠️  Redis unavailable - worker NOT started');
+    console.warn('[Sync Worker] Email sync functionality will be disabled');
+    return null;
+  }
 
-  worker.on('completed', (job) => {
-    console.log(`[Sync Worker] Job ${job.id} completed`);
-  });
+  const redis = getRedis();
+  if (!redis) {
+    console.warn('[Sync Worker] ⚠️  Redis connection failed - worker NOT started');
+    return null;
+  }
 
-  worker.on('failed', (job, err) => {
-    console.error(`[Sync Worker] Job ${job?.id} failed:`, err.message);
-  });
+  try {
+    worker = new Worker(EMAIL_SYNC_QUEUE, processSync, {
+      connection: redis,
+      concurrency: 2, // Process 2 sync jobs at a time
+      limiter: {
+        max: 5,
+        duration: 60000, // Max 5 jobs per minute
+      },
+    });
 
-  worker.on('error', (err) => {
-    console.error('[Sync Worker] Worker error:', err);
-  });
+    worker.on('completed', (job) => {
+      console.log(`[Sync Worker] Job ${job.id} completed`);
+    });
 
-  console.log('[Sync Worker] Started successfully');
-  return worker;
+    worker.on('failed', (job, err) => {
+      console.error(`[Sync Worker] Job ${job?.id} failed:`, err.message);
+    });
+
+    worker.on('error', (err) => {
+      console.error('[Sync Worker] Worker error:', err);
+    });
+
+    console.log('[Sync Worker] ✅ Started successfully');
+    return worker;
+  } catch (error: any) {
+    console.error('[Sync Worker] ❌ Failed to start:', error.message);
+    console.warn('[Sync Worker] ⚠️  Email sync disabled');
+    return null;
+  }
 }
 
 /**
