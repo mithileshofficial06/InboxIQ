@@ -28,14 +28,33 @@ export const config = {
     password: process.env.REDIS_PASSWORD || '',
   },
 
-  // JWT
+  // JWT — short-lived by design. Sessions are stateless, so the only bound on a
+  // stolen or revoked token is its lifetime (plus the denylist in services/tokenDenylist).
   jwt: {
     secret: process.env.JWT_SECRET || 'dev-secret-change-this',
-    expiresIn: '7d',
+    expiresIn: process.env.JWT_EXPIRES_IN || '12h',
   },
 
-  // AI Microservice
-  aiServiceUrl: process.env.AI_SERVICE_URL || 'http://localhost:8000',
+  // Session cookie carrying the JWT. httpOnly so XSS cannot read it.
+  cookie: {
+    name: 'inboxiq_session',
+    // Cross-site cookies (frontend and API on different hosts) require
+    // SameSite=None, which browsers only accept alongside Secure.
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as 'none' | 'lax',
+    domain: process.env.COOKIE_DOMAIN || undefined,
+    maxAgeMs: 12 * 60 * 60 * 1000,
+  },
+
+  // 32-byte key (base64) used to encrypt Google refresh tokens at rest.
+  tokenEncryptionKey: process.env.TOKEN_ENCRYPTION_KEY || '',
+
+  // AI Microservice — private component, reached only via services/aiService.client.ts
+  aiService: {
+    url: process.env.AI_SERVICE_URL || 'http://localhost:8000',
+    // Shared secret the AI service requires on every /ai/* call.
+    token: process.env.AI_SERVICE_TOKEN || '',
+  },
 
   // NVIDIA NIM
   nvidiaApiKey: process.env.NVIDIA_API_KEY || '',

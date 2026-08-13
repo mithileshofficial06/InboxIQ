@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Search, Sparkles, Filter, X, Mail, Calendar, Tag, TrendingUp, Loader2 } from 'lucide-react';
+import { search } from '@/lib/api';
 
 interface SearchResult {
   emailId: string;
@@ -33,6 +34,7 @@ export default function SearchPage() {
   });
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [selectedEmail, setSelectedEmail] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // Fetch suggestions on mount
   useEffect(() => {
@@ -41,16 +43,8 @@ export default function SearchPage() {
 
   const fetchSuggestions = async () => {
     try {
-      const response = await fetch('http://localhost:3001/search/suggestions', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setSuggestions(data.suggestions || []);
-      }
+      const data = await search.suggestions();
+      setSuggestions(data.suggestions || []);
     } catch (error) {
       console.error('Failed to fetch suggestions:', error);
     }
@@ -60,31 +54,19 @@ export default function SearchPage() {
     if (!query.trim()) return;
 
     setLoading(true);
+    setError(null);
     try {
-      const response = await fetch('http://localhost:3001/search/semantic', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: JSON.stringify({
-          query: query.trim(),
-          category: filters.category || undefined,
-          dateFrom: filters.dateFrom || undefined,
-          dateTo: filters.dateTo || undefined,
-          limit: 20,
-        }),
+      const data = await search.semantic(query.trim(), {
+        category: filters.category || undefined,
+        dateFrom: filters.dateFrom || undefined,
+        dateTo: filters.dateTo || undefined,
+        limit: 20,
       });
-
-      if (!response.ok) {
-        throw new Error('Search failed');
-      }
-
-      const data = await response.json();
       setResults(data.results || []);
-    } catch (error) {
-      console.error('Search error:', error);
-      alert('Search failed. Please try again.');
+    } catch (err) {
+      console.error('Search error:', err);
+      setResults([]);
+      setError((err as Error).message || 'Search failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -349,7 +331,16 @@ export default function SearchPage() {
         </div>
       )}
 
-      {!loading && results.length === 0 && query !== '' && (
+      {!loading && error && (
+        <div className="max-w-5xl mx-auto py-8">
+          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-center">
+            <h3 className="text-lg font-semibold text-red-900 mb-1">Search unavailable</h3>
+            <p className="text-red-700 text-sm">{error}</p>
+          </div>
+        </div>
+      )}
+
+      {!loading && !error && results.length === 0 && query !== '' && (
         <div className="max-w-5xl mx-auto text-center py-12">
           <div className="w-16 h-16 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Search className="w-8 h-8 text-stone-400" />

@@ -1,8 +1,8 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import Depends, FastAPI
 from app.db.pgvector import close_vector_store
 from app.routes import classify, embed, rag, health, process, search
+from app.security import require_service_token
 
 
 @asynccontextmanager
@@ -21,22 +21,24 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:3001"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# No CORS middleware by design.
+#
+# This service is only ever called server-to-server by the Express backend, which
+# authenticates with a shared secret. Browsers must not reach it directly — the
+# absence of CORS headers is part of that boundary, not an oversight. Bind it to
+# localhost (or a private network) in every environment.
 
-# Register routes
+# Health is intentionally open so orchestrators can probe it.
 app.include_router(health.router)
-app.include_router(classify.router)
-app.include_router(embed.router)
-app.include_router(rag.router)
-app.include_router(process.router)
-app.include_router(search.router)
+
+# Every AI route handles email content and trusts the caller-supplied user_id,
+# so all of them sit behind the service token.
+_protected = [Depends(require_service_token)]
+app.include_router(classify.router, dependencies=_protected)
+app.include_router(embed.router, dependencies=_protected)
+app.include_router(rag.router, dependencies=_protected)
+app.include_router(process.router, dependencies=_protected)
+app.include_router(search.router, dependencies=_protected)
 
 
 @app.get("/")

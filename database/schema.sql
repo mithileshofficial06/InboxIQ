@@ -73,7 +73,9 @@ CREATE TABLE IF NOT EXISTS embeddings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   chunk_id UUID NOT NULL REFERENCES email_chunks(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  embedding vector(768) NOT NULL, -- Gemini embedding-001 dimension
+  -- 1024 dimensions: NVIDIA nv-embedqa-e5-v5 (see ai-service/app/config.py).
+  -- Must match Settings.embedding_dimension exactly or every insert fails.
+  embedding vector(1024) NOT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -165,3 +167,41 @@ CREATE TRIGGER update_subs_updated_at BEFORE UPDATE ON subscriptions
 
 CREATE TRIGGER update_jobs_updated_at BEFORE UPDATE ON job_applications
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- ============================================
+-- 9. Row Level Security
+-- ============================================
+-- Defense in depth. The backend connects with the service-role key, which
+-- BYPASSES every policy below — so these do not replace the `.eq('user_id', …)`
+-- filters in application code. What they buy us:
+--   * a forgotten filter can no longer leak data to any anon/authenticated client
+--   * the anon key becomes safe to expose to a browser in future
+--   * a leaked non-service credential cannot read the whole table
+--
+-- Supabase maps the authenticated user to auth.uid(). This project authenticates
+-- with its own JWTs rather than Supabase Auth, so there is no auth.uid() to
+-- match against for normal clients — the policies below therefore deny all
+-- non-service access outright, which is the correct posture today.
+
+ALTER TABLE users            ENABLE ROW LEVEL SECURITY;
+ALTER TABLE emails           ENABLE ROW LEVEL SECURITY;
+ALTER TABLE email_chunks     ENABLE ROW LEVEL SECURITY;
+ALTER TABLE embeddings       ENABLE ROW LEVEL SECURITY;
+ALTER TABLE subscriptions    ENABLE ROW LEVEL SECURITY;
+ALTER TABLE job_applications ENABLE ROW LEVEL SECURITY;
+
+-- Force RLS even for the table owner, so only the service role is exempt.
+ALTER TABLE users            FORCE ROW LEVEL SECURITY;
+ALTER TABLE emails           FORCE ROW LEVEL SECURITY;
+ALTER TABLE email_chunks     FORCE ROW LEVEL SECURITY;
+ALTER TABLE embeddings       FORCE ROW LEVEL SECURITY;
+ALTER TABLE subscriptions    FORCE ROW LEVEL SECURITY;
+ALTER TABLE job_applications FORCE ROW LEVEL SECURITY;
+
+-- No permissive policies are defined, so anon and authenticated roles get
+-- nothing. Adding Supabase Auth later means adding policies such as:
+--   CREATE POLICY emails_owner ON emails
+--     FOR SELECT TO authenticated USING (user_id = auth.uid());
+
+REVOKE ALL ON users, emails, email_chunks, embeddings, subscriptions, job_applications
+  FROM anon, authenticated;

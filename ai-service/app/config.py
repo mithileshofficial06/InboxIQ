@@ -14,8 +14,12 @@ class Settings(BaseSettings):
         "postgresql://postgres:password@localhost:5432/postgres"
     )
 
+    # Shared secret proving a caller is the Express backend. Required — the
+    # service refuses all requests when unset (see app/security.py).
+    ai_service_token: str = os.getenv("AI_SERVICE_TOKEN", "")
+
     # NVIDIA NIM API (Meta Llama 3.3 70B)
-    nvidia_api_key: str = os.getenv("NVIDIA_API_KEY", os.getenv("GEMINI_API_KEY", ""))
+    nvidia_api_key: str = os.getenv("NVIDIA_API_KEY", "")
     nvidia_base_url: str = "https://integrate.api.nvidia.com/v1"
     
     # Model config

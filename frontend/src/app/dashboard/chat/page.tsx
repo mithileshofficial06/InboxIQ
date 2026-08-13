@@ -18,14 +18,16 @@ export default function ChatPage() {
     setInput(""); setLoading(true);
 
     try {
-      const token = localStorage.getItem("inboxiq_token");
-      let userId = "unknown";
-      if (token) userId = JSON.parse(atob(token.split(".")[1])).userId;
-      
-      const res = await chat.query(query, userId);
+      // The backend reads the user id from the session cookie — the client no
+      // longer decodes a token or passes an id it could tamper with.
+      const res = await chat.query(query);
       setMessages(p => [...p, { role: "assistant", content: res.answer, sources: res.sources }]);
-    } catch {
-      setMessages(p => [...p, { role: "assistant", content: "I encountered an error accessing your inbox data." }]);
+    } catch (error) {
+      const message =
+        (error as Error).message === "Authentication required"
+          ? "Your session expired. Please sign in again."
+          : "I encountered an error accessing your inbox data.";
+      setMessages(p => [...p, { role: "assistant", content: message }]);
     } finally {
       setLoading(false);
     }

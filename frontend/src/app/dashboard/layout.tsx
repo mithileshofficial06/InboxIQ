@@ -3,19 +3,23 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, Inbox, MessageSquare, Users, Briefcase, Bell, Sparkles, Mail, LogOut, RefreshCw } from "lucide-react";
+// Briefcase/Bell were the Careers and Subscriptions icons — removed with those nav items.
+import { LayoutDashboard, Inbox, MessageSquare, Users, Sparkles, Mail, LogOut, RefreshCw } from "lucide-react";
 import { auth, emails } from "@/lib/api";
 import toast from "react-hot-toast";
 import { SyncIndicator } from "@/components/SyncIndicator";
 import { VideoBackground } from "@/components/VideoBackground";
 
+// "Careers" (/dashboard/jobs) and "Subscriptions" (/dashboard/subs) are hidden.
+// The `job_applications` and `subscriptions` tables are only ever READ — nothing
+// in the sync worker or AI service populates them — so both pages render empty
+// no matter what the user does. The routes, API endpoints and tables are all
+// left intact; re-add the entries below once a detection pipeline exists.
 const NAV_ITEMS = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Overview" },
   { href: "/dashboard/inbox", icon: Inbox, label: "Inbox" },
   { href: "/dashboard/chat", icon: MessageSquare, label: "Assistant" },
   { href: "/dashboard/people", icon: Users, label: "Network" },
-  { href: "/dashboard/jobs", icon: Briefcase, label: "Careers" },
-  { href: "/dashboard/subs", icon: Bell, label: "Subscriptions" },
   { href: "/dashboard/memories", icon: Sparkles, label: "Archives" },
 ];
 
@@ -36,29 +40,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("inboxiq_token");
-    if (!token) { 
-      router.push("/"); 
-      return; 
-    }
-    
-    // Verify token with backend
+    // The session cookie is httpOnly, so the client cannot inspect it. The only
+    // way to know whether we're signed in is to ask the backend.
     auth.getMe()
-      .then(d => { 
-        setUser(d.user); 
-        setLoading(false); 
+      .then(d => {
+        setUser(d.user);
+        setLoading(false);
       })
-      .catch((error) => { 
-        console.error("Auth verification failed:", error);
-        // Only clear token if it's a 401 (unauthorized), not network errors
-        if (error.response?.status === 401) {
-          localStorage.removeItem("inboxiq_token");
-          router.push("/");
-        } else {
-          // Keep token but show error - might be temporary backend issue
-          setLoading(false);
-          toast.error("Could not connect to server. Some features may be unavailable.");
+      .catch((error: Error) => {
+        if (error.message === "Authentication required") {
+          // fetchAPI already redirects to "/" on a 401.
+          return;
         }
+        console.error("Auth verification failed:", error);
+        setLoading(false);
+        toast.error("Could not connect to server. Some features may be unavailable.");
       });
   }, [router]);
 
@@ -70,8 +66,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   const handleLogout = async () => {
+    // The backend revokes the token and clears the cookie; there is nothing
+    // client-side left to clear.
     try { await auth.logout(); } catch {}
-    localStorage.removeItem("inboxiq_token");
     router.push("/");
   };
 

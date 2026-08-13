@@ -26,6 +26,10 @@ getRedis();
 
 const app = express();
 
+// Required for correct client IPs (and therefore correct rate limiting) when
+// running behind a reverse proxy such as Railway, Render or Fly.
+app.set('trust proxy', 1);
+
 // ====================
 // Middleware
 // ====================
@@ -34,9 +38,11 @@ app.use(helmet());
 // CORS configuration - allow multiple origins in development
 const corsOptions = {
   origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
-    // Allow requests with no origin (like mobile apps, Postman, curl)
-    if (!origin) return callback(null, true);
-    
+    // Requests with no Origin header (curl, Postman, server-to-server) are only
+    // tolerated outside production. Now that sessions ride on cookies, blanket
+    // -allowing them in production would weaken the CSRF story for no benefit.
+    if (!origin) return callback(null, config.nodeEnv !== 'production');
+
     // In development, allow localhost and local network IPs
     if (config.nodeEnv === 'development') {
       const allowedOrigins = [
@@ -68,14 +74,38 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Rate limiting (relaxed for development)
-const limiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minute
-  max: 1000, // limit each IP to 1000 requests per minute (very relaxed for dev)
+// ====================
+// Rate limiting
+// ====================
+// Tiered by cost. The general limit protects the API; the strict limits guard
+// endpoints that spend money or third-party quota (Gmail API, NVIDIA NIM) and
+// were previously wide open at 1000 req/min.
+const generalLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 120,
   standardHeaders: true,
   legacyHeaders: false,
+  message: { error: 'Too many requests. Please slow down.' },
 });
-app.use(limiter);
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many authentication attempts. Try again later.' },
+});
+
+// Sync and AI endpoints trigger paid work — keep these tight.
+const expensiveLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Rate limit reached for this operation. Please wait a moment.' },
+});
+
+app.use(generalLimiter);
 
 // ====================
 // Health Check
@@ -91,13 +121,15 @@ app.get('/health', (_req, res) => {
 // ====================
 // Routes
 // ====================
-app.use('/auth', authRoutes);
+app.use('/auth', authLimiter, authRoutes);
+app.use('/emails/sync', expensiveLimiter);
 app.use('/emails', emailRoutes);
 app.use('/analytics', analyticsRoutes);
 app.use('/people', peopleRoutes);
 app.use('/jobs', jobsRoutes);
 app.use('/subs', subsRoutes);
-app.use('/search', searchRoutes);
+// Every /search route calls the AI service (embeddings + LLM) — strictly limited.
+app.use('/search', expensiveLimiter, searchRoutes);
 
 // ====================
 // 404 Handler

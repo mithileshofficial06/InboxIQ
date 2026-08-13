@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import { auth } from "@/lib/api";
 
 function CallbackContent() {
   const router = useRouter();
@@ -11,23 +12,34 @@ function CallbackContent() {
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    const token = searchParams.get("token");
     const message = searchParams.get("message");
-    
-    if (message) { 
+
+    if (message) {
       setStatus("error");
-      setErrorMessage(decodeURIComponent(message));
-      return; 
+      setErrorMessage(message);
+      return;
     }
-    
-    if (token) {
-      localStorage.setItem("inboxiq_token", token);
-      setStatus("success");
-      setTimeout(() => router.push("/dashboard"), 1500);
-    } else {
-      setStatus("error");
-      setErrorMessage("No authentication token received. Please try again.");
-    }
+
+    // The session is an httpOnly cookie set by the backend during the redirect —
+    // there is no token in the URL to read. Confirm the session took by asking
+    // the backend who we are.
+    let cancelled = false;
+    auth
+      .getMe()
+      .then(() => {
+        if (cancelled) return;
+        setStatus("success");
+        setTimeout(() => router.push("/dashboard"), 1000);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setStatus("error");
+        setErrorMessage("We couldn't establish a session. Please sign in again.");
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [searchParams, router]);
 
   return (

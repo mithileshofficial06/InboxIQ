@@ -1,6 +1,7 @@
 import { google, gmail_v1 } from 'googleapis';
 import { getOAuth2Client } from '../config/google';
 import { getSupabase } from '../config/db';
+import { encryptToken, decryptToken } from './tokenCrypto';
 
 interface EmailMetadata {
   gmail_id: string;
@@ -33,10 +34,14 @@ async function getAuthenticatedClient(userId: string) {
     throw new Error('User not found');
   }
 
+  // Tokens are stored encrypted at rest — see services/tokenCrypto.ts.
+  const accessToken = decryptToken(user.access_token);
+  const refreshToken = decryptToken(user.refresh_token);
+
   const oauth2Client = getOAuth2Client();
   oauth2Client.setCredentials({
-    access_token: user.access_token,
-    refresh_token: user.refresh_token,
+    access_token: accessToken,
+    refresh_token: refreshToken,
   });
 
   // Check if token is expired or about to expire (5 min buffer)
@@ -48,16 +53,19 @@ async function getAuthenticatedClient(userId: string) {
       const { credentials } = await oauth2Client.refreshAccessToken();
       oauth2Client.setCredentials(credentials);
 
-      // Update tokens in database
-      await supabase
-        .from('users')
-        .update({
-          access_token: credentials.access_token,
-          token_expiry: credentials.expiry_date
-            ? new Date(credentials.expiry_date).toISOString()
-            : null,
-        })
-        .eq('id', userId);
+      // Re-encrypt before writing back. This is also what migrates any legacy
+      // plaintext rows into encrypted form.
+      const update: Record<string, unknown> = {
+        access_token: encryptToken(credentials.access_token),
+        token_expiry: credentials.expiry_date
+          ? new Date(credentials.expiry_date).toISOString()
+          : null,
+      };
+      if (credentials.refresh_token) {
+        update.refresh_token = encryptToken(credentials.refresh_token);
+      }
+
+      await supabase.from('users').update(update).eq('id', userId);
     } catch (refreshError) {
       console.error('[Gmail] Token refresh failed:', refreshError);
       throw new Error('Token refresh failed. User needs to re-authenticate.');

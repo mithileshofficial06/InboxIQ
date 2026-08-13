@@ -9,6 +9,21 @@ const router = Router();
 router.use(authMiddleware);
 
 /**
+ * Strip characters that carry meaning inside a PostgREST filter expression.
+ *
+ * `,` and `.` delimit conditions, parentheses group them, `*` and `%` are LIKE
+ * wildcards, and backslashes escape. Removing them keeps user input as a plain
+ * substring rather than something that can add filters of its own.
+ */
+function sanitizeFilterValue(value: string): string {
+  return value
+    .replace(/[,.()*%\\"']/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 100);
+}
+
+/**
  * GET /emails
  * Paginated email list with advanced filtering
  */
@@ -54,7 +69,15 @@ router.get('/', async (req: AuthRequest, res: Response) => {
       query = query.lte('date', dateTo);
     }
     if (search && typeof search === 'string') {
-      query = query.or(`subject.ilike.%${search}%,snippet.ilike.%${search}%,sender_name.ilike.%${search}%`);
+      // `.or()` takes a PostgREST filter expression, so raw user text can inject
+      // extra conditions. Strip the syntax characters and the LIKE wildcards
+      // before interpolating.
+      const safeSearch = sanitizeFilterValue(search);
+      if (safeSearch) {
+        query = query.or(
+          `subject.ilike.%${safeSearch}%,snippet.ilike.%${safeSearch}%,sender_name.ilike.%${safeSearch}%`
+        );
+      }
     }
 
     // Sorting

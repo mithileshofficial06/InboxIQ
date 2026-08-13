@@ -597,8 +597,13 @@ export default function LandingPage() {
   const heroOpacity = useTransform(scrollYProgress, [0, 0.25], [1, 0]);
 
   useEffect(() => {
-    const token = localStorage.getItem("inboxiq_token");
-    if (token) setIsLoggedIn(true);
+    // The session cookie is httpOnly and unreadable here — ask the backend.
+    let cancelled = false;
+    auth
+      .getMe()
+      .then(() => { if (!cancelled) setIsLoggedIn(true); })
+      .catch(() => { if (!cancelled) setIsLoggedIn(false); });
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {

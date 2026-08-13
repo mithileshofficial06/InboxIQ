@@ -16,5 +16,9 @@
   "dependencies": {
     "@supabase/ssr": "^0.12.0",
     "@supabase/supabase-js": "^2.108.2"
+  },
+  "overridesComment": "BullMQ pins ioredis to an EXACT version, so the workspace ended up with two copies (backend's ^5.4.1 hoisted to 5.11.1, plus bullmq's nested 5.10.1). TypeScript then treats the two Redis classes as unrelated types, which broke the build, and at runtime it risks two independent connection pools. Pin everything to the version bullmq requires so a single copy is installed. Bump this in step with bullmq.",
+  "overrides": {
+    "ioredis": "5.10.1"
   }
 }

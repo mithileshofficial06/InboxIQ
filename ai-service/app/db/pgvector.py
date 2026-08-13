@@ -61,22 +61,24 @@ class PgVectorStore:
         Returns chunks with similarity scores and email metadata.
         Supports filtering by category and date range.
         """
-        # Build dynamic WHERE clause
-        where_conditions = ["emb.user_id = %s"]
-        params = [user_id]
-        
+        # Build dynamic WHERE clause.
+        # Scope on both emb.user_id and e.user_id so a mis-linked chunk can never
+        # leak another user's email metadata through the join.
+        where_conditions = ["emb.user_id = %s", "e.user_id = %s"]
+        params = [user_id, user_id]
+
         if category:
             where_conditions.append("e.category = %s")
             params.append(category)
-        
+
         if date_from:
-            where_conditions.append("e.received_at >= %s")
+            where_conditions.append("e.date >= %s")
             params.append(date_from)
-        
+
         if date_to:
-            where_conditions.append("e.received_at <= %s")
+            where_conditions.append("e.date <= %s")
             params.append(date_to)
-        
+
         where_clause = " AND ".join(where_conditions)
         
         async with self.conn.cursor() as cur:
@@ -89,7 +91,7 @@ class PgVectorStore:
                     e.subject,
                     e.sender_name,
                     e.sender_email,
-                    e.received_at,
+                    e.date AS received_at,
                     e.category,
                     e.sentiment,
                     1 - (emb.embedding <=> %s::vector) as similarity
@@ -107,6 +109,9 @@ class PgVectorStore:
             await cur.execute(query, all_params)
             rows = await cur.fetchall()
 
+            # Canonical result keys: chunk_id, email_id, chunk_text, chunk_index,
+            # subject, sender_name, sender_email, received_at, category, sentiment,
+            # similarity. Consumers must use exactly these names.
             results = []
             for row in rows:
                 results.append({
@@ -126,16 +131,43 @@ class PgVectorStore:
             return results
 
     async def update_email_classification(
-        self, email_id: str, category: str, sentiment: str, sentiment_score: float
-    ):
-        """Update email with classification results."""
+        self,
+        email_id: str,
+        user_id: str,
+        category: str,
+        sentiment: str,
+        sentiment_score: float,
+    ) -> bool:
+        """
+        Update an email with classification results.
+
+        Scoped by user_id so a caller can never rewrite another user's email.
+        Returns True if a row was updated.
+        """
         async with self.conn.cursor() as cur:
             await cur.execute(
-                """UPDATE emails 
-                   SET category = %s, sentiment = %s, sentiment_score = %s, is_processed = true
-                   WHERE id = %s""",
-                (category, sentiment, sentiment_score, email_id),
+                """UPDATE emails
+                   SET category = %s, sentiment = %s, sentiment_score = %s
+                   WHERE id = %s AND user_id = %s""",
+                (category, sentiment, sentiment_score, email_id, user_id),
             )
+            return cur.rowcount > 0
+
+    async def mark_email_processed(self, email_id: str, user_id: str) -> bool:
+        """
+        Flag an email as fully processed (classified AND embedded).
+
+        Kept separate from update_email_classification so the flag is only set
+        once embeddings are committed — otherwise a failure mid-embedding would
+        leave the email permanently excluded from semantic search.
+        """
+        async with self.conn.cursor() as cur:
+            await cur.execute(
+                """UPDATE emails SET is_processed = true
+                   WHERE id = %s AND user_id = %s""",
+                (email_id, user_id),
+            )
+            return cur.rowcount > 0
 
 
 # Singleton

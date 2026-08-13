@@ -1,21 +1,22 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-const AI_BASE = process.env.NEXT_PUBLIC_AI_URL || 'http://localhost:8000';
 
-function getToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem('inboxiq_token');
-}
+// There is deliberately no AI service base URL here.
+//
+// The AI service trusts the user_id it is given, so calling it from the browser
+// let any signed-in user read any other user's inbox by changing one field.
+// All AI features now go through the backend, which supplies the user id from
+// the verified session.
 
+/**
+ * The session is an httpOnly cookie set by the backend — it is intentionally
+ * unreadable from JavaScript, so there is no token to attach here. Every request
+ * just needs `credentials: 'include'`.
+ */
 async function fetchAPI(endpoint: string, options: RequestInit = {}) {
-  const token = getToken();
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...(options.headers as Record<string, string>),
   };
-
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
 
   const response = await fetch(`${API_BASE}${endpoint}`, {
     ...options,
@@ -24,9 +25,8 @@ async function fetchAPI(endpoint: string, options: RequestInit = {}) {
   });
 
   if (response.status === 401) {
-    // Token expired, redirect to login
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('inboxiq_token');
+    // Session expired or revoked — the cookie is cleared server-side.
+    if (typeof window !== 'undefined' && window.location.pathname !== '/') {
       window.location.href = '/';
     }
     throw new Error('Authentication required');
@@ -73,6 +73,7 @@ export const emails = {
   },
   getById: (id: string) => fetchAPI(`/emails/${id}`),
   getThread: (threadId: string) => fetchAPI(`/emails/thread/${threadId}`),
+  timeline: () => fetchAPI('/emails/timeline'),
   triggerSync: (type: 'full' | 'incremental' = 'incremental') =>
     fetchAPI('/emails/sync', { method: 'POST', body: JSON.stringify({ type }) }),
   getSyncStatus: () => fetchAPI('/emails/sync/status'),
@@ -111,19 +112,22 @@ export const subs = {
   getDead: () => fetchAPI('/subs/dead'),
 };
 
+// ============ Search ============
+export const search = {
+  semantic: (query: string, opts?: { category?: string; dateFrom?: string; dateTo?: string; limit?: number }) =>
+    fetchAPI('/search/semantic', {
+      method: 'POST',
+      body: JSON.stringify({ query, ...opts }),
+    }),
+  suggestions: () => fetchAPI('/search/suggestions'),
+};
+
 // ============ RAG Chat ============
 export const chat = {
-  query: async (query: string, userId: string) => {
-    const response = await fetch(`${AI_BASE}/ai/rag/query`, {
+  // No userId parameter by design — the backend derives it from the session.
+  query: (query: string) =>
+    fetchAPI('/search/chat', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query, user_id: userId, top_k: 20 }),
-    });
-
-    if (!response.ok) {
-      throw new Error('RAG query failed');
-    }
-
-    return response.json();
-  },
+      body: JSON.stringify({ query, topK: 20 }),
+    }),
 };

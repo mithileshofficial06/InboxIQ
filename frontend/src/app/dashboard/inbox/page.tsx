@@ -138,12 +138,7 @@ export default function InboxExplorerPage() {
   async function loadTimeline() {
     setLoading(true);
     try {
-      const response = await fetch("/api/emails/timeline", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-      const data = await response.json();
+      const data = await emailsApi.timeline();
       setTimeline(data.timeline || []);
     } catch (error) {
       console.error("Failed to load timeline:", error);
@@ -157,12 +152,7 @@ export default function InboxExplorerPage() {
     setLoadingThread(true);
     
     try {
-      const response = await fetch(`/api/emails/thread/${email.thread_id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-      const data = await response.json();
+      const data = await emailsApi.getThread(email.thread_id);
       setEmailThread(data.thread || [email]);
     } catch (error) {
       console.error("Failed to load thread:", error);

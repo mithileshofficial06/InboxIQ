@@ -28,13 +28,22 @@ async def process_batch(request: BatchProcessRequest):
                 email.subject, email.snippet, email.sender_email
             )
 
-            # Step 2: Update email with classification
-            await store.update_email_classification(
+            # Step 2: Update email with classification.
+            # Scoped by user_id — a row that doesn't belong to this user is skipped.
+            updated = await store.update_email_classification(
                 email_id=email.email_id,
+                user_id=request.user_id,
                 category=classification["category"],
                 sentiment=classification["sentiment"],
                 sentiment_score=classification["sentiment_score"],
             )
+            if not updated:
+                results.append({
+                    "email_id": email.email_id,
+                    "status": "error",
+                    "error": "email not found for this user",
+                })
+                continue
 
             # Step 3: Chunk the email body
             chunks = chunk_email(email.body_text, email.subject)
@@ -53,6 +62,11 @@ async def process_batch(request: BatchProcessRequest):
                 embedding = await generate_embedding(chunk_data["chunk_text"])
                 await store.store_embedding(chunk_id, request.user_id, embedding)
                 chunk_count += 1
+
+            # Step 5: Only now mark the email processed. Setting this before the
+            # embeddings are committed would strand the email — flagged as done
+            # but invisible to semantic search forever.
+            await store.mark_email_processed(email.email_id, request.user_id)
 
             results.append({
                 "email_id": email.email_id,

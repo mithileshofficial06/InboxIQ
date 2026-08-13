@@ -2,8 +2,16 @@ import { Worker, Job } from 'bullmq';
 import { getRedis, isRedisAvailable } from '../config/redis';
 import { EMAIL_SYNC_QUEUE, SyncJobData } from './emailSync.queue';
 import { fetchEmailIds, batchFetchEmails } from '../services/gmail.service';
+import { processBatch } from '../services/aiService.client';
 import { getSupabase } from '../config/db';
-import { config } from '../config';
+
+interface UnprocessedEmail {
+  id: string;
+  subject: string | null;
+  snippet: string | null;
+  sender_email: string | null;
+  body_text: string | null;
+}
 
 let worker: Worker | null = null;
 
@@ -207,17 +215,18 @@ async function batchFetchEmailsWithRetry(
  */
 async function triggerAIProcessing(userId: string, supabase: any): Promise<void> {
   try {
-    let offset = 0;
     const batchSize = 50; // Process 50 emails at a time
-    let hasMore = true;
 
-    while (hasMore) {
+    // Always take the FIRST page of unprocessed emails, never an advancing offset.
+    // Rows drop out of this filter as the AI service marks them processed, so a
+    // walking offset would skip the rows that shift down to fill the gap.
+    for (;;) {
       const { data: unprocessed, error } = await supabase
         .from('emails')
         .select('id, subject, snippet, sender_email, body_text')
         .eq('user_id', userId)
         .eq('is_processed', false)
-        .range(offset, offset + batchSize - 1);
+        .range(0, batchSize - 1);
 
       if (error) {
         console.error('[Sync Worker] Error fetching unprocessed emails:', error);
@@ -225,38 +234,37 @@ async function triggerAIProcessing(userId: string, supabase: any): Promise<void>
       }
 
       if (!unprocessed || unprocessed.length === 0) {
-        hasMore = false;
         break;
       }
 
       console.log(`[Sync Worker] Sending batch of ${unprocessed.length} emails to AI service...`);
 
-      // Send to AI microservice for classification + embedding
-      const response = await fetch(`${config.aiServiceUrl}/ai/process/batch`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_id: userId,
-          emails: unprocessed.map((e) => ({
+      try {
+        const result = await processBatch({
+          userId,
+          emails: unprocessed.map((e: UnprocessedEmail) => ({
             email_id: e.id,
             subject: e.subject || '',
             snippet: e.snippet || '',
             sender_email: e.sender_email || '',
             body_text: e.body_text || '',
           })),
-        }),
-      });
+        });
+        console.log(
+          `[Sync Worker] AI processing result: ${result.processed} processed, ${result.failed} failed`
+        );
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('[Sync Worker] AI processing failed:', errorText);
-        // Continue to next batch even if this one fails
-      } else {
-        const result = await response.json();
-        console.log(`[Sync Worker] AI processing result: ${result.processed} processed, ${result.failed} failed`);
+        // If the AI service accepted the batch but marked nothing processed, the
+        // filter below will return the same rows forever. Bail out rather than spin.
+        if (result.processed === 0) {
+          console.warn('[Sync Worker] Batch produced no processed emails — stopping to avoid a loop');
+          break;
+        }
+      } catch (batchError) {
+        console.error('[Sync Worker] AI processing failed:', (batchError as Error).message);
+        // Leave these emails unprocessed; the next sync will pick them up.
+        break;
       }
-
-      offset += batchSize;
 
       // Small delay between AI batches
       await new Promise(resolve => setTimeout(resolve, 1000));
