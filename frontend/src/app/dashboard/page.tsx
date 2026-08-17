@@ -1,9 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RechartsPie, Pie, Cell, BarChart, Bar, Legend } from "recharts";
+import { Tooltip, ResponsiveContainer, PieChart as RechartsPie, Pie, Cell } from "recharts";
 import { analytics } from "@/lib/api";
-import { Mail, TrendingUp, TrendingDown, Minus, Clock, RefreshCcw, BarChart2, Users, ChevronRight } from "lucide-react";
+import type {
+  AnalyticsOverview,
+  CategoryCount,
+  SentimentDistribution,
+  TopSender,
+} from "@/lib/types";
+import { Mail, TrendingUp, TrendingDown, Minus, Clock, RefreshCcw, Users, ChevronRight } from "lucide-react";
 import Link from "next/link";
 
 /* ── Earth-tone palette ── */
@@ -37,14 +43,22 @@ function getAvatarColor(name: string): string {
 }
 
 /* ── Custom chart tooltip (earth tones) ── */
-const EarthTooltip = ({ active, payload }: any) => {
+/** The subset of Recharts' tooltip payload this renderer actually reads. */
+interface TooltipEntry {
+  name?: string | number;
+  value?: string | number;
+  color?: string;
+  payload?: { fill?: string };
+}
+
+const EarthTooltip = ({ active, payload }: { active?: boolean; payload?: TooltipEntry[] }) => {
   if (!active || !payload?.length) return null;
   return (
     <div style={{
       background: "#fff", border: "1px solid #e5e2db", borderRadius: 8,
       padding: "10px 14px", boxShadow: "0 4px 12px rgba(0,0,0,0.08)", fontSize: 12,
     }}>
-      {payload.map((p: any) => (
+      {payload.map((p) => (
         <div key={p.name} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 2 }}>
           <div style={{ width: 8, height: 8, borderRadius: "50%", background: p.color || p.payload?.fill }} />
           <span style={{ color: "#57534e" }}>{p.name}</span>
@@ -59,45 +73,49 @@ const EarthTooltip = ({ active, payload }: any) => {
    Dashboard Overview Page
    ═══════════════════════════════════════════════════ */
 export default function DashboardPage() {
-  const [overview, setOverview]     = useState<any>(null);
-  const [categories, setCategories] = useState<any[]>([]);
-  const [sentiment, setSentiment]   = useState<any>({});
-  const [topSenders, setTopSenders] = useState<any[]>([]);
+  const [overview, setOverview]     = useState<AnalyticsOverview | null>(null);
+  const [categories, setCategories] = useState<CategoryCount[]>([]);
+  const [sentiment, setSentiment]   = useState<Partial<SentimentDistribution>>({});
+  const [topSenders, setTopSenders] = useState<TopSender[]>([]);
   const [loading, setLoading]       = useState(true);
   const [syncing, setSyncing]       = useState(false);
 
+  // The loader lives inside the effect so every setState happens in an async
+  // callback rather than synchronously in the effect body, and so the cancelled
+  // flag can stop it writing state after unmount.
   useEffect(() => {
+    let cancelled = false;
+
+    const loadDashboardData = async () => {
+      try {
+        const [o, c, s, ts] = await Promise.all([
+          analytics.overview(),
+          analytics.categories(),
+          analytics.sentiment(),
+          analytics.topSenders(5),
+        ]);
+        if (cancelled) return;
+
+        setOverview(o);
+        setCategories(c.categories);
+        setSentiment(s.distribution);
+        setTopSenders(ts.topSenders);
+        setSyncing(o.syncStatus === 'syncing');
+      } catch (error) {
+        console.error('Failed to load dashboard:', error);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
     loadDashboardData();
     // Poll sync status every 10 seconds
     const interval = setInterval(loadDashboardData, 10000);
-    return () => clearInterval(interval);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, []);
-
-  async function loadDashboardData() {
-    try {
-      const [o, c, s, ts] = await Promise.all([
-        analytics.overview(),
-        analytics.categories(),
-        analytics.sentiment(),
-        analytics.topSenders(5),
-      ]);
-      setOverview(o);
-      setCategories(c.categories);
-      setSentiment(s.distribution);
-      setTopSenders(ts.topSenders);
-      
-      // Check if syncing
-      if (o.syncStatus === 'syncing') {
-        setSyncing(true);
-      } else {
-        setSyncing(false);
-      }
-    } catch (error) {
-      console.error('Failed to load dashboard:', error);
-    } finally {
-      setLoading(false);
-    }
-  }
 
   /* ── Loading skeleton ── */
   if (loading) {
@@ -126,7 +144,7 @@ export default function DashboardPage() {
     : "Never";
 
   const totalSentiments   = (sentiment.positive || 0) + (sentiment.neutral || 0) + (sentiment.negative || 0);
-  const totalCategoryCount = categories.reduce((sum: number, c: any) => sum + c.count, 0);
+  const totalCategoryCount = categories.reduce((sum, c) => sum + c.count, 0);
 
   return (
     <div style={{ paddingBottom: 48 }}>

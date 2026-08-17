@@ -3,18 +3,9 @@
 import { useState, useEffect } from 'react';
 import { Search, Sparkles, Filter, X, Mail, Calendar, Tag, TrendingUp, Loader2 } from 'lucide-react';
 import { search } from '@/lib/api';
-
-interface SearchResult {
-  emailId: string;
-  chunkText: string;
-  similarity: number;
-  subject: string;
-  senderName: string;
-  senderEmail: string;
-  receivedAt: string;
-  category: string;
-  sentiment: string;
-}
+// The shared type is the source of truth: these fields are nullable columns,
+// so the local duplicate that declared them all as `string` was wrong.
+import type { SemanticSearchResult as SearchResult } from '@/lib/types';
 
 interface SearchFilters {
   category: string;
@@ -36,19 +27,23 @@ export default function SearchPage() {
   const [selectedEmail, setSelectedEmail] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch suggestions on mount
+  // Fetch suggestions on mount. The loader is defined inside the effect so its
+  // setState happens in an async callback, not synchronously in the effect body.
   useEffect(() => {
-    fetchSuggestions();
-  }, []);
+    let cancelled = false;
 
-  const fetchSuggestions = async () => {
-    try {
-      const data = await search.suggestions();
-      setSuggestions(data.suggestions || []);
-    } catch (error) {
-      console.error('Failed to fetch suggestions:', error);
-    }
-  };
+    const fetchSuggestions = async () => {
+      try {
+        const data = await search.suggestions();
+        if (!cancelled) setSuggestions(data.suggestions || []);
+      } catch (error) {
+        console.error('Failed to fetch suggestions:', error);
+      }
+    };
+
+    fetchSuggestions();
+    return () => { cancelled = true; };
+  }, []);
 
   const performSearch = async () => {
     if (!query.trim()) return;
@@ -90,7 +85,7 @@ export default function SearchPage() {
 
   const activeFilterCount = [filters.category, filters.dateFrom, filters.dateTo].filter(Boolean).length;
 
-  const getCategoryColor = (category: string) => {
+  const getCategoryColor = (category: string | null) => {
     const colors: Record<string, string> = {
       'Bills & Invoices': 'bg-orange-100 text-orange-800',
       'Job Applications': 'bg-green-100 text-green-800',
@@ -102,7 +97,7 @@ export default function SearchPage() {
       'Promotions': 'bg-amber-100 text-amber-800',
       'Travel & Bookings': 'bg-teal-100 text-teal-800',
     };
-    return colors[category] || 'bg-gray-100 text-gray-800';
+    return (category ? colors[category] : undefined) || 'bg-gray-100 text-gray-800';
   };
 
   const highlightMatch = (text: string, maxLength = 300) => {
@@ -113,7 +108,7 @@ export default function SearchPage() {
     return text;
   };
 
-  const formatDate = (dateStr: string) => {
+  const formatDate = (dateStr: string | null) => {
     if (!dateStr) return 'Unknown';
     const date = new Date(dateStr);
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });

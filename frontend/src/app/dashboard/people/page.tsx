@@ -2,19 +2,40 @@
 
 import { useEffect, useState } from "react";
 import { people as peopleApi } from "@/lib/api";
+import type { Contact } from "@/lib/types";
 
 export default function PeoplePage() {
-  const [contacts, setContacts] = useState<any[]>([]);
+  const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [sort, setSort] = useState<"frequency" | "recency">("frequency");
 
-  useEffect(() => { loadContacts(); }, [sort]);
+  // The loader is defined inside the effect so its setState calls all happen
+  // after an await rather than synchronously in the effect body. Showing the
+  // skeleton on a re-sort is handled by the click handler below, which is where
+  // React wants state set in response to an interaction.
+  useEffect(() => {
+    let cancelled = false;
 
-  async function loadContacts() {
+    const loadContacts = async () => {
+      try {
+        const d = await peopleApi.list(sort, 50);
+        if (!cancelled) setContacts(d.contacts);
+      } catch {
+        // Leave the previous list in place; the empty state covers a first load.
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    loadContacts();
+    return () => { cancelled = true; };
+  }, [sort]);
+
+  const changeSort = (next: "frequency" | "recency") => {
+    if (next === sort) return;
     setLoading(true);
-    try { const d = await peopleApi.list(sort, 50); setContacts(d.contacts); }
-    catch {} finally { setLoading(false); }
-  }
+    setSort(next);
+  };
 
   const max = contacts[0]?.emailCount || 1;
 
@@ -26,7 +47,7 @@ export default function PeoplePage() {
         <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
           <span className="editorial-subheading" style={{ marginRight: "8px" }}>Sort By</span>
           {(["frequency", "recency"] as const).map(s => (
-            <button key={s} onClick={() => setSort(s)} className={sort === s ? "editorial-btn-primary" : "editorial-btn"} style={{ padding: "6px 16px", fontSize: "12px" }}>
+            <button key={s} onClick={() => changeSort(s)} className={sort === s ? "editorial-btn-primary" : "editorial-btn"} style={{ padding: "6px 16px", fontSize: "12px" }}>
               {s.charAt(0).toUpperCase() + s.slice(1)}
             </button>
           ))}

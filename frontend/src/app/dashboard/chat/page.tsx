@@ -2,9 +2,16 @@
 
 import { useState, useRef, useEffect } from "react";
 import { chat } from "@/lib/api";
+import type { ChatSource } from "@/lib/types";
+
+interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+  sources?: ChatSource[];
+}
 
 export default function ChatPage() {
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
@@ -50,7 +57,7 @@ export default function ChatPage() {
               <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
                 {["Summarize the latest communications from my bank.", "What is the status of my recent job applications?", "List the total amount spent on Amazon this month."].map(s => (
                   <button key={s} onClick={() => handleSend(s)} className="editorial-btn" style={{ justifyContent: "center", padding: "16px", color: "var(--color-text-secondary)", fontStyle: "italic" }}>
-                    "{s}"
+                    &ldquo;{s}&rdquo;
                   </button>
                 ))}
               </div>
@@ -69,12 +76,15 @@ export default function ChatPage() {
                     <div style={{ marginTop: "24px", width: "100%", padding: "24px", borderTop: "1px solid var(--color-border-default)", background: "#ffffff" }}>
                       <div className="editorial-subheading" style={{ marginBottom: "16px" }}>Sources Referenced</div>
                       <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                        {m.sources.slice(0, 3).map((s: any, j: number) => (
+                        {m.sources.slice(0, 3).map((s, j) => (
                           <div key={j} style={{ padding: "16px", border: "1px solid var(--color-border-subtle)", borderRadius: "4px" }}>
                             <div style={{ fontSize: "14px", fontWeight: 500, color: "var(--color-text-primary)", marginBottom: "4px" }}>{s.subject}</div>
                             <div style={{ fontSize: "13px", color: "var(--color-text-secondary)", display: "flex", justifyContent: "space-between" }}>
-                              <span>{s.sender_email}</span>
-                              <span>{(s.similarity_score * 100).toFixed(1)}%</span>
+                              {/* The backend returns camelCase (see /search/chat in
+                                  search.routes.ts); the snake_case names read here
+                                  previously were always undefined. */}
+                              <span>{s.senderEmail}</span>
+                              <span>{(s.similarity * 100).toFixed(1)}%</span>
                             </div>
                           </div>
                         ))}

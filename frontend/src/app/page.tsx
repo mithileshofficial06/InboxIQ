@@ -111,9 +111,13 @@ function Typewriter({ queries }: { queries: string[] }) {
       return () => clearTimeout(t);
     }
     if (deleting && text === "") {
-      setDeleting(false);
-      setIdx((idx + 1) % queries.length);
-      return;
+      // Advance on a timer rather than synchronously inside the effect —
+      // a synchronous setState here triggers a cascading re-render.
+      const t = setTimeout(() => {
+        setDeleting(false);
+        setIdx((i) => (i + 1) % queries.length);
+      }, speed);
+      return () => clearTimeout(t);
     }
 
     const t = setTimeout(() => {
@@ -334,7 +338,7 @@ function HeroCanvas() {
       currentStep: number;
     }
 
-    let activePulses: ActivePulse[] = [];
+    const activePulses: ActivePulse[] = [];
 
     const triggerPulse = () => {
       if (points.length === 0) return;
@@ -378,7 +382,7 @@ function HeroCanvas() {
       });
     };
 
-    let pulseInterval = setInterval(triggerPulse, 800); // Trigger slightly less frequently since they move slower
+    const pulseInterval = setInterval(triggerPulse, 800); // Trigger slightly less frequently since they move slower
 
     interface Ripple {
       x: number;
@@ -388,7 +392,7 @@ function HeroCanvas() {
       opacity: number;
       color: string;
     }
-    let ripples: Ripple[] = [];
+    const ripples: Ripple[] = [];
 
     const draw = () => {
       const w = window.innerWidth;

@@ -2,14 +2,35 @@
 
 import { useEffect, useState } from 'react';
 
+/** Either the probe succeeded (status/ok, plus any parsed body) or it threw. */
+type ProbeResult =
+  | { status: number; ok: boolean; data?: unknown }
+  | { error: string; type: string };
+
+interface TestResults {
+  envVar: string;
+  timestamp: string;
+  health?: ProbeResult;
+  auth?: ProbeResult;
+  directLocalhost?: ProbeResult;
+}
+
+/** Narrow an unknown catch value to something with a readable message. */
+function describeError(error: unknown): { error: string; type: string } {
+  return {
+    error: error instanceof Error ? error.message : String(error),
+    type: error instanceof Error ? error.constructor.name : typeof error,
+  };
+}
+
 export default function ApiTestPage() {
-  const [results, setResults] = useState<any>({});
+  const [results, setResults] = useState<TestResults | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function testConnections() {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const tests: any = {
+      const tests: TestResults = {
         envVar: apiUrl,
         timestamp: new Date().toISOString(),
       };
@@ -22,11 +43,8 @@ export default function ApiTestPage() {
           ok: healthResponse.ok,
           data: await healthResponse.json(),
         };
-      } catch (error: any) {
-        tests.health = {
-          error: error.message,
-          type: error.constructor.name,
-        };
+      } catch (error) {
+        tests.health = describeError(error);
       }
 
       // Test 2: Auth endpoint (should return 401)
@@ -38,11 +56,8 @@ export default function ApiTestPage() {
           status: authResponse.status,
           ok: authResponse.ok,
         };
-      } catch (error: any) {
-        tests.auth = {
-          error: error.message,
-          type: error.constructor.name,
-        };
+      } catch (error) {
+        tests.auth = describeError(error);
       }
 
       // Test 3: Direct localhost test
@@ -52,11 +67,8 @@ export default function ApiTestPage() {
           status: directResponse.status,
           ok: directResponse.ok,
         };
-      } catch (error: any) {
-        tests.directLocalhost = {
-          error: error.message,
-          type: error.constructor.name,
-        };
+      } catch (error) {
+        tests.directLocalhost = describeError(error);
       }
 
       setResults(tests);
@@ -85,7 +97,7 @@ export default function ApiTestPage() {
           <h2 className="font-semibold mb-2">Debugging Tips:</h2>
           <ul className="list-disc list-inside space-y-1 text-sm">
             <li>If you see CORS errors, check backend is running on port 3001</li>
-            <li>If you see "Failed to fetch", try hard refresh (Ctrl+Shift+R)</li>
+            <li>If you see &quot;Failed to fetch&quot;, try hard refresh (Ctrl+Shift+R)</li>
             <li>Check browser console for detailed error messages</li>
             <li>Verify .env.local file exists in frontend directory</li>
           </ul>

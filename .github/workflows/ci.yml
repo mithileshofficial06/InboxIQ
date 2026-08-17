@@ -48,14 +48,9 @@ jobs:
       - name: Test
         run: pytest
 
-  frontend-lint:
-    name: Frontend (lint, non-blocking)
+  frontend:
+    name: Frontend (lint + build)
     runs-on: ubuntu-latest
-    # Non-blocking on purpose: the frontend currently has 41 pre-existing ESLint
-    # errors (mostly prefer-const and no-explicit-any). Reporting them keeps the
-    # debt visible without blocking every PR on an unrelated cleanup. Once those
-    # are fixed, drop continue-on-error to make this enforcing.
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 
@@ -68,3 +63,7 @@ jobs:
 
       - name: Lint
         run: npm run lint --workspace frontend
+
+      # Also typechecks — `next build` runs tsc over the app.
+      - name: Build
+        run: npm run build --workspace frontend

@@ -6,6 +6,7 @@ import Link from "next/link";
 // Briefcase/Bell were the Careers and Subscriptions icons — removed with those nav items.
 import { LayoutDashboard, Inbox, MessageSquare, Users, Sparkles, Mail, LogOut, RefreshCw } from "lucide-react";
 import { auth, emails } from "@/lib/api";
+import type { User } from "@/lib/types";
 import toast from "react-hot-toast";
 import { SyncIndicator } from "@/components/SyncIndicator";
 import { VideoBackground } from "@/components/VideoBackground";
@@ -35,7 +36,7 @@ const getAvatarColor = (name: string) => {
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [syncing, setSyncing] = useState(false);
   const [loading, setLoading] = useState(true);
 

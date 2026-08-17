@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Standalone CommonJS build script that generated public/topo.svg — it is
+    // run by hand with `node`, never bundled, so the app's TS/React rules
+    // (no-require-imports in particular) do not apply to it.
+    "generate_topo.js",
   ]),
 ]);
 

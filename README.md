@@ -371,25 +371,24 @@ pip install -r requirements-dev.txt
 pytest
 ```
 
-**Frontend** currently has lint only — there is no test suite yet:
+**Frontend** has lint and typecheck (via the build) — there is no test suite yet:
 ```bash
 cd frontend
 npm run lint
+npm run build
 ```
 
 ### Continuous Integration
 
 `.github/workflows/ci.yml` runs on every push and pull request to `main`:
 
-| Job | What it runs | Blocking |
-|-----|--------------|----------|
-| `backend` | `tsc` typecheck + Jest suite | Yes |
-| `ai-service` | pytest suite | Yes |
-| `frontend-lint` | ESLint | No — see below |
+| Job | What it runs |
+|-----|--------------|
+| `backend` | `tsc` typecheck + Jest suite |
+| `ai-service` | pytest suite |
+| `frontend` | ESLint + `next build` (which typechecks) |
 
-The frontend lint job is non-blocking because the frontend has 41 pre-existing
-ESLint errors (mostly `prefer-const` and `no-explicit-any`). Clearing those and
-removing `continue-on-error` from the workflow is a good standalone cleanup task.
+All three jobs are blocking.
 
 ### Environment Variables
 

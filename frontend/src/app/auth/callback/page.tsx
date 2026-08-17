@@ -8,17 +8,22 @@ import { auth } from "@/lib/api";
 function CallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
-  const [errorMessage, setErrorMessage] = useState("");
+
+  // An error passed back on the URL is derivable during render — setting it from
+  // an effect would be a synchronous setState that triggers a cascading render.
+  const urlMessage = searchParams.get("message");
+
+  const [session, setSession] = useState<{
+    status: "loading" | "success" | "error";
+    message?: string;
+  }>({ status: "loading" });
+
+  const status = urlMessage ? "error" : session.status;
+  const errorMessage = urlMessage ?? session.message ?? "";
 
   useEffect(() => {
-    const message = searchParams.get("message");
-
-    if (message) {
-      setStatus("error");
-      setErrorMessage(message);
-      return;
-    }
+    // The backend already told us this failed; nothing to verify.
+    if (urlMessage) return;
 
     // The session is an httpOnly cookie set by the backend during the redirect —
     // there is no token in the URL to read. Confirm the session took by asking
@@ -28,19 +33,21 @@ function CallbackContent() {
       .getMe()
       .then(() => {
         if (cancelled) return;
-        setStatus("success");
+        setSession({ status: "success" });
         setTimeout(() => router.push("/dashboard"), 1000);
       })
       .catch(() => {
         if (cancelled) return;
-        setStatus("error");
-        setErrorMessage("We couldn't establish a session. Please sign in again.");
+        setSession({
+          status: "error",
+          message: "We couldn't establish a session. Please sign in again.",
+        });
       });
 
     return () => {
       cancelled = true;
     };
-  }, [searchParams, router]);
+  }, [urlMessage, router]);
 
   return (
     <div className="min-h-screen" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { emails as emailsApi } from "@/lib/api";
+import type { Email, EmailDetail, EmailListParams, TimelineMonth } from "@/lib/types";
 import {
   Mail,
   Search,
@@ -44,7 +45,9 @@ const CATEGORY_STYLES: Record<string, { bg: string; text: string; border: string
   "Uncategorized": { bg: "#f5f2ed", text: "#78716c", border: "#e5e2db" },
 };
 
-const getCategoryStyle = (category: string) => {
+// category, sender_name and sender_email are all nullable columns (see
+// database/schema.sql), so these accept null rather than making callers guard.
+const getCategoryStyle = (category: string | null | undefined) => {
   const normalized = category || "Uncategorized";
   if (normalized.startsWith("Travel")) {
     return CATEGORY_STYLES["Travel"];
@@ -52,16 +55,16 @@ const getCategoryStyle = (category: string) => {
   return CATEGORY_STYLES[normalized] || CATEGORY_STYLES["Uncategorized"];
 };
 
-const getAvatarColor = (name: string) => {
+const getAvatarColor = (name: string | null | undefined) => {
   const colors = ['#6b7a8f', '#849b87', '#c46b5a', '#c99a5c', '#b5838d'];
   let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  for (let i = 0; i < (name?.length ?? 0); i++) {
+    hash = name!.charCodeAt(i) + ((hash << 5) - hash);
   }
   return colors[Math.abs(hash) % colors.length];
 };
 
-const getInitials = (name: string) => {
+const getInitials = (name: string | null | undefined) => {
   if (!name) return "";
   const parts = name.trim().split(/\s+/);
   if (parts.length >= 2) {
@@ -69,6 +72,16 @@ const getInitials = (name: string) => {
   }
   return name.charAt(0).toUpperCase();
 };
+
+type SenderFields = Pick<Email, "sender_name" | "sender_email">;
+
+/** Full display label for a sender, falling back when both columns are null. */
+const getSenderLabel = (email: SenderFields) =>
+  email.sender_name || email.sender_email || "Unknown sender";
+
+/** Short display name — the sender's name, else the local part of their address. */
+const getSenderName = (email: SenderFields) =>
+  email.sender_name || email.sender_email?.split("@")[0] || "Unknown sender";
 
 const SENTIMENT_ICONS = {
   positive: <Smile className="w-4 h-4 text-green-600" />,
@@ -79,8 +92,8 @@ const SENTIMENT_ICONS = {
 type ViewMode = "grid" | "list" | "timeline";
 
 export default function InboxExplorerPage() {
-  const [emails, setEmails] = useState<any[]>([]);
-  const [timeline, setTimeline] = useState<any[]>([]);
+  const [emails, setEmails] = useState<Email[]>([]);
+  const [timeline, setTimeline] = useState<TimelineMonth[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<ViewMode>("grid");
   const [page, setPage] = useState(1);
@@ -97,8 +110,8 @@ export default function InboxExplorerPage() {
   const [showFilters, setShowFilters] = useState(false);
   
   // Email detail modal
-  const [selectedEmail, setSelectedEmail] = useState<any>(null);
-  const [emailThread, setEmailThread] = useState<any[]>([]);
+  const [selectedEmail, setSelectedEmail] = useState<EmailDetail | null>(null);
+  const [emailThread, setEmailThread] = useState<EmailDetail[]>([]);
   const [loadingThread, setLoadingThread] = useState(false);
 
   useEffect(() => {
@@ -112,7 +125,7 @@ export default function InboxExplorerPage() {
   async function loadEmails() {
     setLoading(true);
     try {
-      const params: any = {
+      const params: EmailListParams = {
         page,
         limit: view === "grid" ? 12 : 20,
       };
@@ -147,7 +160,7 @@ export default function InboxExplorerPage() {
     }
   }
 
-  async function openEmailDetail(email: any) {
+  async function openEmailDetail(email: EmailDetail) {
     setSelectedEmail(email);
     setLoadingThread(true);
     
@@ -407,7 +420,7 @@ export default function InboxExplorerPage() {
               {emails.map((email, index) => {
                 const isUnread = !email.is_read;
                 const categoryStyle = getCategoryStyle(email.category);
-                const senderName = email.sender_name || email.sender_email.split("@")[0];
+                const senderName = getSenderName(email);
                 const formattedDate =
                   new Date(email.date).toLocaleDateString("en-US", {
                     month: "short",
@@ -434,9 +447,9 @@ export default function InboxExplorerPage() {
                     <div className="flex items-start gap-5 mb-6">
                       <div
                         className="w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-xl shrink-0 shadow-md"
-                        style={{ backgroundColor: getAvatarColor(email.sender_name || email.sender_email) }}
+                        style={{ backgroundColor: getAvatarColor(getSenderLabel(email)) }}
                       >
-                        {getInitials(email.sender_name || email.sender_email)}
+                        {getInitials(getSenderLabel(email))}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="text-base font-bold text-gray-900 truncate mb-1">{senderName}</div>
@@ -557,15 +570,15 @@ export default function InboxExplorerPage() {
                     {/* Sender Avatar */}
                     <div 
                       className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0"
-                      style={{ backgroundColor: getAvatarColor(email.sender_name || email.sender_email) }}
+                      style={{ backgroundColor: getAvatarColor(getSenderLabel(email)) }}
                     >
-                      {getInitials(email.sender_name || email.sender_email)}
+                      {getInitials(getSenderLabel(email))}
                     </div>
                     
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 mb-1">
                         <span className="font-semibold text-[#1c1917] text-sm">
-                          {email.sender_name || email.sender_email.split("@")[0]}
+                          {getSenderName(email)}
                         </span>
                         {/* Category Badge */}
                         {(() => {
@@ -643,9 +656,9 @@ export default function InboxExplorerPage() {
                     <h4 className="text-sm font-semibold text-[#57534e] mb-3">Top Categories</h4>
                     <div className="space-y-2">
                       {Object.entries(month.categories)
-                        .sort(([, a]: any, [, b]: any) => b - a)
+                        .sort(([, a], [, b]) => b - a)
                         .slice(0, 5)
-                        .map(([name, count]: any) => {
+                        .map(([name, count]) => {
                           const style = getCategoryStyle(name);
                           return (
                             <div key={name} className="flex items-center justify-between text-sm">
@@ -667,7 +680,7 @@ export default function InboxExplorerPage() {
                   <div>
                     <h4 className="text-sm font-semibold text-[#57534e] mb-3">Sentiment Breakdown</h4>
                     <div className="space-y-2">
-                      {Object.entries(month.sentiments).map(([name, count]: any) => {
+                      {Object.entries(month.sentiments).map(([name, count]) => {
                         const Icon = name === "positive" ? Smile : name === "negative" ? Frown : Meh;
                         const color =
                           name === "positive" ? "text-green-600" : name === "negative" ? "text-red-600" : "text-gray-600";
@@ -776,9 +789,9 @@ export default function InboxExplorerPage() {
                       <div className="flex items-start gap-4 mb-4">
                         <div 
                           className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-base shrink-0"
-                          style={{ backgroundColor: getAvatarColor(email.sender_name || email.sender_email) }}
+                          style={{ backgroundColor: getAvatarColor(getSenderLabel(email)) }}
                         >
-                          {getInitials(email.sender_name || email.sender_email)}
+                          {getInitials(getSenderLabel(email))}
                         </div>
                         <div className="flex-1">
                           <div className="flex items-baseline justify-between gap-4 mb-1">

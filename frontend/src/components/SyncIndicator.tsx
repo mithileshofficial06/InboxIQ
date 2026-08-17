@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Mail, CheckCircle2, AlertCircle, Loader } from "lucide-react";
+import { CheckCircle2, AlertCircle, Loader } from "lucide-react";
 import { analytics } from "@/lib/api";
+import type { SyncStatusResponse } from "@/lib/types";
 
 export function SyncIndicator() {
-  const [status, setStatus] = useState<any>(null);
+  const [status, setStatus] = useState<SyncStatusResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
 
