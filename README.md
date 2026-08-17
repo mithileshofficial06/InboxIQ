@@ -358,23 +358,38 @@ InboxIQ/
 
 ### Running Tests
 
-**Backend:**
+**Backend** (Jest + ts-jest — auth, token encryption, OAuth state, env validation, filter sanitizing):
 ```bash
 cd backend
 npm test
 ```
 
-**Frontend:**
-```bash
-cd frontend
-npm test
-```
-
-**AI Service:**
+**AI Service** (pytest — service-token auth, chunker, classifier, pgvector query scoping):
 ```bash
 cd ai-service
+pip install -r requirements-dev.txt
 pytest
 ```
+
+**Frontend** currently has lint only — there is no test suite yet:
+```bash
+cd frontend
+npm run lint
+```
+
+### Continuous Integration
+
+`.github/workflows/ci.yml` runs on every push and pull request to `main`:
+
+| Job | What it runs | Blocking |
+|-----|--------------|----------|
+| `backend` | `tsc` typecheck + Jest suite | Yes |
+| `ai-service` | pytest suite | Yes |
+| `frontend-lint` | ESLint | No — see below |
+
+The frontend lint job is non-blocking because the frontend has 41 pre-existing
+ESLint errors (mostly `prefer-const` and `no-explicit-any`). Clearing those and
+removing `continue-on-error` from the workflow is a good standalone cleanup task.
 
 ### Environment Variables
 

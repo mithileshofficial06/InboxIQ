@@ -15,7 +15,7 @@ router.use(authMiddleware);
  * wildcards, and backslashes escape. Removing them keeps user input as a plain
  * substring rather than something that can add filters of its own.
  */
-function sanitizeFilterValue(value: string): string {
+export function sanitizeFilterValue(value: string): string {
   return value
     .replace(/[,.()*%\\"']/g, ' ')
     .replace(/\s+/g, ' ')
