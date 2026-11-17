@@ -1,558 +1,104 @@
-# 📧 InboxIQ
+# InboxIQ
 
-**AI-Powered Gmail Analytics Platform**
+**AI analytics for your Gmail inbox.** InboxIQ syncs your mail through the Gmail API, classifies every message by category and sentiment, embeds it for semantic search, and lets you ask questions about your inbox in plain language through a retrieval-augmented chat.
 
-InboxIQ is a sophisticated email analytics application that provides intelligent insights into your Gmail inbox using advanced AI models. It automatically categorizes emails, performs sentiment analysis, enables semantic search, and provides actionable insights through RAG-based AI assistance.
+![Next.js](https://img.shields.io/badge/Next.js_16-000000?logo=nextdotjs&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
+![Express](https://img.shields.io/badge/Express-000000?logo=express&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL_+_pgvector-4169E1?logo=postgresql&logoColor=white)
+![Redis](https://img.shields.io/badge/BullMQ_+_Redis-DC382D?logo=redis&logoColor=white)
 
----
+## What it does
 
-## ✨ Features
+| Feature | Details |
+|---|---|
+| Gmail sync | Google OAuth sign-in, then a background BullMQ job pulls messages through the Gmail API |
+| Categorisation | Nine categories: bills, job applications, orders, OTPs, newsletters, real people, academic, promotions, travel |
+| Sentiment | Positive, neutral or negative for every message |
+| Semantic search | 1024-dimension embeddings in pgvector, so you can search by meaning, not keywords |
+| Inbox chat | RAG over your own mail: "What urgent emails haven't I replied to?" |
+| Analytics | Volume over time, top senders, category and sentiment breakdowns, timeline view |
 
-### Core Functionality
-- 🔐 **Google OAuth Authentication** - Secure login with Gmail integration
-- 📊 **Email Analytics Dashboard** - Comprehensive overview of inbox statistics
-- 🏷️ **AI-Powered Categorization** - Automatic email classification into 9+ categories
-- 😊 **Sentiment Analysis** - Positive, neutral, and negative sentiment detection
-- 🔍 **Semantic Search** - Find emails by meaning, not just keywords
-- 💬 **RAG-Based AI Chat** - Ask questions about your emails using natural language
-- 📅 **Timeline View** - Visualize email patterns over time
-- 👥 **Contact Analytics** - Track communication patterns with senders
-
-### Technical Features
-- ⚡ **Background Email Sync** - Async queue-based processing with BullMQ
-- 🎨 **Modern UI** - Ultra-spacious, magazine-style interface
-- 🔄 **Real-time Updates** - Live sync status and progress tracking
-- 🔒 **Secure Storage** - PostgreSQL with pgvector for embeddings
-- 🚀 **Scalable Architecture** - Microservices-based design
-
----
-
-## 🏗️ Architecture
-
-InboxIQ consists of three main services:
+## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                      Frontend (Next.js)                 │
-│                    http://localhost:3000                │
-└───────────────────────┬─────────────────────────────────┘
-                        │
-                        ▼
-┌─────────────────────────────────────────────────────────┐
-│                   Backend (Express.js)                  │
-│                    http://localhost:3001                │
-│                                                          │
-│  • Google OAuth Authentication                          │
-│  • Email Sync Queue (BullMQ + Redis)                    │
-│  • REST API Endpoints                                   │
-│  • JWT Token Management                                 │
-└────────┬──────────────────────────────┬─────────────────┘
-         │                              │
-         ▼                              ▼
-┌─────────────────────┐      ┌──────────────────────────┐
-│  AI Service (FastAPI)│      │  PostgreSQL + pgvector   │
-│  http://localhost:8000│      │       (Supabase)         │
-│                       │      │                          │
-│  • Email Classification│      │  • Users & Emails       │
-│  • Sentiment Analysis  │      │  • Classifications      │
-│  • Embeddings (NVIDIA) │      │  • Embeddings (1024D)   │
-│  • RAG Pipeline        │      │  • Vector Search        │
-└────────┬──────────────┘      └──────────────────────────┘
-         │
-         ▼
-┌─────────────────────┐
-│   Redis (Upstash)   │
-│   Queue Management  │
-└─────────────────────┘
+Next.js frontend (:3000)
+        |
+        v
+Express API (:3001) ---- BullMQ worker ---- Redis (Upstash)
+   |  Google OAuth, JWT sessions             |
+   |  encrypted Gmail tokens                 | sync jobs
+   v                                         v
+FastAPI AI service (:8000) <------- classify + embed each message
+   |  Llama 3.3 70B (NVIDIA NIM)
+   |  NV-EmbedQA-E5-v5 embeddings
+   v
+PostgreSQL + pgvector (Supabase, row-level security)
 ```
 
----
+1. The user signs in with Google; the backend stores the Gmail refresh token encrypted at rest.
+2. A sync job is queued in Redis; a BullMQ worker fetches messages from the Gmail API and writes them to Postgres.
+3. The worker calls the AI service, which classifies each message and generates its embedding.
+4. Search and chat query pgvector, scoped to the signed-in user, and the chat answers from the retrieved messages.
 
-## 🛠️ Tech Stack
+## Security
 
-### Frontend
-- **Framework**: Next.js 16 (App Router, Turbopack)
-- **UI**: React, TailwindCSS, Lucide Icons
-- **State**: React Hooks
-- **API Client**: Fetch API with JWT authentication
+- Gmail OAuth tokens are encrypted before storage (`TOKEN_ENCRYPTION_KEY`).
+- The AI service only accepts calls carrying a shared service token, so it is not an open LLM proxy.
+- Supabase row-level security and user-scoped vector queries keep one user's mail out of another user's results.
+- OAuth `state` is validated and user-supplied filters are sanitised before they reach the database.
 
-### Backend
-- **Runtime**: Node.js with TypeScript
-- **Framework**: Express.js
-- **Queue**: BullMQ + Redis (Upstash)
-- **Auth**: Google OAuth 2.0 + JWT
-- **Gmail API**: googleapis package
+## Tech stack
 
-### AI Service
-- **Framework**: FastAPI (Python)
-- **LLM**: Meta Llama 3.3 70B Instruct (via NVIDIA NIM)
-- **Embeddings**: NVIDIA NV-EmbedQA-E5-v5 (1024 dimensions)
-- **Vector DB**: pgvector extension in PostgreSQL
+- **Frontend:** Next.js 16 (App Router), React 19, Tailwind CSS, Recharts
+- **Backend:** Node.js, Express, TypeScript, BullMQ, googleapis, JWT
+- **AI service:** Python, FastAPI, Meta Llama 3.3 70B Instruct and NV-EmbedQA-E5-v5 via NVIDIA NIM
+- **Data:** PostgreSQL with pgvector on Supabase, Redis on Upstash
 
-### Database
-- **Database**: PostgreSQL (Supabase)
-- **Extensions**: pgvector for semantic search
-- **Schema**: Users, Emails, Classifications, Embeddings
+## Getting started
 
-### Infrastructure
-- **Queue**: Redis (Upstash) for background jobs
-- **Storage**: Supabase (managed PostgreSQL)
-- **AI APIs**: NVIDIA NIM platform
-
----
-
-## 📋 Prerequisites
-
-Before you begin, ensure you have:
-
-- **Node.js** 18+ and npm
-- **Python** 3.9+ and pip
-- **Git** for version control
-- **Google Cloud Project** with Gmail API enabled
-- **Supabase Account** (free tier works)
-- **Upstash Account** (free Redis tier works)
-- **NVIDIA NIM API Key** (free tier available)
-
----
-
-## 🚀 Quick Start
-
-### 1. Clone Repository
+**Prerequisites:** Node.js 18+, Python 3.10+, a Google Cloud project with the Gmail API enabled, a Supabase project, an Upstash Redis database and an NVIDIA NIM API key.
 
 ```bash
-git clone https://github.com/yourusername/InboxIQ.git
+git clone https://github.com/mithileshofficial06/InboxIQ.git
 cd InboxIQ
+cp .env.example .env                                # backend
+cp ai-service/.env.example ai-service/.env          # AI service
+cp frontend/.env.local.example frontend/.env.local  # frontend
 ```
 
-### 2. Set Up Environment Variables
+Fill in the values (Google OAuth client, Supabase keys, Redis host, `JWT_SECRET`, `TOKEN_ENCRYPTION_KEY`, `AI_SERVICE_TOKEN`, `NVIDIA_API_KEY`). The Google OAuth redirect URI is `http://localhost:3001/auth/google/callback`.
 
-Copy the example environment file:
+Create the database by running `database/schema.sql`, then `database/migrate_001_embeddings_and_rls.sql`, in the Supabase SQL editor.
 
 ```bash
-cp .env.example .env
+npm install                                         # frontend + backend workspaces
+cd ai-service && python -m venv venv && venv/Scripts/activate && pip install -r requirements.txt && cd ..
+
+npm run dev       # frontend :3000 and backend :3001
+npm run dev:ai    # AI service :8000 (Swagger docs at /docs)
 ```
 
-Edit `.env` and fill in your credentials:
+On Windows, `start-all.bat` starts all three services.
 
-```env
-# Google OAuth (from Google Cloud Console)
-GOOGLE_CLIENT_ID=your_client_id
-GOOGLE_CLIENT_SECRET=your_client_secret
-GOOGLE_REDIRECT_URI=http://localhost:3001/auth/google/callback
+The first sync fetches up to 200 messages (`MAX_EMAILS_TO_SYNC` in `backend/src/queues/emailSync.worker.ts`).
 
-# Supabase (from Supabase Dashboard)
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_ANON_KEY=your_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-DATABASE_URL=postgresql://postgres:password@db.your-project.supabase.co:5432/postgres
+## Testing
 
-# Redis (from Upstash Console)
-REDIS_HOST=your-redis-host.upstash.io
-REDIS_PORT=6379
-REDIS_PASSWORD=your_redis_password
+| Part | Command | Covers |
+|---|---|---|
+| Backend | `cd backend && npm test` | Auth, token encryption, OAuth state, env validation, filter sanitising |
+| AI service | `cd ai-service && pip install -r requirements-dev.txt && pytest` | Service-token auth, chunker, classifier, pgvector query scoping |
+| Frontend | `cd frontend && npm run lint && npm run build` | Lint and type checks |
 
-# JWT Secret (generate a random string)
-JWT_SECRET=your-random-secret-string
+GitHub Actions (`.github/workflows/ci.yml`) runs all three on every push and pull request to `main`.
 
-# NVIDIA NIM API (from NVIDIA platform)
-NVIDIA_API_KEY=your_nvidia_api_key
-
-# Service URLs
-FRONTEND_URL=http://localhost:3000
-AI_SERVICE_URL=http://localhost:8000
-```
-
-### 3. Set Up Database
-
-1. Go to your Supabase project dashboard
-2. Navigate to **SQL Editor**
-3. Copy the contents of `database/schema.sql`
-4. Paste and run the SQL script
-5. Verify tables are created in **Database > Tables**
-
-### 4. Install Dependencies
-
-**Backend:**
-```bash
-cd backend
-npm install
-```
-
-**Frontend:**
-```bash
-cd frontend
-npm install
-```
-
-**AI Service:**
-```bash
-cd ai-service
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
-```
-
-### 5. Start Services
-
-You can start all services with one command:
-
-```bash
-# On Windows
-start-all.bat
-
-# On macOS/Linux
-chmod +x start-all.sh
-./start-all.sh
-```
-
-Or start each service individually:
-
-**Backend:**
-```bash
-cd backend
-npm run dev
-```
-
-**Frontend:**
-```bash
-cd frontend
-npm run dev
-```
-
-**AI Service:**
-```bash
-cd ai-service
-python -m app.main
-```
-
-### 6. Access the Application
-
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:3001
-- **AI Service**: http://localhost:8000
-
----
-
-## 📖 Configuration Guide
-
-### Google OAuth Setup
-
-1. Go to [Google Cloud Console](https://console.cloud.google.com)
-2. Create a new project or select existing
-3. Enable **Gmail API**
-4. Go to **APIs & Services > Credentials**
-5. Create **OAuth 2.0 Client ID**
-6. Add authorized redirect URI: `http://localhost:3001/auth/google/callback`
-7. Copy Client ID and Client Secret to `.env`
-
-### Supabase Setup
-
-1. Create account at [supabase.com](https://supabase.com)
-2. Create a new project
-3. Wait for project to be ready (~2 minutes)
-4. Go to **Project Settings > API**
-5. Copy **Project URL** and **API Keys** to `.env`
-6. Go to **Project Settings > Database**
-7. Copy connection string to `.env` (remember to URL-encode password: `@` becomes `%40`)
-8. Run `database/schema.sql` in SQL Editor
-
-### Upstash Redis Setup
-
-1. Create account at [upstash.com](https://upstash.com)
-2. Create a new Redis database
-3. Copy **Endpoint** (just hostname, not `https://`)
-4. Copy **Port** (usually 6379)
-5. Copy **Password**
-6. Add to `.env`
-
-### NVIDIA NIM Setup
-
-1. Sign up at [build.nvidia.com](https://build.nvidia.com)
-2. Navigate to API Catalog
-3. Generate API key
-4. Add to `.env`
-
----
-
-## 🎯 Usage
-
-### First Login
-
-1. Open http://localhost:3000
-2. Click **"Sign in with Google"**
-3. Authorize InboxIQ to access your Gmail
-4. Wait for email sync to complete (~1-2 minutes for 200 emails)
-
-### Dashboard
-
-View comprehensive analytics:
-- Total emails, categories, sentiment distribution
-- Top senders and communication patterns
-- Email volume over time
-- Unread email count
-
-### Inbox Explorer
-
-- **Grid View**: Magazine-style cards with spacious layout
-- **List View**: Compact list with quick scanning
-- **Timeline View**: Chronological email patterns
-
-### Search & Filter
-
-- Search by subject, sender, or content
-- Filter by category (9+ categories)
-- Filter by sentiment (positive, neutral, negative)
-- Filter by date range
-- Filter by sender email
-
-### AI Chat
-
-Ask questions about your emails:
-- "Show me all job applications from last month"
-- "What are the urgent emails I haven't replied to?"
-- "Summarize emails from [sender]"
-- "Find emails about [topic]"
-
----
-
-## 📁 Project Structure
+## Project structure
 
 ```
-InboxIQ/
-├── frontend/               # Next.js frontend
-│   ├── src/
-│   │   ├── app/           # App router pages
-│   │   ├── components/    # React components
-│   │   └── lib/           # API client, utilities
-│   └── package.json
-│
-├── backend/               # Express.js backend
-│   ├── src/
-│   │   ├── config/        # Configuration
-│   │   ├── middleware/    # Auth middleware
-│   │   ├── routes/        # API endpoints
-│   │   ├── services/      # Gmail service
-│   │   └── queues/        # BullMQ workers
-│   └── package.json
-│
-├── ai-service/            # FastAPI AI service
-│   ├── app/
-│   │   ├── routes/        # AI endpoints
-│   │   ├── services/      # AI logic
-│   │   ├── models/        # Pydantic schemas
-│   │   └── db/            # pgvector client
-│   └── requirements.txt
-│
-├── database/              # Database schemas
-│   └── schema.sql         # PostgreSQL + pgvector
-│
-├── .env                   # Environment variables
-├── .env.example           # Example configuration
-├── start-all.bat          # Windows startup script
-└── README.md              # This file
+frontend/     Next.js app: dashboard, inbox explorer, search, chat
+backend/      Express API, Google OAuth, Gmail service, BullMQ sync worker
+ai-service/   FastAPI: classification, sentiment, embeddings, RAG
+database/     PostgreSQL schema and pgvector / RLS migration
 ```
-
----
-
-## 🔧 Development
-
-### Running Tests
-
-**Backend** (Jest + ts-jest — auth, token encryption, OAuth state, env validation, filter sanitizing):
-```bash
-cd backend
-npm test
-```
-
-**AI Service** (pytest — service-token auth, chunker, classifier, pgvector query scoping):
-```bash
-cd ai-service
-pip install -r requirements-dev.txt
-pytest
-```
-
-**Frontend** has lint and typecheck (via the build) — there is no test suite yet:
-```bash
-cd frontend
-npm run lint
-npm run build
-```
-
-### Continuous Integration
-
-`.github/workflows/ci.yml` runs on every push and pull request to `main`:
-
-| Job | What it runs |
-|-----|--------------|
-| `backend` | `tsc` typecheck + Jest suite |
-| `ai-service` | pytest suite |
-| `frontend` | ESLint + `next build` (which typechecks) |
-
-All three jobs are blocking.
-
-### Environment Variables
-
-See `.env.example` for all available configuration options.
-
-### API Documentation
-
-- **Backend API**: http://localhost:3001/health
-- **AI Service API**: http://localhost:8000/docs (Swagger UI)
-
----
-
-## 📊 Email Sync
-
-### How It Works
-
-1. User logs in with Google OAuth
-2. Backend queues email sync job in Redis
-3. BullMQ worker processes job asynchronously
-4. Fetches emails from Gmail API (200 limit for testing)
-5. Stores emails in PostgreSQL
-6. Triggers AI service for classification
-7. AI service generates embeddings and categories
-8. Results stored back in database
-
-### Sync Limits
-
-- **Testing**: 200 emails (configurable in `backend/src/queues/emailSync.worker.ts`)
-- **Production**: Increase `MAX_EMAILS_TO_SYNC` as needed
-
-### Monitoring Sync
-
-Watch backend logs:
-```
-[Sync] Starting email sync for user: <user_id>
-[Sync Worker] Processing job: <job_id>
-[Sync Worker] Fetched 100 message IDs (total: 100)
-[Sync Worker] Stored 95 emails (total processed: 95)
-[Sync Worker] ✅ Completed full-sync: 200 emails
-```
-
----
-
-## 🤖 AI Features
-
-### Email Categories
-
-Automatically classified into:
-- Bills & Invoices
-- Job Applications
-- Orders & Deliveries
-- OTPs & Notifications
-- Newsletters
-- Real People
-- Academic
-- Promotions
-- Travel & Bookings
-
-### Sentiment Analysis
-
-Three-level classification:
-- **Positive**: Appreciative, friendly, enthusiastic
-- **Neutral**: Informational, transactional
-- **Negative**: Complaints, urgent issues, problems
-
-### Embeddings
-
-- **Model**: NVIDIA NV-EmbedQA-E5-v5
-- **Dimensions**: 1024
-- **Use Cases**: Semantic search, similarity matching, RAG
-
----
-
-## 🐛 Troubleshooting
-
-### Backend won't start
-
-- Check `.env` file has all required variables
-- Verify Redis is accessible
-- Confirm Supabase database is active
-
-### Database connection errors
-
-- Ensure Supabase project is not paused
-- Verify `DATABASE_URL` has correct credentials
-- Check password is URL-encoded (`@` → `%40`)
-
-### Redis connection fails
-
-- Confirm Upstash Redis database is active
-- Verify `REDIS_HOST` doesn't include `https://`
-- Check firewall isn't blocking port 6379
-
-### Email sync not working
-
-- Verify Redis connection is successful
-- Check Google OAuth scopes include Gmail API
-- Look for errors in backend logs
-
-### AI service errors
-
-- Confirm NVIDIA API key is valid
-- Check network connection to NVIDIA NIM
-- Verify embeddings table exists in database
-
----
-
-## 🚀 Deployment
-
-### Production Checklist
-
-- [ ] Set `NODE_ENV=production`
-- [ ] Use strong `JWT_SECRET`
-- [ ] Enable HTTPS for all services
-- [ ] Update `FRONTEND_URL` and `GOOGLE_REDIRECT_URI`
-- [ ] Increase email sync limit if needed
-- [ ] Set up monitoring and logging
-- [ ] Configure database backups
-- [ ] Review and adjust rate limits
-
-### Recommended Hosting
-
-- **Frontend**: Vercel, Netlify
-- **Backend**: Railway, Render, Fly.io
-- **AI Service**: Railway, Render (with GPU for better performance)
-- **Database**: Supabase (managed PostgreSQL)
-- **Redis**: Upstash (serverless Redis)
-
----
-
-## 📄 License
-
-MIT License - see LICENSE file for details
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please:
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
-
----
-
-## 📞 Support
-
-For issues and questions:
-- **GitHub Issues**: [github.com/yourusername/InboxIQ/issues](https://github.com/yourusername/InboxIQ/issues)
-- **Email**: support@inboxiq.com
-
----
-
-## 🙏 Acknowledgments
-
-- **NVIDIA NIM**: For providing powerful LLM APIs
-- **Supabase**: For managed PostgreSQL with pgvector
-- **Upstash**: For serverless Redis
-- **Next.js Team**: For the amazing React framework
-- **Gmail API**: For enabling email access
-
----
-
-**Built with ❤️ using AI assistance**
